@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# rce_scanner.py  (versión robusta)
+# rce_scanner.py (robust version)
 import argparse, ast, json, os, sys
 from pathlib import Path
 
@@ -11,18 +11,19 @@ DEFAULT_RULES = {
     "torch": {
         "imports": {"torch"},
         "calls": {("torch", "load"), ("torch", "save")},
-    }
+    },
 }
 
 SKIP_DIRS = {".git", "__pycache__", ".venv", "venv", ".mypy_cache", ".pytest_cache", "env"}
-MAX_FILE_BYTES = 10 * 1024 * 1024 #10 mb allowed
-MAX_AST_NODES = 100000 #10 MB allowed
-# MAX_FILE_BYTES = 2 * 1024 * 1024      # 2 MB: evita archivos gigantes
-# MAX_AST_NODES  = 20000                # corta árboles patológicos
+MAX_FILE_BYTES = 10 * 1024 * 1024  # 10 MB allowed
+MAX_AST_NODES = 100000  # AST node limit (anti-pathological inputs)
+# MAX_FILE_BYTES = 2 * 1024 * 1024   # 2 MB: avoid huge files
+# MAX_AST_NODES = 20000              # cut off pathological ASTs early
 
-# Banner ASCII
+
+# ASCII banner
 def banner():
-    banner = r"""
+    b = r"""
   _____ _      _    _        _____   _____ ______   ______ _           _           
  |  __ (_)    | |  | |      |  __ \ / ____|  ____| |  ____(_)         | |          
  | |__) |  ___| | _| | ___  | |__) | |    | |__    | |__   _ _ __   __| | ___ _ __ 
@@ -34,18 +35,19 @@ def banner():
                 coded by @JoshuaProvoste (jp / kw0)
 
 """
-    print(banner)
-banner()
+    print(b)
+
 
 def load_rules_json(path: str) -> dict:
     data = json.loads(Path(path).read_text(encoding="utf-8"))
     rules = {}
     for mod, spec in data.items():
         imports = set(spec.get("imports", []))
-        # "calls" en JSON como lista de pares: [["pickle","load"], ["pickle","dump"]]
-        calls = { (m, f) for m, f in spec.get("calls", []) }
+        # "calls" in JSON as a list of pairs: [["pickle","load"], ["pickle","dump"]]
+        calls = {(m, f) for m, f in spec.get("calls", [])}
         rules[mod] = {"imports": imports, "calls": calls}
     return rules
+
 
 def iter_py_files(root: Path):
     for dirpath, dirnames, filenames in os.walk(root):
@@ -53,6 +55,7 @@ def iter_py_files(root: Path):
         for fn in filenames:
             if fn.endswith(".py"):
                 yield Path(dirpath) / fn
+
 
 class RefVisitor(ast.NodeVisitor):
     def __init__(self, rules):
@@ -103,11 +106,17 @@ class RefVisitor(ast.NodeVisitor):
         return mod in self.rules and (mod, func) in self.rules[mod]["calls"]
 
     def _report(self, node, kind, module, name, alias=None):
-        self.findings.append({
-            "kind": kind, "module": module, "name": name, "alias": alias,
-            "lineno": getattr(node, "lineno", None),
-            "col_offset": getattr(node, "col_offset", None),
-        })
+        self.findings.append(
+            {
+                "kind": kind,
+                "module": module,
+                "name": name,
+                "alias": alias,
+                "lineno": getattr(node, "lineno", None),
+                "col_offset": getattr(node, "col_offset", None),
+            }
+        )
+
 
 def scan_file(path: Path, rules):
     try:
@@ -128,7 +137,7 @@ def scan_file(path: Path, rules):
     except RecursionError as e:
         return [{"file": str(path), "error": f"parse_recursion_error:{e}"}]
 
-    # Cota de complejidad del AST
+    # AST complexity bound
     try:
         node_count = sum(1 for _ in ast.walk(tree))
     except RecursionError as e:
@@ -146,12 +155,27 @@ def scan_file(path: Path, rules):
 
     return [{"file": str(path), **f} for f in v.findings]
 
+
 def main():
-    ap = argparse.ArgumentParser(description="Escáner simple de referencias a módulos/funciones (pickle, extensible).")
-    ap.add_argument("--path", default=".", help="Directorio raíz a escanear (por defecto: .)")
-    ap.add_argument("--rules-file", help="Ruta a JSON de reglas; si se provee, reemplaza RULES")
-    ap.add_argument("--out", default="-", help="Archivo de salida JSONL (use '-' para stdout; por defecto: '-')")
+    ap = argparse.ArgumentParser(
+        description="Simple AST-based scanner for module/function references (pickle-focused, extensible)."
+    )
+    ap.add_argument("--path", default=".", help="Root directory to scan (default: .)")
+    ap.add_argument("--rules-file", help="Path to rules JSON; if provided, overrides DEFAULT_RULES")
+    ap.add_argument(
+        "--out",
+        default="-",
+        help="Output JSONL file (use '-' for stdout; default: '-')",
+    )
+    ap.add_argument(
+        "--no-banner",
+        action="store_true",
+        help="Do not print the banner (avoids polluting stdout when using --out -).",
+    )
     args = ap.parse_args()
+
+    if not args.no_banner:
+        banner()
 
     rules = DEFAULT_RULES
     if args.rules_file:
@@ -170,6 +194,7 @@ def main():
     finally:
         if sink is not sys.stdout:
             sink.close()
+
 
 if __name__ == "__main__":
     main()
