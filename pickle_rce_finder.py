@@ -30,7 +30,7 @@ MAX_AST_NODES = 100000  # Max AST nodes visited per file (DoS/anti-pathological 
 # MAX_AST_NODES = 20000              # Lower AST node cap
 
 # ASCII banner
-def banner():
+def banner(file=sys.stdout):
     b = r"""
   _____ _      _    _        _____   _____ ______   ______ _           _           
  |  __ (_)    | |  | |      |  __ \ / ____|  ____| |  ____(_)         | |          
@@ -43,7 +43,7 @@ def banner():
             coded by @JoshuaProvoste (jp / kw0)
 
 """
-    print(b)
+    print(b, file=file)
 
 def load_rules_json(path: str) -> dict:
     def warn(msg: str) -> None:
@@ -304,9 +304,6 @@ def main():
     )
     args = ap.parse_args()
 
-    if not args.no_banner:
-        banner()
-
     rules = DEFAULT_RULES
     if args.rules_file:
         rules = load_rules_json(args.rules_file)
@@ -314,27 +311,79 @@ def main():
     root = Path(args.path).resolve()
     skip_dirs = {d.strip() for d in args.skip_dirs.split(",") if d.strip()}
 
-    had_errors = False
+    # Human-readable output goes to stdout when writing JSONL to a file,
+    # and to stderr when writing JSONL to stdout (to avoid corrupting JSONL).
+    human = sys.stderr if args.out == "-" else sys.stdout
 
-    def emit(sink, item):
-        nonlocal had_errors
-        if isinstance(item, dict) and "error" in item:
-            had_errors = True
+    if not args.no_banner:
+        banner(file=human)
+
+    total_findings = 0
+    total_errors = 0
+    files_scanned = 0
+    jsonl_lines = 0
+
+    def print_finding(item: dict):
+        # Compact CLI line
+        sev = item.get("severity", "-")
+        cat = item.get("category", "-")
+        qn = item.get("qualified_name") or f"{item.get('module')}.{item.get('name')}"
+        loc = f"{item.get('file')}:{item.get('lineno')}"
+        print(f"[{sev.upper()}][{cat}] {loc}  {qn}", file=human)
+
+    def print_error(item: dict):
+        loc = item.get("file", "?")
+        err = item.get("error", "unknown_error")
+        print(f"[ERROR] {loc}  {err}", file=human)
+
+    def emit(sink, item: dict):
+        nonlocal total_findings, total_errors, jsonl_lines
         sink.write(json.dumps(item, ensure_ascii=False) + "\n")
+        jsonl_lines += 1
+
+        if isinstance(item, dict) and "error" in item:
+            total_errors += 1
+            print_error(item)
+        else:
+            # findings (calls) are what we print as results
+            if item.get("kind") == "call":
+                total_findings += 1
+                print_finding(item)
 
     if args.out == "-":
+        # JSONL to stdout
         for py in iter_py_files(root, skip_dirs):
+            files_scanned += 1
             for item in scan_file(py, rules):
                 emit(sys.stdout, item)
+        out_desc = "stdout (JSONL)"
+        out_size = None
     else:
         out_path = Path(args.out).expanduser().resolve()
         with out_path.open("w", encoding="utf-8") as sink:
             for py in iter_py_files(root, skip_dirs):
+                files_scanned += 1
                 for item in scan_file(py, rules):
                     emit(sink, item)
+        out_desc = str(out_path)
+        try:
+            out_size = out_path.stat().st_size
+        except OSError:
+            out_size = None
+
+    # Summary
+    print("", file=human)
+    print("Scan finished.", file=human)
+    print(f"Files scanned: {files_scanned}", file=human)
+    print(f"Findings: {total_findings}", file=human)
+    print(f"Errors: {total_errors}", file=human)
+    if out_size is None:
+        print(f"JSONL output: {out_desc} (lines: {jsonl_lines})", file=human)
+    else:
+        print(f"JSONL output: {out_desc} (lines: {jsonl_lines}, bytes: {out_size})", file=human)
 
     # Non-zero exit code is useful in CI when any IO/parse errors occurred.
-    raise SystemExit(1 if had_errors else 0)
+    raise SystemExit(1 if total_errors else 0)
 
 if __name__ == "__main__":
     main()
