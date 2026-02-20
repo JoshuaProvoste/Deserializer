@@ -68,8 +68,8 @@ class RefVisitor(ast.NodeVisitor):
             mod = alias.name.split(".")[0]
             asname = alias.asname or mod
             if mod in self.rules and mod in self.rules[mod]["imports"]:
+                # Keep alias/module mapping for later call resolution
                 self.name_to_module[asname] = mod
-                self._report(node, "import", mod, None, asname)
         self.generic_visit(node)
 
     def visit_ImportFrom(self, node: ast.ImportFrom):
@@ -79,8 +79,8 @@ class RefVisitor(ast.NodeVisitor):
         if base in self.rules and base in self.rules[base]["imports"]:
             for alias in node.names:
                 local = alias.asname or alias.name
+                # Keep alias/module mapping for later call resolution
                 self.name_to_module[local] = base
-                self._report(node, "importfrom", base, alias.name, local)
         self.generic_visit(node)
 
     def visit_Call(self, node: ast.Call):
