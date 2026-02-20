@@ -46,15 +46,76 @@ def banner():
     print(b)
 
 def load_rules_json(path: str) -> dict:
-    data = json.loads(Path(path).read_text(encoding="utf-8"))
+    def warn(msg: str) -> None:
+        print(f"[rules] {msg}", file=sys.stderr)
+
+    try:
+        raw = Path(path).read_text(encoding="utf-8")
+        data = json.loads(raw)
+    except Exception as e:
+        raise ValueError(f"Failed to load rules JSON from {path}: {e}") from e
+
+    if not isinstance(data, dict):
+        raise ValueError(f"Rules JSON root must be an object/dict, got {type(data).__name__}")
+
     rules = {}
     for mod, spec in data.items():
-        imports = set(spec.get("imports", []))
-        # "calls" in JSON as a list of pairs: [["pickle","load"], ["pickle","dump"]]
-        calls = {(m, f) for m, f in spec.get("calls", [])}
-        rules[mod] = {"imports": imports, "calls": calls}
-    return rules
+        if not isinstance(mod, str) or not mod.strip():
+            warn(f"Skipping rule with non-string/empty module key: {mod!r}")
+            continue
+        if not isinstance(spec, dict):
+            warn(f"Skipping module '{mod}': spec must be an object/dict, got {type(spec).__name__}")
+            continue
 
+        # --- imports ---
+        imports_raw = spec.get("imports", [])
+        if not isinstance(imports_raw, list):
+            warn(f"Module '{mod}': 'imports' must be a list, got {type(imports_raw).__name__}; treating as empty")
+            imports_raw = []
+
+        imports = set()
+        for imp in imports_raw:
+            if not isinstance(imp, str) or not imp.strip():
+                warn(f"Module '{mod}': ignoring invalid import entry: {imp!r}")
+                continue
+            # Normalize to import root (same behavior as visitor)
+            imports.add(imp.split(".")[0])
+
+        # Heuristic typo/mismatch warning (e.g., pickle vs picle)
+        if imports and mod not in imports:
+            suggestion = None
+            for imp in imports:
+                if abs(len(imp) - len(mod)) <= 1 and imp[:3] == mod[:3]:
+                    suggestion = imp
+                    break
+            if suggestion:
+                warn(f"Module '{mod}': imports contains '{suggestion}' but not '{mod}' (typo?).")
+            else:
+                warn(f"Module '{mod}': imports does not include '{mod}' (current imports={sorted(imports)!r}).")
+
+        # --- calls ---
+        calls_raw = spec.get("calls", [])
+        if not isinstance(calls_raw, list):
+            warn(f"Module '{mod}': 'calls' must be a list, got {type(calls_raw).__name__}; treating as empty")
+            calls_raw = []
+
+        calls = set()
+        for item in calls_raw:
+            if (
+                isinstance(item, (list, tuple))
+                and len(item) == 2
+                and isinstance(item[0], str)
+                and isinstance(item[1], str)
+                and item[0].strip()
+                and item[1].strip()
+            ):
+                calls.add((item[0], item[1]))
+            else:
+                warn(f"Module '{mod}': ignoring malformed call entry (expected [module, func]): {item!r}")
+
+        rules[mod] = {"imports": imports, "calls": calls}
+
+    return rules
 
 def iter_py_files(root: Path):
     for dirpath, dirnames, filenames in os.walk(root):
