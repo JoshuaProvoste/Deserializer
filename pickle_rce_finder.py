@@ -38,7 +38,7 @@ def banner():
  |_|   |_|\___|_|\_\_|\___| |_|  \_\\_____|______| |_|    |_|_| |_|\__,_|\___|_|   
                                                                                                                                                                   
     Pickle Deserialization Parser for Python Source Code
-                coded by @JoshuaProvoste (jp / kw0)
+            coded by @JoshuaProvoste (jp / kw0)
 
 """
     print(b)
@@ -107,17 +107,41 @@ class RefVisitor(ast.NodeVisitor):
         self.generic_visit(node)
 
     def _resolve_call(self, func_node):
-        if isinstance(func_node, ast.Attribute) and isinstance(func_node.value, ast.Name):
-            base = func_node.value.id
-            attr = func_node.attr
-            mod = self.name_to_module.get(base, base)
-            return mod, attr
-        if isinstance(func_node, ast.Name):
-            name = func_node.id
-            mod = self.name_to_module.get(name)
-            if mod:
-                return mod, name
+        # Build a dotted path from nested attributes, e.g.:
+        #   pkg.pickle.loads -> ["pkg", "pickle", "loads"]
+        #   t.serialization.load -> ["t", "serialization", "load"]
+        def _dotted_parts(node):
+            if isinstance(node, ast.Name):
+                return [node.id]
+            if isinstance(node, ast.Attribute):
+                left = _dotted_parts(node.value)
+                if not left:
+                    return None
+                return left + [node.attr]
+            return None
+
+        parts = _dotted_parts(func_node)
+        if not parts:
+            return None, None
+
+        # If the root name is an alias we track (e.g., "t" -> "torch"), rewrite it.
+        root = parts[0]
+        parts[0] = self.name_to_module.get(root, root)
+
+        func = parts[-1]
+
+        # Prefer the (possibly de-aliased) root module if it's tracked.
+        if parts[0] in self.rules:
+            return parts[0], func
+
+        # Otherwise, support cases like pkg.pickle.loads where the tracked module
+        # appears later in the chain.
+        for p in parts[:-1]:
+            if p in self.rules:
+                return p, func
+
         return None, None
+
 
     def _is_tracked_call(self, mod, func):
         return mod in self.rules and (mod, func) in self.rules[mod]["calls"]
