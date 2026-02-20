@@ -22,10 +22,12 @@ DEFAULT_RULES = {
 }
 
 SKIP_DIRS = {".git", "__pycache__", ".venv", "venv", ".mypy_cache", ".pytest_cache", "env"}
-MAX_FILE_BYTES = 10 * 1024 * 1024  # 10 MB allowed
-MAX_AST_NODES = 100000  # AST node limit (anti-pathological inputs)
-# MAX_FILE_BYTES = 2 * 1024 * 1024   # 2 MB: avoid huge files
-# MAX_AST_NODES = 20000              # cut off pathological ASTs early
+MAX_FILE_BYTES = 10 * 1024 * 1024  # Max source file size to parse (bytes). 10 MiB.
+MAX_AST_NODES = 100000  # Max AST nodes visited per file (DoS/anti-pathological guardrail).
+
+# Optional tighter limits (useful for CI / scanning huge repos):
+# MAX_FILE_BYTES = 2 * 1024 * 1024   # 2 MiB
+# MAX_AST_NODES = 20000              # Lower AST node cap
 
 # ASCII banner
 def banner():
