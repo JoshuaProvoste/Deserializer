@@ -117,9 +117,10 @@ def load_rules_json(path: str) -> dict:
 
     return rules
 
-def iter_py_files(root: Path):
+def iter_py_files(root: Path, skip_dirs):
+    skip_dirs = set(skip_dirs)
     for dirpath, dirnames, filenames in os.walk(root):
-        dirnames[:] = [d for d in dirnames if d not in SKIP_DIRS and not d.startswith(".")]
+        dirnames[:] = [d for d in dirnames if d not in skip_dirs and not d.startswith(".")]
         for fn in filenames:
             if fn.endswith(".py"):
                 yield Path(dirpath) / fn
@@ -273,6 +274,11 @@ def main():
         action="store_true",
         help="Do not print the banner (avoids polluting stdout when using --out -).",
     )
+    ap.add_argument(
+        "--skip-dirs",
+        default=",".join(sorted(SKIP_DIRS)),
+        help="Comma-separated directory names to skip while walking (default: built-in SKIP_DIRS).",
+    )
     args = ap.parse_args()
 
     if not args.no_banner:
@@ -283,15 +289,29 @@ def main():
         rules = load_rules_json(args.rules_file)
 
     root = Path(args.path).resolve()
+    skip_dirs = {d.strip() for d in args.skip_dirs.split(",") if d.strip()}
 
-    sink = sys.stdout if args.out == "-" else Path(args.out).expanduser().resolve().open("w", encoding="utf-8")
-    try:
-        for py in iter_py_files(root):
+    had_errors = False
+
+    def emit(sink, item):
+        nonlocal had_errors
+        if isinstance(item, dict) and "error" in item:
+            had_errors = True
+        sink.write(json.dumps(item, ensure_ascii=False) + "\n")
+
+    if args.out == "-":
+        for py in iter_py_files(root, skip_dirs):
             for item in scan_file(py, rules):
-                sink.write(json.dumps(item, ensure_ascii=False) + "\n")
-    finally:
-        if sink is not sys.stdout:
-            sink.close()
+                emit(sys.stdout, item)
+    else:
+        out_path = Path(args.out).expanduser().resolve()
+        with out_path.open("w", encoding="utf-8") as sink:
+            for py in iter_py_files(root, skip_dirs):
+                for item in scan_file(py, rules):
+                    emit(sink, item)
+
+    # Non-zero exit code is useful in CI when any IO/parse errors occurred.
+    raise SystemExit(1 if had_errors else 0)
 
 if __name__ == "__main__":
     main()
