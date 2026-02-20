@@ -170,9 +170,25 @@ class RefVisitor(ast.NodeVisitor):
         self.generic_visit(node)
 
     def visit_Call(self, node: ast.Call):
-        mod, func = self._resolve_call(node.func)
+        mod, func, qualified = self._resolve_call(node.func)
         if mod and func and self._is_tracked_call(mod, func):
-            self._report(node, "call", mod, func)
+            # Simple classification for better triage/filtering (does not affect detection logic)
+            if mod == "pickle" and func in ("load", "loads"):
+                category, severity = "deserialize", "high"
+            elif mod == "torch" and func == "load":
+                category, severity = "model_load", "high"
+            else:
+                category, severity = "call", "medium"
+
+            self._report(
+                node,
+                "call",
+                mod,
+                func,
+                qualified_name=qualified,
+                category=category,
+                severity=severity,
+            )
         self.generic_visit(node)
 
     def _resolve_call(self, func_node):
@@ -191,41 +207,48 @@ class RefVisitor(ast.NodeVisitor):
 
         parts = _dotted_parts(func_node)
         if not parts:
-            return None, None
+            return None, None, None
 
-        # If the root name is an alias we track (e.g., "t" -> "torch"), rewrite it.
+        # De-alias the root if we tracked it (e.g., "t" -> "torch")
         root = parts[0]
         parts[0] = self.name_to_module.get(root, root)
 
         func = parts[-1]
+        qualified = ".".join(parts)
 
         # Prefer the (possibly de-aliased) root module if it's tracked.
         if parts[0] in self.rules:
-            return parts[0], func
+            return parts[0], func, qualified
 
         # Otherwise, support cases like pkg.pickle.loads where the tracked module
         # appears later in the chain.
         for p in parts[:-1]:
             if p in self.rules:
-                return p, func
+                return p, func, qualified
 
-        return None, None
-
+        return None, None, None
 
     def _is_tracked_call(self, mod, func):
         return mod in self.rules and (mod, func) in self.rules[mod]["calls"]
 
-    def _report(self, node, kind, module, name, alias=None):
-        self.findings.append(
-            {
-                "kind": kind,
-                "module": module,
-                "name": name,
-                "alias": alias,
-                "lineno": getattr(node, "lineno", None),
-                "col_offset": getattr(node, "col_offset", None),
-            }
-        )
+    def _report(self, node, kind, module, name, alias=None, *, qualified_name=None, category=None, severity=None):
+        item = {
+            "kind": kind,
+            "module": module,
+            "name": name,
+            "alias": alias,
+            "lineno": getattr(node, "lineno", None),
+            "col_offset": getattr(node, "col_offset", None),
+        }
+        # Enriched fields (backwards-compatible: just extra keys)
+        if qualified_name is not None:
+            item["qualified_name"] = qualified_name
+        if category is not None:
+            item["category"] = category
+        if severity is not None:
+            item["severity"] = severity
+
+        self.findings.append(item)
 
 def scan_file(path: Path, rules):
     try:
