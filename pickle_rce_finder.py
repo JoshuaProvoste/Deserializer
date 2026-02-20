@@ -6,11 +6,18 @@ from pathlib import Path
 DEFAULT_RULES = {
     "pickle": {
         "imports": {"pickle"},
-        "calls": {("pickle", "load"), ("pickle", "dump")},
+        # Focus on dangerous deserialization entrypoints
+        "calls": {
+            ("pickle", "load"),
+            ("pickle", "loads"),
+        },
     },
     "torch": {
         "imports": {"torch"},
-        "calls": {("torch", "load"), ("torch", "save")},
+        # torch.load() can deserialize pickled payloads depending on usage
+        "calls": {
+            ("torch", "load"),
+        },
     },
 }
 
