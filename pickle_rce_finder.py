@@ -27,7 +27,6 @@ MAX_AST_NODES = 100000  # AST node limit (anti-pathological inputs)
 # MAX_FILE_BYTES = 2 * 1024 * 1024   # 2 MB: avoid huge files
 # MAX_AST_NODES = 20000              # cut off pathological ASTs early
 
-
 # ASCII banner
 def banner():
     b = r"""
@@ -43,7 +42,6 @@ def banner():
 
 """
     print(b)
-
 
 def load_rules_json(path: str) -> dict:
     data = json.loads(Path(path).read_text(encoding="utf-8"))
@@ -62,7 +60,6 @@ def iter_py_files(root: Path):
         for fn in filenames:
             if fn.endswith(".py"):
                 yield Path(dirpath) / fn
-
 
 class RefVisitor(ast.NodeVisitor):
     def __init__(self, rules):
@@ -124,7 +121,6 @@ class RefVisitor(ast.NodeVisitor):
             }
         )
 
-
 def scan_file(path: Path, rules):
     try:
         if path.stat().st_size > MAX_FILE_BYTES:
@@ -162,7 +158,6 @@ def scan_file(path: Path, rules):
 
     return [{"file": str(path), **f} for f in v.findings]
 
-
 def main():
     ap = argparse.ArgumentParser(
         description="Simple AST-based scanner for module/function references (pickle-focused, extensible)."
@@ -189,19 +184,15 @@ def main():
         rules = load_rules_json(args.rules_file)
 
     root = Path(args.path).resolve()
-    outputs = []
-
-    for py in iter_py_files(root):
-        outputs.extend(scan_file(py, rules))
 
     sink = sys.stdout if args.out == "-" else Path(args.out).expanduser().resolve().open("w", encoding="utf-8")
     try:
-        for item in outputs:
-            sink.write(json.dumps(item, ensure_ascii=False) + "\n")
+        for py in iter_py_files(root):
+            for item in scan_file(py, rules):
+                sink.write(json.dumps(item, ensure_ascii=False) + "\n")
     finally:
         if sink is not sys.stdout:
             sink.close()
-
 
 if __name__ == "__main__":
     main()
