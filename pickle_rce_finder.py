@@ -61,11 +61,24 @@ def iter_py_files(root: Path):
             if fn.endswith(".py"):
                 yield Path(dirpath) / fn
 
+class AstNodeLimitExceeded(Exception):
+    def __init__(self, count: int, limit: int):
+        super().__init__(f"AST node limit exceeded: {count}>{limit}")
+        self.count = count
+        self.limit = limit
+
 class RefVisitor(ast.NodeVisitor):
     def __init__(self, rules):
         self.rules = rules
         self.name_to_module = {}
         self.findings = []
+        self.node_count = 0  # counts visited AST nodes
+
+    def generic_visit(self, node):
+        self.node_count += 1
+        if self.node_count > MAX_AST_NODES:
+            raise AstNodeLimitExceeded(self.node_count, MAX_AST_NODES)
+        return super().generic_visit(node)
 
     def visit_Import(self, node: ast.Import):
         for alias in node.names:
@@ -140,17 +153,11 @@ def scan_file(path: Path, rules):
     except RecursionError as e:
         return [{"file": str(path), "error": f"parse_recursion_error:{e}"}]
 
-    # AST complexity bound
-    try:
-        node_count = sum(1 for _ in ast.walk(tree))
-    except RecursionError as e:
-        return [{"file": str(path), "error": f"walk_recursion_error:{e}"}]
-    if node_count > MAX_AST_NODES:
-        return [{"file": str(path), "error": f"skipped_huge_ast>{node_count}nodes"}]
-
     v = RefVisitor(rules)
     try:
         v.visit(tree)
+    except AstNodeLimitExceeded as e:
+        return [{"file": str(path), "error": f"skipped_huge_ast>{e.count}nodes"}]
     except RecursionError as e:
         return [{"file": str(path), "error": f"visit_recursion_error:{e}"}]
     except Exception as e:
