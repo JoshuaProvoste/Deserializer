@@ -74,6 +74,11 @@ class RefVisitor(ast.NodeVisitor):
         self.findings = []
         self.node_count = 0  # counts visited AST nodes
 
+        # Precompute allowed import roots from the ruleset
+        self.tracked_imports = set()
+        for spec in self.rules.values():
+            self.tracked_imports.update(spec.get("imports", set()))
+
     def generic_visit(self, node):
         self.node_count += 1
         if self.node_count > MAX_AST_NODES:
@@ -84,7 +89,7 @@ class RefVisitor(ast.NodeVisitor):
         for alias in node.names:
             mod = alias.name.split(".")[0]
             asname = alias.asname or mod
-            if mod in self.rules and mod in self.rules[mod]["imports"]:
+            if mod in self.tracked_imports:
                 # Keep alias/module mapping for later call resolution
                 self.name_to_module[asname] = mod
         self.generic_visit(node)
@@ -93,7 +98,7 @@ class RefVisitor(ast.NodeVisitor):
         if not node.module:
             return
         base = node.module.split(".")[0]
-        if base in self.rules and base in self.rules[base]["imports"]:
+        if base in self.tracked_imports:
             for alias in node.names:
                 local = alias.asname or alias.name
                 # Keep alias/module mapping for later call resolution
