@@ -2,6 +2,8 @@
 # rce_scanner.py (robust version)
 import argparse, ast, json, os, sys
 from pathlib import Path
+import tokenize
+import warnings
 
 DEFAULT_RULES = {
     "pickle": {
@@ -250,6 +252,307 @@ class RefVisitor(ast.NodeVisitor):
 
         self.findings.append(item)
 
+def scan_tokens_fallback(src: str, path: Path, rules: dict) -> list[dict]:
+    """
+    Streaming fallback scanner for huge files (memory-safe):
+    - Uses tokenize without materializing token list
+    - Reconstructs import/alias mappings
+    - Detects dotted call expressions followed by '('
+    Preserves the same rules/alias intent as the AST visitor.
+    """
+    import io
+
+    tracked_imports = set()
+    for spec in rules.values():
+        tracked_imports.update(spec.get("imports", set()))
+
+    name_to_module: dict[str, str] = {}
+    findings: list[dict] = []
+
+    def is_tracked_call(mod: str, func: str) -> bool:
+        return mod in rules and (mod, func) in rules[mod]["calls"]
+
+    def classify(mod: str, func: str) -> tuple[str, str]:
+        if mod == "pickle" and func in ("load", "loads"):
+            return "deserialize", "high"
+        if mod == "torch" and func == "load":
+            return "model_load", "high"
+        return "call", "medium"
+
+    def resolve_dotted(parts: list[str]) -> tuple[str | None, str | None, str | None]:
+        # De-alias root
+        if parts:
+            parts = parts[:]  # copy
+            parts[0] = name_to_module.get(parts[0], parts[0])
+
+        if not parts:
+            return None, None, None
+
+        func = parts[-1]
+        qualified = ".".join(parts)
+
+        # Prefer root module if tracked
+        if parts[0] in rules:
+            return parts[0], func, qualified
+
+        # Support pkg.pickle.loads where tracked module is later
+        for p in parts[:-1]:
+            if p in rules:
+                return p, func, qualified
+
+        return None, None, None
+
+    def emit_call(mod: str, func: str, qualified: str, lineno: int, col: int) -> None:
+        category, severity = classify(mod, func)
+        findings.append(
+            {
+                "kind": "call",
+                "module": mod,
+                "name": func,
+                "alias": None,
+                "lineno": lineno,
+                "col_offset": col,
+                "qualified_name": qualified,
+                "category": category,
+                "severity": severity,
+                "parser": "tokenize_fallback",
+            }
+        )
+
+    # Stream tokens (NO splitlines(), NO list())
+    try:
+        reader = io.StringIO(src).readline
+        tok_iter = tokenize.generate_tokens(reader)
+    except Exception:
+        return [{"file": str(path), "error": "tokenize_error"}]
+
+    # Skip trivia but keep NEWLINE/NL (they matter as statement boundaries)
+    DROP = {
+        tokenize.INDENT,
+        tokenize.DEDENT,
+        tokenize.COMMENT,
+        tokenize.ENCODING,
+    }
+
+    pending: list[tokenize.TokenInfo] = []
+
+    def next_tok() -> tokenize.TokenInfo:
+        if pending:
+            return pending.pop()
+        return next(tok_iter)
+
+    def push_tok(t: tokenize.TokenInfo) -> None:
+        pending.append(t)
+
+    def next_nondrop() -> tokenize.TokenInfo:
+        while True:
+            t = next_tok()
+            if t.type not in DROP:
+                return t
+
+    def parse_module_name(first: tokenize.TokenInfo) -> tuple[list[str], tokenize.TokenInfo | None]:
+        # module := NAME ('.' NAME)*
+        parts = [first.string]
+        while True:
+            try:
+                t = next_nondrop()
+            except StopIteration:
+                return parts, None
+            if t.type == tokenize.OP and t.string == ".":
+                try:
+                    t2 = next_nondrop()
+                except StopIteration:
+                    return parts, None
+                if t2.type == tokenize.NAME:
+                    parts.append(t2.string)
+                    continue
+                # unexpected token after dot -> push back and stop
+                push_tok(t2)
+                push_tok(t)
+                return parts, t
+            else:
+                push_tok(t)
+                return parts, t
+
+    def parse_import_stmt() -> None:
+        # after seeing NAME 'import'
+        while True:
+            try:
+                t = next_nondrop()
+            except StopIteration:
+                return
+
+            if t.type in (tokenize.NEWLINE, tokenize.NL, tokenize.ENDMARKER):
+                return
+            if t.type == tokenize.OP and t.string == ",":
+                continue
+            if t.type != tokenize.NAME:
+                continue
+
+            mod_parts, _ = parse_module_name(t)
+            mod_root = mod_parts[0]
+            asname = mod_root
+
+            # optional "as NAME"
+            try:
+                t2 = next_nondrop()
+            except StopIteration:
+                t2 = None
+
+            if t2 and t2.type == tokenize.NAME and t2.string == "as":
+                try:
+                    t3 = next_nondrop()
+                except StopIteration:
+                    t3 = None
+                if t3 and t3.type == tokenize.NAME:
+                    asname = t3.string
+                else:
+                    if t3:
+                        push_tok(t3)
+            else:
+                if t2:
+                    push_tok(t2)
+
+            if mod_root in tracked_imports:
+                name_to_module[asname] = mod_root
+
+            # consume optional comma/newline naturally by loop
+
+    def parse_from_stmt() -> None:
+        # after seeing NAME 'from'
+        try:
+            t = next_nondrop()
+        except StopIteration:
+            return
+
+        if t.type in (tokenize.NEWLINE, tokenize.NL, tokenize.ENDMARKER):
+            return
+        if t.type != tokenize.NAME:
+            return
+
+        mod_parts, _ = parse_module_name(t)
+        base = mod_parts[0]
+
+        # expect "import"
+        try:
+            t2 = next_nondrop()
+        except StopIteration:
+            return
+        if not (t2.type == tokenize.NAME and t2.string == "import"):
+            push_tok(t2)
+            return
+
+        if base not in tracked_imports:
+            # consume until end of statement but don't map aliases
+            while True:
+                try:
+                    t3 = next_nondrop()
+                except StopIteration:
+                    return
+                if t3.type in (tokenize.NEWLINE, tokenize.NL, tokenize.ENDMARKER):
+                    return
+            # unreachable
+
+        # parse imported names list: NAME [as NAME] (, ...)
+        while True:
+            try:
+                t3 = next_nondrop()
+            except StopIteration:
+                return
+            if t3.type in (tokenize.NEWLINE, tokenize.NL, tokenize.ENDMARKER):
+                return
+            if t3.type == tokenize.OP and t3.string == ",":
+                continue
+            if t3.type != tokenize.NAME:
+                continue
+
+            local = t3.string
+
+            # optional "as NAME"
+            try:
+                t4 = next_nondrop()
+            except StopIteration:
+                t4 = None
+            if t4 and t4.type == tokenize.NAME and t4.string == "as":
+                try:
+                    t5 = next_nondrop()
+                except StopIteration:
+                    t5 = None
+                if t5 and t5.type == tokenize.NAME:
+                    local = t5.string
+                else:
+                    if t5:
+                        push_tok(t5)
+            else:
+                if t4:
+                    push_tok(t4)
+
+            name_to_module[local] = base
+
+    while True:
+        try:
+            t = next_nondrop()
+        except StopIteration:
+            break
+        except tokenize.TokenError:
+            return [{"file": str(path), "error": "tokenize_error"}]
+        except MemoryError:
+            return [{"file": str(path), "error": "tokenize_memory_error"}]
+
+        if t.type in (tokenize.NEWLINE, tokenize.NL):
+            continue
+
+        # import / from handling
+        if t.type == tokenize.NAME and t.string == "import":
+            parse_import_stmt()
+            continue
+        if t.type == tokenize.NAME and t.string == "from":
+            parse_from_stmt()
+            continue
+
+        # call detection: NAME ('.' NAME)* '('
+        if t.type == tokenize.NAME:
+            parts = [t.string]
+            lineno, col = t.start
+
+            while True:
+                try:
+                    t1 = next_nondrop()
+                except StopIteration:
+                    t1 = None
+
+                if t1 is None:
+                    break
+                if t1.type in (tokenize.NEWLINE, tokenize.NL):
+                    push_tok(t1)
+                    break
+
+                if t1.type == tokenize.OP and t1.string == ".":
+                    try:
+                        t2 = next_nondrop()
+                    except StopIteration:
+                        break
+                    if t2.type == tokenize.NAME:
+                        parts.append(t2.string)
+                        continue
+                    # not a proper dotted chain
+                    push_tok(t2)
+                    push_tok(t1)
+                    break
+
+                if t1.type == tokenize.OP and t1.string == "(":
+                    mod, func, qualified = resolve_dotted(parts)
+                    if mod and func and qualified and is_tracked_call(mod, func):
+                        emit_call(mod, func, qualified, lineno, col)
+                    # do not push back '('
+                    break
+
+                # any other token breaks the chain
+                push_tok(t1)
+                break
+
+    return [{"file": str(path), **f} for f in findings]
+
 def scan_file(path: Path, rules):
     try:
         if path.stat().st_size > MAX_FILE_BYTES:
@@ -257,13 +560,26 @@ def scan_file(path: Path, rules):
     except OSError as e:
         return [{"file": str(path), "error": f"stat_error:{e}"}]
 
+    # Read source robustly (PEP263 + BOM-safe)
     try:
-        src = path.read_text(encoding="utf-8", errors="ignore")
+        with tokenize.open(str(path)) as f:
+            src = f.read()
+    except (SyntaxError, UnicodeDecodeError):
+        try:
+            data = path.read_bytes()
+            src = data.decode("utf-8-sig", errors="replace")
+        except Exception as e2:
+            return [{"file": str(path), "error": f"read_error:{e2}"}]
     except Exception as e:
         return [{"file": str(path), "error": f"read_error:{e}"}]
 
+    if src.startswith("\ufeff"):
+        src = src[1:]
+
     try:
-        tree = ast.parse(src, filename=str(path))
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", SyntaxWarning)
+            tree = ast.parse(src, filename=str(path))
     except SyntaxError as e:
         return [{"file": str(path), "error": f"syntax_error:{e}"}]
     except RecursionError as e:
@@ -272,8 +588,9 @@ def scan_file(path: Path, rules):
     v = RefVisitor(rules)
     try:
         v.visit(tree)
-    except AstNodeLimitExceeded as e:
-        return [{"file": str(path), "error": f"skipped_huge_ast>{e.count}nodes"}]
+    except AstNodeLimitExceeded:
+        # IMPORTANT: do NOT treat this as an error; fall back to tokenize scan
+        return scan_tokens_fallback(src, path, rules)
     except RecursionError as e:
         return [{"file": str(path), "error": f"visit_recursion_error:{e}"}]
     except Exception as e:
