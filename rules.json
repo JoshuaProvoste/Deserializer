@@ -1,5 +1,5 @@
 {
-    "pickle": {"imports": ["picle"],"calls": [["pickle", "load"], ["pickle", "dump"],["pickle", "loads"]]},
+    "pickle": {"imports": ["pickle"],"calls": [["pickle", "load"], ["pickle", "dump"],["pickle", "loads"]]},
     "torch": {"imports": ["torch"],"calls": [["torch","load"], ["torch","save"]]},
     "pandas": {"imports": ["pandas"],"calls": [["pandas", "read_pickle"], ["pandas", "to_pickle"]]},
     "numpy": {"imports": ["numpy"],"calls": [["numpy", "save"], ["numpy", "load"]]},
@@ -12,7 +12,7 @@
     "kedro": {"imports": ["kedro"],"calls": [["kedro","PickleDataSet"]]},
     "shelve": {"imports": ["shelve"],"calls": [["shelve","open"]]},
     "fastai": {"imports": ["fastai"],"calls": [["fastai","load_learner"]]},
-    "pytorch_ignite": {"imports": ["ignite"],"calls": [["ignite","Checkpoint"],["ignite","DiskSaver"],["ignite","load_objects"]]},
+    "ignite": {"imports": ["ignite"], "calls": [["ignite", "Checkpoint"], ["ignite", "DiskSaver"], ["ignite", "load_objects"]]},
     "gensim": {"imports": ["gensim"],"calls": [["gensim","save"], ["gensim","load"]]},
     "mlflow": {"imports": ["mlflow"],"calls": [["mlflow","save_model"], ["mlflow","load_model"]]},
     "sklearn": {"imports": ["sklearn"],"calls": [] },
