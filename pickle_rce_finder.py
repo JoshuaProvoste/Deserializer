@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-# rce_scanner.py (robust version)
-import argparse, ast, json, os, re, sys
+import argparse, ast, json, os, re, sys, io, shutil
 from pathlib import Path
 import tokenize
 import warnings
+import ctypes
 
 DEFAULT_RULES = {
     "pickle": {
@@ -46,6 +46,21 @@ def banner(file=sys.stdout):
 
 """
     print(b, file=file)
+
+def setup_windows_ansi():
+    """ Enables Virtual Terminal Processing in Windows CMD/PowerShell for ANSI support. """
+    if os.name == 'nt':
+        try:
+            from ctypes import wintypes
+            kernel32 = ctypes.windll.kernel32
+            for handle_id in [-11, -12]:  # STD_OUTPUT_HANDLE, STD_ERROR_HANDLE
+                h = kernel32.GetStdHandle(handle_id)
+                mode = wintypes.DWORD()
+                if kernel32.GetConsoleMode(h, ctypes.byref(mode)):
+                    # ENABLE_VIRTUAL_TERMINAL_PROCESSING = 0x0004
+                    kernel32.SetConsoleMode(h, mode.value | 0x0004)
+        except Exception:
+            pass
 
 def sanitize_template_syntax(src: str) -> str:
     """
@@ -727,6 +742,7 @@ def main():
         help="Comma-separated directory names to skip while walking (default: built-in SKIP_DIRS).",
     )
     args = ap.parse_args()
+    setup_windows_ansi()
 
     rules = DEFAULT_RULES
     if args.rules_file:
@@ -748,17 +764,27 @@ def main():
     jsonl_lines = 0
 
     def print_finding(item: dict):
+        if human.isatty():
+            # Clean the current progress line before printing the finding
+            human.write('\r' + ' ' * 140 + '\r')
+            human.flush()
         # Compact CLI line
         sev = item.get("severity", "-")
         cat = item.get("category", "-")
         qn = item.get("qualified_name") or f"{item.get('module')}.{item.get('name')}"
         loc = f"{item.get('file')}:{item.get('lineno')}"
         print(f"[{sev.upper()}][{cat}] {loc}  {qn}", file=human)
+        print("", file=human)  # Spacing after finding
 
     def print_error(item: dict):
+        if human.isatty():
+            # Clean the current progress line before printing the error
+            human.write('\r' + ' ' * 140 + '\r')
+            human.flush()
         loc = item.get("file", "?")
         err = item.get("error", "unknown_error")
         print(f"[ERROR] {loc}  {err}", file=human)
+        print("", file=human)  # Spacing after error
 
     def emit(sink, item: dict):
         nonlocal total_findings, total_errors, jsonl_lines
@@ -775,33 +801,57 @@ def main():
                 total_findings += 1
                 print_finding(item)
 
+    all_files = list(iter_py_files(root, skip_dirs))
+    total_files = len(all_files)
+
+    def print_progress(current, py_path=None):
+        if not human.isatty(): return
+        if total_files == 0: return
+        pct = (current / total_files) * 100
+        rem_pct = 100 - pct
+        rem_cnt = total_files - current
+        
+        fn = py_path.name if py_path else "..."
+        # Truncate filename to keep the status bar stable
+        limit = 30
+        display_fn = (fn[:limit-3] + "...") if len(fn) > limit else fn
+        
+        msg = f"\rProgress: {pct:5.1f}% | Res: {total_findings} | Scanned: {current}/{total_files} | Current: {display_fn}"
+        # Pad with spaces and flush to ensure the line is clean and visible
+        human.write(msg.ljust(120))
+        human.flush()
+
     if args.out == "-":
         # JSONL to stdout
-        for py in iter_py_files(root, skip_dirs):
-            files_scanned += 1
+        for idx, py in enumerate(all_files, 1):
+            files_scanned = idx
+            print_progress(idx, py)
             for item in scan_file(py, rules):
                 emit(sys.stdout, item)
         out_desc = "stdout (JSONL)"
         out_size = None
     else:
         out_path = Path(args.out).expanduser().resolve()
+        out_desc = str(out_path)
         with out_path.open("w", encoding="utf-8") as sink:
-            for py in iter_py_files(root, skip_dirs):
-                files_scanned += 1
+            for idx, py in enumerate(all_files, 1):
+                files_scanned = idx
+                print_progress(idx, py)
                 for item in scan_file(py, rules):
                     emit(sink, item)
-        out_desc = str(out_path)
         try:
             out_size = out_path.stat().st_size
         except OSError:
             out_size = None
 
     # Summary
-    print("", file=human)
+    print("\n", file=human)
     print("Scan finished.", file=human)
     print(f"Files scanned: {files_scanned}", file=human)
     print(f"Findings: {total_findings}", file=human)
     print(f"Errors: {total_errors}", file=human)
+    print("", file=human)  # Spacing before JSONL info
+
     if out_size is None:
         print(f"JSONL output: {out_desc} (lines: {jsonl_lines})", file=human)
     else:
