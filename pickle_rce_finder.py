@@ -810,4 +810,9 @@ def main():
     raise SystemExit(1 if total_errors else 0)
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except KeyboardInterrupt:
+        # Avoid printing a messy stack trace on Ctrl+C
+        print("\n[!] Scan interrupted by user (Ctrl+C). Exiting...", file=sys.stderr)
+        sys.exit(130)
