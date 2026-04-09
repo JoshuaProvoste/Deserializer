@@ -1,9 +1,13 @@
 #!/usr/bin/env python3
 import argparse, ast, json, os, re, sys, io, shutil
+import concurrent.futures
+import multiprocessing
+import signal
 from pathlib import Path
 import tokenize
 import warnings
 import ctypes
+from typing import Union, Any
 
 DEFAULT_RULES = {
     "pickle": {
@@ -657,12 +661,18 @@ def scan_regex_fallback(src: str, path: Path, rules: dict) -> list[dict]:
                     "severity": "high",
                     "parser": "regex_fallback"
                 })
-    return [{"file": str(path), **f} for f in findings]
+def init_worker():
+    """ Worker initializer to ignore SIGINT and silence stderr for clean Ctrl+C tracebacks on Windows. """
+    signal.signal(signal.SIGINT, signal.SIG_IGN)
+    # Silence stderr in workers so they don't leak technical tracebacks to the console during shutdown.
+    sys.stderr = open(os.devnull, 'w')
 
-def scan_file(path: Path, rules):
+def scan_file(path: Union[str, Path], rules, max_size=10*1024*1024):
+    """ Main entrypoint for scanning a file. Handles AST, Token and Regex passes. """
+    path = Path(path)
     try:
-        if path.stat().st_size > MAX_FILE_BYTES:
-            return [{"file": str(path), "error": f"skipped_large_file>{path.stat().st_size}B"}]
+        if path.stat().st_size > max_size:
+            return [{"file": str(path), "error": f"skipped_large_file>{max_size}B"}]
     except OSError as e:
         return [{"file": str(path), "error": f"stat_error:{e}"}]
 
@@ -687,23 +697,20 @@ def scan_file(path: Path, rules):
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore", SyntaxWarning)
                 tree = ast.parse(src, filename=str(path))
-        except SyntaxError as e:
-            # Fallback pass: attempt to sanitize template syntax (Jinja2, etc.)
+        except SyntaxError:
             sanitized = sanitize_template_syntax(src)
-            # If sanitization changed the source, try parsing again
             if sanitized != src:
                 try:
                     with warnings.catch_warnings():
                         warnings.simplefilter("ignore", SyntaxWarning)
                         tree = ast.parse(sanitized, filename=str(path))
-                    src = sanitized  # Use sanitized source for downstream analysis
+                    src = sanitized
                 except (SyntaxError, Exception):
-                    # Final fallback: If AST still fails, use the token-based scanner
-                    # This ensures zero errors on extremely complex template files.
                     return scan_tokens_fallback(src, path, rules)
             else:
-                # No sanitization possible/changed, use token-based fallback
                 return scan_tokens_fallback(src, path, rules)
+        except Exception:
+            return scan_tokens_fallback(src, path, rules)
     except RecursionError as e:
         return [{"file": str(path), "error": f"parse_recursion_error:{e}"}]
 
@@ -711,7 +718,6 @@ def scan_file(path: Path, rules):
     try:
         v.visit(tree)
     except AstNodeLimitExceeded:
-        # IMPORTANT: do NOT treat this as an error; fall back to tokenize scan
         return scan_tokens_fallback(src, path, rules)
     except RecursionError as e:
         return [{"file": str(path), "error": f"visit_recursion_error:{e}"}]
@@ -741,9 +747,40 @@ def main():
         default=",".join(sorted(SKIP_DIRS)),
         help="Comma-separated directory names to skip while walking (default: built-in SKIP_DIRS).",
     )
+    ap.add_argument(
+        "-j", "--concurrency",
+        type=int,
+        default=max(1, (os.cpu_count() or 1) - 2),
+        help="Number of concurrent processes (default: CPU cores - 2).",
+    )
+    ap.add_argument(
+        "-t", "--timeout",
+        type=float,
+        default=None,
+        help="Timeout in seconds for each file analysis (only works in parallel mode).",
+    )
+    ap.add_argument(
+        "--max-size",
+        type=int,
+        default=10 * 1024 * 1024,
+        help="Maximum file size in bytes to process (default: 10MiB).",
+    )
     args = ap.parse_args()
     setup_windows_ansi()
 
+    # Native Windows CTRL+C Handler for 100% responsiveness even during heavy processing.
+    if os.name == 'nt':
+        def win_handler(ctrl_type):
+            if ctrl_type in (0, 1): # CTRL_C_EVENT or CTRL_BREAK_EVENT
+                # Direct exit from system thread to bypass blocking executor cleanup.
+                sys.stderr.write("\n\n[!] Scan interrupted by user (Ctrl+C). Exiting...\n")
+                os._exit(130)
+            return 0
+        
+        # Maintain global reference to the callback to prevent GC (Garbage Collection).
+        global _win_handler_ref
+        _win_handler_ref = ctypes.WINFUNCTYPE(ctypes.c_int, ctypes.c_uint)(win_handler)
+        ctypes.windll.kernel32.SetConsoleCtrlHandler(_win_handler_ref, True)
     rules = DEFAULT_RULES
     if args.rules_file:
         rules = load_rules_json(args.rules_file)
@@ -762,29 +799,26 @@ def main():
     total_errors = 0
     files_scanned = 0
     jsonl_lines = 0
-
     def print_finding(item: dict):
         if human.isatty():
-            # Clean the current progress line before printing the finding
-            human.write('\r' + ' ' * 140 + '\r')
+            # Move down to clear the progress bar line if it exists
+            human.write('\033[B\r' + ' ' * 140 + '\r\033[A')
             human.flush()
-        # Compact CLI line
+        # Compact CLI line (restored variables after compaction)
         sev = item.get("severity", "-")
         cat = item.get("category", "-")
         qn = item.get("qualified_name") or f"{item.get('module')}.{item.get('name')}"
         loc = f"{item.get('file')}:{item.get('lineno')}"
         print(f"[{sev.upper()}][{cat}] {loc}  {qn}", file=human)
-        print("", file=human)  # Spacing after finding
 
     def print_error(item: dict):
         if human.isatty():
-            # Clean the current progress line before printing the error
-            human.write('\r' + ' ' * 140 + '\r')
+            # Move down to clear the progress bar line if it exists
+            human.write('\033[B\r' + ' ' * 140 + '\r\033[A')
             human.flush()
         loc = item.get("file", "?")
         err = item.get("error", "unknown_error")
         print(f"[ERROR] {loc}  {err}", file=human)
-        print("", file=human)  # Spacing after error
 
     def emit(sink, item: dict):
         nonlocal total_findings, total_errors, jsonl_lines
@@ -807,46 +841,78 @@ def main():
     def print_progress(current, py_path=None):
         if not human.isatty(): return
         if total_files == 0: return
+
+        # Draw a gap, then the progress bar, then move back UP to the gap line.
+        # This keeps the cursor at the spot where the NEXT finding should be printed.
         pct = (current / total_files) * 100
-        rem_pct = 100 - pct
-        rem_cnt = total_files - current
         
         fn = py_path.name if py_path else "..."
-        # Truncate filename to keep the status bar stable
         limit = 30
         display_fn = (fn[:limit-3] + "...") if len(fn) > limit else fn
         
-        msg = f"\rProgress: {pct:5.1f}% | Res: {total_findings} | Scanned: {current}/{total_files} | Current: {display_fn}"
-        # Pad with spaces and flush to ensure the line is clean and visible
+        msg = f"\n\rProgress: {pct:5.1f}% | Res: {total_findings} | Scanned: {current}/{total_files} | Current: {display_fn}"
         human.write(msg.ljust(120))
+        human.write("\033[A") # Move back up to the gap line
         human.flush()
 
+    # Determine output sink
     if args.out == "-":
-        # JSONL to stdout
-        for idx, py in enumerate(all_files, 1):
-            files_scanned = idx
-            print_progress(idx, py)
-            for item in scan_file(py, rules):
-                emit(sys.stdout, item)
+        sink = sys.stdout
         out_desc = "stdout (JSONL)"
         out_size = None
     else:
         out_path = Path(args.out).expanduser().resolve()
         out_desc = str(out_path)
-        with out_path.open("w", encoding="utf-8") as sink:
+        sink = out_path.open("w", encoding="utf-8")
+
+    # Sink established, proceed to scanning logic.
+    try:
+        if args.concurrency > 1 and total_files > 1:
+            # Parallel Scan Mode
+            with concurrent.futures.ProcessPoolExecutor(
+                max_workers=args.concurrency,
+                initializer=init_worker
+            ) as executor:
+                # Map futures to their paths for tracking (pass as string to avoid pickling issues)
+                future_to_path = {executor.submit(scan_file, str(py), rules, args.max_size): py for py in all_files}
+                
+                try:
+                    for future in concurrent.futures.as_completed(future_to_path, timeout=None):
+                        py = future_to_path[future]
+                        files_scanned += 1
+                        
+                        try:
+                            results = future.result(timeout=args.timeout)
+                            for item in results:
+                                emit(sink, item)
+                            
+                            print_progress(files_scanned, py)
+                        except concurrent.futures.TimeoutError:
+                            emit(sink, {"file": str(py), "error": f"timeout_reached({args.timeout}s)"})
+                        except Exception as exc:
+                            emit(sink, {"file": str(py), "error": f"executor_error:{exc}"})
+                except KeyboardInterrupt:
+                    # Emergency shutdown on Windows/Linux
+                    if args.out != "-": sink.close()
+                    print("\n\n[!] Scan interrupted by user (Ctrl+C). Exiting...", file=sys.stderr)
+                    os._exit(130)
+        else:
+            # Sequential Scan Mode (Fallback or explicitly requested)
             for idx, py in enumerate(all_files, 1):
                 files_scanned = idx
                 print_progress(idx, py)
                 for item in scan_file(py, rules):
                     emit(sink, item)
-        try:
-            out_size = out_path.stat().st_size
-        except OSError:
-            out_size = None
+    finally:
+        if args.out != "-":
+            sink.close()
+            try:
+                out_size = out_path.stat().st_size
+            except OSError:
+                out_size = None
 
     # Summary
-    print("\n", file=human)
-    print("Scan finished.", file=human)
+    print("\n\nScan finished.", file=human)
     print(f"Files scanned: {files_scanned}", file=human)
     print(f"Findings: {total_findings}", file=human)
     print(f"Errors: {total_errors}", file=human)
@@ -865,5 +931,5 @@ if __name__ == "__main__":
         main()
     except KeyboardInterrupt:
         # Avoid printing a messy stack trace on Ctrl+C
-        print("\n[!] Scan interrupted by user (Ctrl+C). Exiting...", file=sys.stderr)
+        print("\n\n[!] Scan interrupted by user (Ctrl+C). Exiting...", file=sys.stderr)
         sys.exit(130)

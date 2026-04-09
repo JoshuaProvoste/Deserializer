@@ -1,7 +1,7 @@
 # Pickle RCE Finder (AST-based)
 
 ```
-C:\pickle-rce-finder>python pickle_rce_finder.py --path artifacts --out artifacts.jsonl
+python pickle_rce_finder.py --path artifacts --rules-file rules.json -j 4 --out artifacts.jsonl
 
   _____ _      _    _        _____   _____ ______   ______ _           _
  |  __ (_)    | |  | |      |  __ \ / ____|  ____| |  ____(_)         | |
@@ -13,18 +13,18 @@ C:\pickle-rce-finder>python pickle_rce_finder.py --path artifacts --out artifact
     Pickle Deserialization Parser for Python Source Code
             coded by @JoshuaProvoste (jp / kw0)
 
+[HIGH][deserialize] \artifacts\chemical_components.py:34  pickle.loads
+[HIGH][deserialize] \artifacts\json_conversion.py:382  pickle.loads
+[HIGH][deserialize] \artifacts\predictor.py:62  pickle.load
 
-[HIGH][deserialize] C:\pickle-rce-finder\artifacts\chemical_components.py:34  pickle.loads
-[HIGH][deserialize] C:\pickle-rce-finder\artifacts\json_conversion.py:382  pickle.loads
-[HIGH][deserialize] C:\pickle-rce-finder\artifacts\predictor.py:62  pickle.load
-
+Progress: 100.0% | Res: 3 | Scanned: 3/3 | Current: predictor.py
 Scan finished.
 Files scanned: 3
-Findings: 3
+Findings: 4
 Errors: 0
-JSONL output: C:\pickle-rce-finder\artifacts.jsonl (lines: 3, bytes: 885)
-```
 
+JSONL output: artifacts.jsonl (lines: 3, bytes: 1124)
+```
 
 **Pickle RCE Finder** is a lightweight, repo-friendly Python static scanner that hunts for risky **Python deserialization entrypoints** (e.g., `pickle.load(s)` and `torch.load`) by parsing source code with the built-in `ast` module. It was designed for quick triage across large codebases: run it on a folder, get **newline-delimited JSON (JSONL)** findings with file/line context, and immediately spot places where an attacker-controlled artifact could turn into **RCE during load**.
 
@@ -33,6 +33,17 @@ JSONL output: C:\pickle-rce-finder\artifacts.jsonl (lines: 3, bytes: 885)
 This scanner is designed to be purely **Pythonic**, meaning it relies exclusively on the **Python Standard Library**. It has **zero external dependencies**, making it highly portable and ready to run in any environment with Python 3.8+ without the need for `pip install`. 
 
 While the current architecture prioritizes zero-dependency autonomy, future releases may introduce third-party packages to enhance detection capabilities or integrate advanced features.
+
+## Performance & Multiprocessing
+
+This scanner features a high-performance **parallel execution engine** built on Python's `concurrent.futures.ProcessPoolExecutor`. It is designed to scale across all available CPU cores (controllable via the `-j` or `--concurrency` flag), making it capable of scanning tens of thousands of files in seconds.
+
+- **Non-Blocking UI**: Features a stable, docked progress bar with a one-line gap for clean results presentation.
+- **Native Signal Handling**: On Windows, it utilizes a native `SetConsoleCtrlHandler` via `ctypes` to ensure that `Ctrl+C` is 100% responsive, even during heavy processing.
+- **Silent Tracebacks**: Worker processes are silented to ensure that interrupts and internal errors don't clutter the technical output.
+
+> [!WARNING]
+> **Performance Warning**: When analyzing extremely large or complex files (e.g., over 1MB, 2MB, or 3MB in size), the tool may experience significant slowdowns or appear "stuck" while parsing deep AST trees. If you encounter such bottlenecks, consider using the `--timeout` (to skip slow files) and `--max-size` (to skip huge files) flags to maintain scan velocity.
 
 ## Research writeups that this scanner supported
 
@@ -74,40 +85,67 @@ python --version
 
 ## Usage
 
-Basic scan (write JSONL to a file, print findings + summary to the terminal):
-
+### 1. Basic Scan
+Scan the current directory and print findings to the terminal (writes JSONL to stdout by default):
 ```bash
-python pickle_rce_finder.py --path artifacts --out artifacts.jsonl
+python pickle_rce_finder.py
 ```
 
-Stream JSONL to stdout (human output goes to stderr so JSONL stays clean):
-
+### 2. Targeted Audit
+Scan a specific repository and save findings to a JSONL file:
 ```bash
-python pickle_rce_finder.py --path . --out -
+python pickle_rce_finder.py --path /path/to/my-repo --out audit_results.jsonl
 ```
 
-Use a custom rules file:
-
+### 3. Turbo Mode (Performance Tuning)
+Use 8 concurrent processes and a 5-second timeout per file to keep the scan moving:
 ```bash
-python pickle_rce_finder.py --path . --rules-file rules.json --out findings.jsonl
+python pickle_rce_finder.py -j 8 --timeout 5 --out findings.jsonl
 ```
 
-## CLI flags
+### 4. CI/CD & Pipeline Integration
+Disable the banner and stream JSONL directly to stdout for pipe processing (human logs will go to stderr):
+```bash
+python pickle_rce_finder.py --no-banner --out - | jq .
+```
+
+### 5. Hardened / Safety Scan
+Limit processing to files under 1MB and skip specific data directories:
+```bash
+python pickle_rce_finder.py --max-size 1048576 --skip-dirs "data,samples,tests"
+```
+
+### 6. Custom Detection Rules
+Use a proprietary ruleset to detect logic-specific calls:
+```bash
+python pickle_rce_finder.py --rules-file my_custom_rules.json --out legacy_audit.jsonl
+```
+
+## CLI Flags
 
 - `--path <dir>`  
   Root directory to scan. Default: `.`
 
 - `--rules-file <path>`  
-  JSON ruleset path. If provided, it overrides `DEFAULT_RULES`.
+  Path to a JSON ruleset. If provided, it overrides the built-in `DEFAULT_RULES`.
 
 - `--out <path|->`  
-  Output destination for JSONL. Use `-` to write JSONL to stdout. Default: `-`
+  Output destination for JSONL results. Use `-` to write JSONL to `stdout`. Default: `-`
+
+- `-j, --concurrency <int>`  
+  Number of concurrent processes to use. Default: `(CPU cores - 2)`.
+
+- `-t, --timeout <float>`  
+  Timeout in seconds for each file analysis. Only effective in parallel mode. Default: `None` (no timeout).
+
+- `--max-size <bytes>`  
+  Maximum file size in bytes to process. Default: `10,485,760` (10 MiB).
+
+- `--skip-dirs <list>`  
+  Comma-separated list of directory names to ignore (e.g., `tests,.git,env`).
 
 - `--no-banner`  
-  Disable the ASCII banner.
-
-- `--skip-dirs <comma,separated,names>`  
-  Directory names to skip during walking. Default is the built-in `SKIP_DIRS` list.
+  Disable the ASCII branding banner for cleaner output in scripts.
 
 ## Output format (JSONL)
 
