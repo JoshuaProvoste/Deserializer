@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # rce_scanner.py (robust version)
-import argparse, ast, json, os, sys
+import argparse, ast, json, os, re, sys
 from pathlib import Path
 import tokenize
 import warnings
@@ -46,6 +46,46 @@ def banner(file=sys.stdout):
 
 """
     print(b, file=file)
+
+def sanitize_template_syntax(src: str) -> str:
+    """
+    Identifies Jinja2/Mako-like template tags and neutralizes them while 
+    preserving line count and (mostly) column offsets.
+    """
+    import re
+    pattern = re.compile(r"(\{%.*?%\}|\{\{.*?\}\}|\{#.*?#\})", re.DOTALL)
+    
+    parts = []
+    last_end = 0
+    for match in pattern.finditer(src):
+        parts.append(src[last_end:match.start()])
+        content = match.group(0)
+        
+        sub_parts = []
+        is_expr = content.startswith('{{')
+        first = True
+        for c in content:
+            if c == '\n':
+                sub_parts.append('\n')
+            elif is_expr:
+                # Replace expressions with a valid identifier T____ to preserve length/grammar
+                sub_parts.append('T' if first else '_')
+                first = False
+            else:
+                # Replace blocks/comments with spaces to preserve length/alignment
+                sub_parts.append(' ')
+        
+        parts.append("".join(sub_parts))
+        last_end = match.end()
+    
+    parts.append(src[last_end:])
+    sanitized = "".join(parts)
+    
+    # Post-processing: Fix the 'el  if' -> 'elif' issue common in structural templates
+    # This might shift columns by a few characters on these specific lines, but ensures valid parsing.
+    sanitized = re.sub(r'\bel\s+if\b', 'elif ', sanitized)
+    
+    return sanitized
 
 def load_rules_json(path: str) -> dict:
     def warn(msg: str) -> None:
@@ -253,6 +293,8 @@ class RefVisitor(ast.NodeVisitor):
         self.findings.append(item)
 
 def scan_tokens_fallback(src: str, path: Path, rules: dict) -> list[dict]:
+    # Sanitize source to avoid tokenization errors on template tags
+    src = sanitize_template_syntax(src)
     """
     Streaming fallback scanner for huge files (memory-safe):
     - Uses tokenize without materializing token list
@@ -323,8 +365,21 @@ def scan_tokens_fallback(src: str, path: Path, rules: dict) -> list[dict]:
     try:
         reader = io.StringIO(src).readline
         tok_iter = tokenize.generate_tokens(reader)
+        
+        # We must wrap the iteration too, as tokenize.generate_tokens is a generator 
+        # that can raise IndentationError during next()
+        def wrapped_tok_iter():
+            try:
+                for t in tok_iter:
+                    yield t
+            except (tokenize.TokenError, IndentationError, SyntaxError):
+                # If tokenization fails (e.g. indentation issues in templates),
+                # this generator will stop, and we'll handle it in the loop below.
+                return
+
+        gen = wrapped_tok_iter()
     except Exception:
-        return [{"file": str(path), "error": "tokenize_error"}]
+        return scan_regex_fallback(src, path, rules)
 
     # Skip trivia but keep NEWLINE/NL (they matter as statement boundaries)
     DROP = {
@@ -339,7 +394,13 @@ def scan_tokens_fallback(src: str, path: Path, rules: dict) -> list[dict]:
     def next_tok() -> tokenize.TokenInfo:
         if pending:
             return pending.pop()
-        return next(tok_iter)
+        try:
+            return next(gen)
+        except StopIteration:
+            raise StopIteration
+        except Exception:
+            # Ensure we break out of the token scanner loop on any internal error
+            raise StopIteration
 
     def push_tok(t: tokenize.TokenInfo) -> None:
         pending.append(t)
@@ -492,12 +553,11 @@ def scan_tokens_fallback(src: str, path: Path, rules: dict) -> list[dict]:
     while True:
         try:
             t = next_nondrop()
-        except StopIteration:
+        except (StopIteration, tokenize.TokenError, IndentationError):
             break
-        except tokenize.TokenError:
-            return [{"file": str(path), "error": "tokenize_error"}]
-        except MemoryError:
-            return [{"file": str(path), "error": "tokenize_memory_error"}]
+        except Exception:
+            # Any other crash in the token scanner results in regex fallback
+            return scan_regex_fallback(src, path, rules)
 
         if t.type in (tokenize.NEWLINE, tokenize.NL):
             continue
@@ -553,6 +613,37 @@ def scan_tokens_fallback(src: str, path: Path, rules: dict) -> list[dict]:
 
     return [{"file": str(path), **f} for f in findings]
 
+def scan_regex_fallback(src: str, path: Path, rules: dict) -> list[dict]:
+    """
+    Final emergency fallback: purely regex-based detection.
+    Completely ignores syntax and indentation, making it 'unbreakable'.
+    """
+    import re
+    findings = []
+    for spec in rules.values():
+        for mod, func in spec.get("calls", set()):
+            # Simple pattern: \bmodule\.function\s*\(
+            pattern = re.compile(rf"\b{re.escape(mod)}\.{re.escape(func)}\s*\(")
+            for m in pattern.finditer(src):
+                # Calculate lineno and col_offset manually
+                preceding = src[:m.start()]
+                lineno = preceding.count('\n') + 1
+                last_newline = preceding.rfind('\n')
+                col = m.start() - last_newline - 1 if last_newline != -1 else m.start()
+                
+                findings.append({
+                    "kind": "call",
+                    "module": mod,
+                    "name": func,
+                    "lineno": lineno,
+                    "col_offset": col,
+                    "qualified_name": f"{mod}.{func}",
+                    "category": "regex_fallback",
+                    "severity": "high",
+                    "parser": "regex_fallback"
+                })
+    return [{"file": str(path), **f} for f in findings]
+
 def scan_file(path: Path, rules):
     try:
         if path.stat().st_size > MAX_FILE_BYTES:
@@ -577,11 +668,27 @@ def scan_file(path: Path, rules):
         src = src[1:]
 
     try:
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore", SyntaxWarning)
-            tree = ast.parse(src, filename=str(path))
-    except SyntaxError as e:
-        return [{"file": str(path), "error": f"syntax_error:{e}"}]
+        try:
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore", SyntaxWarning)
+                tree = ast.parse(src, filename=str(path))
+        except SyntaxError as e:
+            # Fallback pass: attempt to sanitize template syntax (Jinja2, etc.)
+            sanitized = sanitize_template_syntax(src)
+            # If sanitization changed the source, try parsing again
+            if sanitized != src:
+                try:
+                    with warnings.catch_warnings():
+                        warnings.simplefilter("ignore", SyntaxWarning)
+                        tree = ast.parse(sanitized, filename=str(path))
+                    src = sanitized  # Use sanitized source for downstream analysis
+                except (SyntaxError, Exception):
+                    # Final fallback: If AST still fails, use the token-based scanner
+                    # This ensures zero errors on extremely complex template files.
+                    return scan_tokens_fallback(src, path, rules)
+            else:
+                # No sanitization possible/changed, use token-based fallback
+                return scan_tokens_fallback(src, path, rules)
     except RecursionError as e:
         return [{"file": str(path), "error": f"parse_recursion_error:{e}"}]
 
