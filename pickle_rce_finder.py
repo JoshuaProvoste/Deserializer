@@ -763,6 +763,7 @@ def main():
     def emit(sink, item: dict):
         nonlocal total_findings, total_errors, jsonl_lines
         sink.write(json.dumps(item, ensure_ascii=False) + "\n")
+        sink.flush()
         jsonl_lines += 1
 
         if isinstance(item, dict) and "error" in item:
