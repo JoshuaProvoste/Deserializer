@@ -28,6 +28,12 @@ JSONL output: C:\pickle-rce-finder\artifacts.jsonl (lines: 3, bytes: 885)
 
 **Pickle RCE Finder** is a lightweight, repo-friendly Python static scanner that hunts for risky **Python deserialization entrypoints** (e.g., `pickle.load(s)` and `torch.load`) by parsing source code with the built-in `ast` module. It was designed for quick triage across large codebases: run it on a folder, get **newline-delimited JSON (JSONL)** findings with file/line context, and immediately spot places where an attacker-controlled artifact could turn into **RCE during load**.
 
+## Dependencies & Portability
+
+This scanner is designed to be purely **Pythonic**, meaning it relies exclusively on the **Python Standard Library**. It has **zero external dependencies**, making it highly portable and ready to run in any environment with Python 3.8+ without the need for `pip install`. 
+
+While the current architecture prioritizes zero-dependency autonomy, future releases may introduce third-party packages to enhance detection capabilities or integrate advanced features.
+
 ## Research writeups that this scanner supported
 
 **Pickle RCE Finder** directly supported my security research and helped me locate insecure deserialization paths that were later documented in these investigations: **AlphaFold 3 (v3.0.1)**, **Vertex AI SDK (v1.121.0)**, and **PyGlove (v0.4.5)**. Concretely, it made it easy to enumerate where projects deserialize model/artifact blobs (like `ccd.pickle` or `model.pkl`) and prioritize the high-risk code paths that execute during `pickle.loads`/`pickle.load` or equivalent loading flows, accelerating root-cause analysis and PoC development.
