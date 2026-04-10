@@ -794,6 +794,9 @@ def main():
 
     if not args.no_banner:
         banner(file=human)
+        print("="*80, file=human)
+        print(" [>] Starting Static Analysis Scan...", file=human)
+        print("="*80, file=human)
 
     total_findings = 0
     total_errors = 0
@@ -922,6 +925,95 @@ def main():
         print(f"JSONL output: {out_desc} (lines: {jsonl_lines})", file=human)
     else:
         print(f"JSONL output: {out_desc} (lines: {jsonl_lines}, bytes: {out_size})", file=human)
+
+    # --- PHASE 2: RELATIONSHIP MAPPING (Integration) ---
+    if total_findings > 0 and args.out != "-":
+        print("\n" + "="*80, file=human)
+        print(" [>] Starting Relationship Mapping process...", file=human)
+        print("="*80, file=human)
+        
+        try:
+            from modules.relationship_mapper import RelationshipMapper
+            mapper = RelationshipMapper(args.path)
+            
+            # Load findings from the JSONL we just created
+            findings = []
+            with open(out_desc, 'r', encoding='utf-8') as f:
+                for line in f:
+                    if line.strip():
+                        findings.append(json.loads(line))
+            
+            if findings:
+                from modules.result_processor import ResultProcessor
+                project_name = ResultProcessor.infer_project_name(findings[0].get("file", ""))
+                output_mapper = os.path.join(project_name, "relationship_mapper.jsonl")
+
+                print(f"Identified {len(findings)} findings. Starting bulk mapping...\n", file=human)
+                mapper_results = []
+                
+                for i, finding in enumerate(findings, 1):
+                    target = f"{finding.get('file')}:{finding.get('lineno')}"
+                    print(f"[{i}/{len(findings)}] Processing: {target}...", file=human)
+                    
+                    result = mapper.map_finding(finding)
+                    mapper_results.append(result)
+                
+                # Persist results
+                with open(output_mapper, 'w', encoding='utf-8') as f:
+                    for res in mapper_results:
+                        f.write(json.dumps(res, ensure_ascii=False) + '\n')
+                
+                print(f"\n[+] Bulk Mapping Completed", file=human)
+                print(f"Total records processed: {len(mapper_results)}", file=human)
+                print(f"Results saved in: {output_mapper}", file=human)
+                
+                print("\n --- Findings Breakdown ---", file=human)
+                for res in mapper_results:
+                    root = res.get('root_finding', {})
+                    target_f = res.get('target_function', 'N/A')
+                    code_rels = len(res.get('relationships', {}).get('code', []))
+                    print(f" - {root.get('file')}:{root.get('lineno')} -> {target_f} ({code_rels} relationships)", file=human)
+                
+                print("\n--- End of Mapping Phase ---", file=human)
+                
+                # --- PHASE 3: RESULT PROCESSING / REPORT GENERATION (Integration) ---
+                print("\n" + "="*80, file=human)
+                print(" [>] Starting Security Report Generation...", file=human)
+                print("="*80, file=human)
+                
+                try:
+                    from modules.result_processor import ResultProcessor
+                    processor = ResultProcessor(output_base_dir="reports")
+                    
+                    if os.path.exists(output_mapper):
+                        count = 0
+                        with open(output_mapper, 'r', encoding='utf-8') as f:
+                            for idx, line in enumerate(f, 1):
+                                if not line.strip(): continue
+                                result = json.loads(line)
+                                
+                                # Use robust inference logic built into the module
+                                project_name = ResultProcessor.infer_project_name(
+                                    result.get("root_finding", {}).get("file", "")
+                                )
+                                
+                                report_file = processor.generate_report(result, idx, project_name)
+                                print(f"  [+] Generated: {report_file}", file=human)
+                                count += 1
+                        
+                        print(f"\n[OK] {count} detailed reports have been generated.", file=human)
+                        print(f"Check the 'reports/' folder to see the results.", file=human)
+                    else:
+                        print(f"[!] Error: Mapper output {output_mapper} not found.", file=human)
+                except ImportError:
+                    print("\n[!] Warning: Result Processor module not found. Skipping...", file=human)
+                except Exception as e:
+                    print(f"\n[!] Error during Report Generation: {e}", file=human)
+
+        except ImportError:
+            print("\n[!] Warning: Mapping module not found. Skipping...", file=human)
+        except Exception as e:
+            print(f"\n[!] Error during Relationship Mapping: {e}", file=human)
 
     # Non-zero exit code is useful in CI when any IO/parse errors occurred.
     raise SystemExit(1 if total_errors else 0)
