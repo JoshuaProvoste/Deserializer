@@ -1,7 +1,18 @@
 # Pickle RCE Finder (AST-based)
 
 ```
-python pickle_rce_finder.py --path artifacts --rules-file rules.json -j 4 --out artifacts.jsonl
+L:\Pickle-RCE-Finder>git clone https://github.com/microsoft/agent-framework
+Cloning into 'agent-framework'...
+remote: Enumerating objects: 60315, done.
+remote: Counting objects: 100% (631/631), done.
+remote: Compressing objects: 100% (376/376), done.
+Receiving objects: 100% (60315/60315), 84.32 MiB | 30.38 MiB/s, done.59684 (from 3)
+
+Resolving deltas: 100% (43682/43682), done.
+Updating files: 100% (3958/3958), done.
+Filtering content: 100% (2/2), 334.47 KiB | 227.00 KiB/s, done.
+
+L:\Pickle-RCE-Finder>python pickle_rce_finder.py --path agent-framework --rules-file rules.json -j 4 --out agent-framework/agent-framework.jsonl
 
   _____ _      _    _        _____   _____ ______   ______ _           _
  |  __ (_)    | |  | |      |  __ \ / ____|  ____| |  ____(_)         | |
@@ -13,17 +24,45 @@ python pickle_rce_finder.py --path artifacts --rules-file rules.json -j 4 --out 
     Pickle Deserialization Parser for Python Source Code
             coded by @JoshuaProvoste (jp / kw0)
 
-[HIGH][deserialize] \artifacts\chemical_components.py:34  pickle.loads
-[HIGH][deserialize] \artifacts\json_conversion.py:382  pickle.loads
-[HIGH][deserialize] \artifacts\predictor.py:62  pickle.load
 
-Progress: 100.0% | Res: 3 | Scanned: 3/3 | Current: predictor.py
+================================================================================
+ [>] Starting Static Analysis Scan...
+================================================================================
+[HIGH][deserialize] L:\Pickle-RCE-Finder\agent-framework\python\packages\core\agent_framework\_workflows\_checkpoint_encoding.py:270  pickle.loads
+
+Progress: 100.0% | Res: 1 | Scanned: 852/852 | Current: _dependency_bounds_upper_im...
 Scan finished.
-Files scanned: 3
-Findings: 4
+Files scanned: 852
+Findings: 1
 Errors: 0
 
-JSONL output: artifacts.jsonl (lines: 3, bytes: 1124)
+JSONL output: L:\Pickle-RCE-Finder\agent-framework\agent-framework.jsonl (lines: 1, bytes: 312)
+
+================================================================================
+ [>] Starting Relationship Mapping process...
+================================================================================
+Identified 1 findings. Starting bulk mapping...
+
+[1/1] Processing: L:\Pickle-RCE-Finder\agent-framework\python\packages\core\agent_framework\_workflows\_checkpoint_encoding.py:270...
+
+[+] Bulk Mapping Completed
+Total records processed: 1
+Results saved in: agent-framework\relationship_mapper.jsonl
+
+ --- Findings Breakdown ---
+ - L:\Pickle-RCE-Finder\agent-framework\python\packages\core\agent_framework\_workflows\_checkpoint_encoding.py:270 -> _base64_to_unpickle (1 relationships)
+
+--- End of Mapping Phase ---
+
+================================================================================
+ [>] Starting Security Report Generation...
+================================================================================
+  [+] Generated: reports\agent-framework\report_1.md
+
+[OK] 1 detailed reports have been generated.
+Check the 'reports/' folder to see the results.
+
+L:\Pickle-RCE-Finder>
 ```
 
 **Pickle RCE Finder** is a lightweight, repo-friendly Python static scanner that hunts for risky **Python deserialization entrypoints** (e.g., `pickle.load(s)` and `torch.load`) by parsing source code with the built-in `ast` module. It was designed for quick triage across large codebases: run it on a folder, get **newline-delimited JSON (JSONL)** findings with file/line context, and immediately spot places where an attacker-controlled artifact could turn into **RCE during load**.
@@ -47,16 +86,17 @@ This scanner features a high-performance **parallel execution engine** built on 
 
 ## Research writeups that this scanner supported
 
-**Pickle RCE Finder** directly supported my security research and helped me locate insecure deserialization paths that were later documented in these investigations: **AlphaFold 3 (v3.0.1)**, **Vertex AI SDK (v1.121.0)**, and **PyGlove (v0.4.5)**. Concretely, it made it easy to enumerate where projects deserialize model/artifact blobs (like `ccd.pickle` or `model.pkl`) and prioritize the high-risk code paths that execute during `pickle.loads`/`pickle.load` or equivalent loading flows, accelerating root-cause analysis and PoC development.
+**Pickle RCE Finder** directly supported my security research and helped me locate insecure deserialization paths that were later documented in these investigations: **Brax (v0.14.2)**, **Dopamine (v2.0)**, and **PyGlove (v0.4.5)**. Concretely, it made it easy to enumerate where projects deserialize model/artifact blobs and prioritize the high-risk code paths that execute during `pickle` loading flows, accelerating root-cause analysis and PoC development.
 
-- AlphaFold 3 (v3.0.1): `chemical_components.py` deserializing `ccd.pickle` via `pickle.loads(...)`
-- Vertex AI SDK (v1.121.0): `predictor.py` loading `model.pkl` via `pickle.load(...)`
-- PyGlove (v0.4.5): opaque JSON decoding path leading to `pickle.loads(...)` within conversion flow
-
-See the full writeups (with PoCs and reproduction steps):
-- https://github.com/JoshuaProvoste/Command-Injection-RCE-AlphaFold-v3.0.1
-- https://github.com/JoshuaProvoste/Command-Injection-RCE-Vertex-AI-SDK-v1.121.0
-- https://github.com/JoshuaProvoste/Command-Injection-RCE-PyGlove-v0.4.5
+- **Brax (v0.14.2)**:
+  - **Impact**: Critical RCE on compute nodes and TPU/GPU pods.
+  - **Details**: `load_params` in `brax.io.model` uses `etils.epath` to download and deserialize malicious parameters via `pickle.loads` from remote URIs (SMB, GCS, S3).
+- **Dopamine (v2.0)**:
+  - **Impact**: Critical RCE in distributed research clusters.
+  - **Details**: `load_statistics` and `Checkpointer` use `tf.io.gfile` to deserialize pickles from attacker-controlled remote paths or malicious `gin-config` injections.
+- **PyGlove (v0.4.5)**:
+  - **Impact**: Critical RCE via JSON APIs and distributed tuning.
+  - **Details**: `_OpaqueObject` allows automatic pickle decoding embedded in JSON. Also vulnerable in `sandbox_call` and `fsspec` URI loading flows.
 
 ## What it does
 
