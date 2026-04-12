@@ -1,6 +1,43 @@
-# Pickle-RCE-Finder Modules
+# Pickle RCE Finder Modules
 
 This directory contains a collection of specialized tools and support libraries for the deep analysis of deserialization vulnerabilities in Python. Each module is designed to be functional independently via its Command Line Interface (CLI) or to be integrated into automated workflows through programmatic imports.
+
+## Dynamic Orchestration and Import Architecture
+
+`pickle_rce_finder.py` serves as the primary engine and orchestrator of the ecosystem. The interaction between the core scanner and the deep analysis submodules is managed through a phased workflow:
+
+1.  **Core Scanning (Phase 1)**: Initial identification of deserialization sinks using AST, Tokenizer, or Regex.
+2.  **Relationship Mapping (Phase 2)**: Deep impact analysis, call graph construction, and inheritance tracing.
+3.  **Result Processing (Phase 3)**: Human-readable Markdown report generation and project-based segregation.
+
+### Technical Import Mechanism & Exhaustive Analysis
+
+The system implements a sophisticated **Dynamic Orchestration** pattern to manage local dependencies and execution flow. Below is a detailed technical breakdown of this process:
+
+#### 1. Conditional Phase Gating
+The transition from Phase 1 to Phase 2/3 is guarded by a conditional gate (`if total_findings > 0 and args.out != "-"`). This ensures that deep analysis only occurs when:
+-   At least one high-risk finding has been identified.
+-   A physical output file is specified. Because Phase 2 and 3 rely on reading and writing intermediate JSONL states, they are bypassed when the scanner is used in streaming mode (`--out -`) to prevent console output corruption.
+
+#### 2. Local Scope Namespace Injection (Lazy Loading)
+To minimize the memory footprint and prevent circular dependency issues, imports are performed at the **Function-Level** within the `main()` orchestrator:
+-   **Mapper Loading**: `RelationshipMapper` is imported only at the start of Phase 2.
+-   **Processor Loading**: `ResultProcessor` is imported twice—first as a static utility to infer project names and create directory structures, and later as a full instance to handle report generation.
+This ensures that the specialized analysis libraries are not loaded into the Python interpreter session unless they are explicitly required by the scan results.
+
+#### 3. Error Handling and Resilience (Graceful Degradation)
+Each module import is encapsulated in a `try...except ImportError` block. This provides two major design advantages:
+-   **Modular Distribution**: The core scanner (`pickle_rce_finder.py`) can be deployed as a standalone script in restricted environments (e.g., CI/CD containers) even if the `modules/` directory is not provided.
+-   **Fail-Safe Execution**: If a module is corrupted or missing, the orchestrator catches the error and allows the process to terminate gracefully, ensuring that the primary scan results (Phase 1) are never lost due to reporting failures.
+
+#### 4. Disk-Coupled State Transfer
+The interaction between components is **disk-coupled** rather than held in-memory. This architecture is chosen for scalability:
+-   **Scan -> Map**: The scanner flushes and closes its output buffer (`sink.close()`) before the mapper starts. The mapper then re-opens the file in read-only mode to process findings one by one.
+-   **Map -> Process**: The mapper persists its enriched graph into a project-specific `relationship_mapper.jsonl`. The processor later consumes this file to "flatten" recursive call chains into Markdown.
+This sequential, file-based hand-off ensures that the memory usage remains predictable even when analyzing repositories with thousands of files or complex call deep hierarchies.
+
+#### 5. Namespace and Pathing Resolution
+The orchestration relies on the `modules` directory being treated as a package. By using the notation `from modules.relationship_mapper import RelationshipMapper`, the system expects the execution context to be the project root. This allows for clean, explicit namespacing and prevents collision with other local library names in the analyzed repositories.
 
 ---
 
