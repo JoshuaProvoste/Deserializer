@@ -69,9 +69,8 @@ L:\Pickle-RCE-Finder>
 
 ## Dependencies & Portability
 
-This scanner is designed to be purely **Pythonic**, meaning it relies exclusively on the **Python Standard Library**. It has **zero external dependencies**, making it highly portable and ready to run in any environment with Python 3.8+ without the need for `pip install`. 
-
-While the current architecture prioritizes zero-dependency autonomy, this project includes an optional **Phase 4: AI-Driven Deep Analysis** that leverages external intelligence for advanced vulnerability synthesis.
+- **Core Scanner (Phases 1-3)**: Purely **Pythonic** and relies exclusively on the **Python Standard Library**. It has **zero external dependencies** and is ready to run in any environment with Python 3.8+ without `pip install`.
+- **AI-Driven Deep Analysis (Phase 4)**: This optional phase requires third-party libraries for AI orchestration and inference. These dependencies are documented in the `requirements.txt` file.
 
 ### AI-Driven Deep Analysis (Phase 4)
 
@@ -82,8 +81,10 @@ This phase integrates a specialized AI Security Agent to perform deep code revie
   ```env
   HF_TOKEN=your_token_here
   ```
-- **Dependencies**: Install the following packages in your environment:
-  `pip install smolagents python-dotenv huggingface_hub`
+- **Dependencies**: Install the optional libraries using the frozen requirements file:
+  ```bash
+  pip install -r requirements.txt
+  ```
 
 ## Performance & Multiprocessing
 
