@@ -9,6 +9,7 @@ This directory contains a collection of specialized tools and support libraries 
 1.  **Core Scanning (Phase 1)**: Initial identification of deserialization sinks using AST, Tokenizer, or Regex.
 2.  **Relationship Mapping (Phase 2)**: Deep impact analysis, call graph construction, and inheritance tracing.
 3.  **Result Processing (Phase 3)**: Human-readable Markdown report generation and project-based segregation.
+4.  **AI Deep Analysis (Phase 4)**: Autonomous verification and reproduction guide synthesis using LLM agents.
 
 ### Technical Import Mechanism & Exhaustive Analysis
 
@@ -23,6 +24,7 @@ The transition from Phase 1 to Phase 2/3 is guarded by a conditional gate (`if t
 To minimize the memory footprint and prevent circular dependency issues, imports are performed at the **Function-Level** within the `main()` orchestrator:
 -   **Mapper Loading**: `RelationshipMapper` is imported only at the start of Phase 2.
 -   **Processor Loading**: `ResultProcessor` is imported twice—first as a static utility to infer project names and create directory structures, and later as a full instance to handle report generation.
+-   **AI Orchestrator Loading**: `AIOrchestrator` is lazy-loaded at the start of Phase 4 to bridge scanning results with external AI intelligence.
 This ensures that the specialized analysis libraries are not loaded into the Python interpreter session unless they are explicitly required by the scan results.
 
 #### 3. Error Handling and Resilience (Graceful Degradation)
@@ -120,4 +122,41 @@ processor = ResultProcessor(output_base_dir="my_reports")
 # Generate report for a specific result
 # 'result' is a dictionary loaded from the JSONL
 processor.generate_report(result, index=1, project_name="my_audit")
+```
+
+---
+
+## AI Orchestrator (`ai_orchestrator.py`)
+
+### Description
+The **AI Orchestrator** is the final stage of the analysis pipeline. It manages the integration between static scanning results and advanced AI-driven verification. It coordinates a sequential workflow where an AI agent acts as a Senior Security Researcher to perform manual-like code reviews and synthesize multi-platform exploit reproduction guides.
+
+### Key Features
+- **Sequential Tasking**: Manages two autonomous sub-phases: **Attack Surface Discovery** and **Reproduction Guide Synthesis**.
+- **Dynamic Prompting**: Assembles high-fidelity security prompts in English to achieve maximum model reasoning quality.
+- **Advanced Reasoning**: Integrates with the **MiniMax-M2.5** model to reverse "self-command-injection" contexts.
+- **Multi-Platform Focus**: Compiles reproduction guides specifically formatted for UNIX (Attacker) and Windows (Victim) environments.
+
+### Independent Usage (CLI)
+Phase 4 can be run as a standalone process on a project that has already undergone Phases 1-3:
+
+```bash
+python modules/ai_orchestrator.py <project_name> [repo_path]
+```
+
+- **project_name**: The name of the project folder (used to locate generated reports).
+- **repo_path** (Optional): Path to the analyzed repository. Defaults to `.`.
+
+### Module Usage (Import)
+The orchestrator is designed to be lazily loaded by the main scanner for deep analysis:
+
+```python
+from modules.ai_orchestrator import AIOrchestrator
+
+# Initialization (auto-loads .env for HF_TOKEN)
+orchestrator = AIOrchestrator()
+
+# Execute the full Phase 4 analysis
+# Generates {project_name}/ATTACK_SURFACE.md and {project_name}/REPRODUCTION_GUIDE.md
+orchestrator.run_analysis(project_name="agent-framework", repo_path="agent-framework")
 ```
