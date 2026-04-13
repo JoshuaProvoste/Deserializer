@@ -71,7 +71,19 @@ L:\Pickle-RCE-Finder>
 
 This scanner is designed to be purely **Pythonic**, meaning it relies exclusively on the **Python Standard Library**. It has **zero external dependencies**, making it highly portable and ready to run in any environment with Python 3.8+ without the need for `pip install`. 
 
-While the current architecture prioritizes zero-dependency autonomy, future releases may introduce third-party packages to enhance detection capabilities or integrate advanced features.
+While the current architecture prioritizes zero-dependency autonomy, this project includes an optional **Phase 4: AI-Driven Deep Analysis** that leverages external intelligence for advanced vulnerability synthesis.
+
+### AI-Driven Deep Analysis (Phase 4)
+
+This phase integrates a specialized AI Security Agent to perform deep code reviews and map complex 0-day RCE vectors. Using the **MiniMax-M2.5** model (via Hugging Face), the agent analyzes findings to reverse "self-command-injection" contexts and generate technical reproduction guides with a multi-platform focus (e.g., Attacker UNIX/Raspberry vs Victim Windows).
+
+**Setup Requirements**:
+- **Environment**: Create a `.env` file in the root directory and add your Hugging Face token:
+  ```env
+  HF_TOKEN=your_token_here
+  ```
+- **Dependencies**: Install the following packages in your environment:
+  `pip install smolagents python-dotenv huggingface_hub`
 
 ## Performance & Multiprocessing
 
