@@ -1,0 +1,17 @@
+absl-py>=1.0.0
+numpy>=1.18
+jax>=0.4.0
+jaxlib>=0.4.0
+pytest
+tqdm>=4.62.3
+flax>=0.6.0
+dm-haiku>=0.0.9
+optax>=0.1.0
+chex
+tensorflow>=2.16.0
+tensorflow-datasets>=4.9.0
+tensorflow-metadata>=1.14.0
+tensorflow-probability>=0.23.0
+tensorboard>=2.16.0
+gin-config>=0.5.0
+dill
