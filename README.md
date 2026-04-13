@@ -69,8 +69,13 @@ L:\Pickle-RCE-Finder>
 
 ## Dependencies & Portability
 
-- **Core Scanner (Phases 1-3)**: Purely **Pythonic** and relies exclusively on the **Python Standard Library**. It has **zero external dependencies** and is ready to run in any environment with Python 3.8+ without `pip install`.
-- **AI-Driven Deep Analysis (Phase 4)**: This optional phase requires third-party libraries for AI orchestration and inference. These dependencies are documented in the `requirements.txt` file.
+This scanner integrates high-fidelity **AI-Driven Deep Analysis (Phase 4)** by default to perform autonomous manual code reviews. Consequently, the project **requires** the installation of external dependencies for AI orchestration, environment management, and inference.
+
+**Installation**:
+Before running the scanner, you MUST install the dependencies:
+```bash
+pip install -r requirements.txt
+```
 
 ### AI-Driven Deep Analysis (Phase 4)
 
@@ -80,10 +85,6 @@ This phase integrates a specialized AI Security Agent to perform deep code revie
 - **Environment**: Create a `.env` file in the root directory and add your Hugging Face token:
   ```env
   HF_TOKEN=your_token_here
-  ```
-- **Dependencies**: Install the optional libraries using the frozen requirements file:
-  ```bash
-  pip install -r requirements.txt
   ```
 
 ## Performance & Multiprocessing
