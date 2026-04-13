@@ -1,0 +1,23 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environment files
+.env
+.venv/
+
+# Project specific untracked files/folders
+PYPI-django/
+PYPI-google-cloud-aiplatform/
+PYPI-unsloth/
+Prompt.md
+adk-python/
+alphafold3/
+learned_optimization/
+ml-compiler-opt/
+agent-framework/
+
+# Reports content (keeping the directory tracked via .gitkeep)
+reports/*
+!reports/.gitkeep

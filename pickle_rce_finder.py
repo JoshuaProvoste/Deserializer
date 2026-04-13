@@ -1003,6 +1003,25 @@ def main():
                         
                         print(f"\n[OK] {count} detailed reports have been generated.", file=human)
                         print(f"Check the 'reports/' folder to see the results.", file=human)
+
+                        # --- PHASE 4: AI ANALYSIS (Integration) ---
+                        print("\n" + "="*80, file=human)
+                        print(" [>] Starting AI-Driven Security Analysis...", file=human)
+                        print("="*80, file=human)
+                        
+                        try:
+                            from modules.ai_orchestrator import AIOrchestrator
+                            orchestrator = AIOrchestrator()
+                            ai_result = orchestrator.run_analysis(project_name, args.path, output_stream=human)
+                            
+                            print("\n" + "-"*40, file=human)
+                            print(f"AI Analysis Result for {project_name}:", file=human)
+                            print(ai_result, file=human)
+                            print("-" * 40, file=human)
+                        except ImportError:
+                            print("\n[!] Warning: AI Orchestrator module not found. Skipping...", file=human)
+                        except Exception as e:
+                            print(f"\n[!] Error during AI Analysis: {e}", file=human)
                     else:
                         print(f"[!] Error: Mapper output {output_mapper} not found.", file=human)
                 except ImportError:
