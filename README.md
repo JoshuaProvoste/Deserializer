@@ -100,7 +100,7 @@ This scanner features a high-performance **parallel execution engine** built on 
 
 ## Research writeups that this scanner supported
 
-**Pickle RCE Finder** directly supported my security research and helped me locate insecure deserialization paths that were later documented in these investigations: **Brax (v0.14.2)**, **Dopamine (v2.0)**, and **PyGlove (v0.4.5)**. Concretely, it made it easy to enumerate where projects deserialize model/artifact blobs and prioritize the high-risk code paths that execute during `pickle` loading flows, accelerating root-cause analysis and PoC development.
+**Pickle RCE Finder** directly supported my security research and helped me locate insecure deserialization paths that were later documented in these investigations: **Brax (v0.14.2)**, **Dopamine (v2.0)**, **PyGlove (v0.4.5)**, and **Learned Optimization (v0.0.1)**. Concretely, it made it easy to enumerate where projects deserialize model/artifact blobs and prioritize the high-risk code paths that execute during `pickle` loading flows, accelerating root-cause analysis and PoC development.
 
 - **Brax (v0.14.2)**:
   - **Impact**: Critical RCE on compute nodes and TPU/GPU pods.
@@ -111,6 +111,9 @@ This scanner features a high-performance **parallel execution engine** built on 
 - **PyGlove (v0.4.5)**:
   - **Impact**: Critical RCE via JSON APIs and distributed tuning.
   - **Details**: `_OpaqueObject` allows automatic pickle decoding embedded in JSON. Also vulnerable in `sandbox_call` and `fsspec` URI loading flows.
+- **Learned Optimization (v0.0.1)**:
+  - **Impact**: Critical RCE in HPC research environments and TPU/GPU pods.
+  - **Details**: `read_npz` in `learned_optimization.baselines.utils` uses `numpy.load(..., allow_pickle=True)` on researcher-controlled paths (GCS, SMB), enabling the execution of arbitrary Python objects during deserialization.
 
 ## What it does
 
