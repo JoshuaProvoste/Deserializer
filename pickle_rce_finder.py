@@ -954,21 +954,15 @@ def main():
                 output_mapper = os.path.join(project_name, "relationship_mapper.jsonl")
 
                 print(f"Identified {len(findings)} findings. Starting bulk mapping...\n", file=human)
-                mapper_results = []
                 
-                for i, finding in enumerate(findings, 1):
-                    target = f"{finding.get('file')}:{finding.get('lineno')}"
-                    print(f"[{i}/{len(findings)}] Processing: {target}...", file=human)
-                    
-                    result = mapper.map_finding(finding)
-                    mapper_results.append(result)
+                # Execute Parallel Mapping via the new map_bulk API
+                mapper_results = mapper.map_bulk(findings, args.concurrency)
                 
                 # Persist results
                 with open(output_mapper, 'w', encoding='utf-8') as f:
                     for res in mapper_results:
                         f.write(json.dumps(res, ensure_ascii=False) + '\n')
                 
-                print(f"\n[+] Bulk Mapping Completed", file=human)
                 print(f"Total records processed: {len(mapper_results)}", file=human)
                 print(f"Results saved in: {output_mapper}", file=human)
                 

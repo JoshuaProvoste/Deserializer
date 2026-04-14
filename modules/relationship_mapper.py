@@ -435,6 +435,35 @@ class RelationshipMapper:
             "activities": self.analyzer.activities
         }
 
+    def map_bulk(self, findings: List[Dict[str, Any]], concurrency: int = None) -> List[Dict[str, Any]]:
+        """
+        Executes bulk mapping of findings using Multiprocessing.
+        This provides a programmatic way to leverage the parallel engine from other scripts.
+        """
+        if concurrency is None:
+            concurrency = max(1, cpu_count() - 2)
+            
+        total_findings = len(findings)
+        temp_results = [None] * total_findings
+        
+        with ProcessPoolExecutor(max_workers=concurrency, initializer=init_worker) as executor:
+            future_to_finding = {executor.submit(map_finding_worker, finding, self.repo_path): i for i, finding in enumerate(findings)}
+            
+            completed = 0
+            for future in as_completed(future_to_finding):
+                idx = future_to_finding[future]
+                try:
+                    result = future.result()
+                    temp_results[idx] = result
+                    completed += 1
+                    # Progress update for console-based tools
+                    print(f"[{completed}/{total_findings}] Processing: {findings[idx].get('file')}:{findings[idx].get('lineno')}...", end='\r', flush=True)
+                except Exception as exc:
+                    print(f"\n[!] Error processing record {idx}: {exc}")
+            
+            print(f"\n[+] Bulk Mapping Completed")
+            return [r for r in temp_results if r is not None]
+
 def main(args: List[str]):
     """Command line interface for independent execution."""
     if len(args) < 2:
@@ -466,9 +495,10 @@ def main(args: List[str]):
                     findings.append(json.loads(line))
         
         results = []
+        mapper = RelationshipMapper(repo_path)
+        
         if record_index is not None:
             # Single-record mapping (Sequential)
-            mapper = RelationshipMapper(repo_path)
             if 0 < record_index <= len(findings):
                 finding = findings[record_index - 1]
                 result = mapper.map_finding(finding)
@@ -477,29 +507,10 @@ def main(args: List[str]):
                 print(f"Error: record_index {record_index} is out of range.")
                 sys.exit(1)
         else:
-            # Bulk mapping (Multiprocessing)
+            # Bulk mapping (Programmatic Multiprocessing)
             total_findings = len(findings)
             print(f"Identified {total_findings} findings. Starting bulk mapping (concurrency={concurrency})...")
-            
-            with ProcessPoolExecutor(max_workers=concurrency, initializer=init_worker) as executor:
-                future_to_finding = {executor.submit(map_finding_worker, finding, repo_path): i for i, finding in enumerate(findings)}
-                
-                # We want to maintain order as much as possible, or at least collect everything
-                completed = 0
-                temp_results = [None] * total_findings
-                
-                for future in as_completed(future_to_finding):
-                    idx = future_to_finding[future]
-                    try:
-                        result = future.result()
-                        temp_results[idx] = result
-                        completed += 1
-                        print(f"[{completed}/{total_findings}] Processing: {findings[idx].get('file')}:{findings[idx].get('lineno')}...", end='\r')
-                    except Exception as exc:
-                        print(f"\n[!] Error processing record {idx}: {exc}")
-                
-                results = [r for r in temp_results if r is not None]
-                print(f"\n[+] Bulk Mapping Completed")
+            results = mapper.map_bulk(findings, concurrency)
 
         if output_path:
             with open(output_path, 'w', encoding='utf-8') as f:
