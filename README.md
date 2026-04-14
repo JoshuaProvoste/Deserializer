@@ -100,7 +100,7 @@ This scanner features a high-performance **parallel execution engine** built on 
 
 ## Research writeups that this scanner supported
 
-**Pickle RCE Finder** directly supported my security research and helped me locate insecure deserialization paths that were later documented in these investigations: **Brax (v0.14.2)**, **Dopamine (v2.0)**, **PyGlove (v0.4.5)**, and **Learned Optimization (v0.0.1)**. Concretely, it made it easy to enumerate where projects deserialize model/artifact blobs and prioritize the high-risk code paths that execute during `pickle` loading flows, accelerating root-cause analysis and PoC development.
+**Pickle RCE Finder** directly supported my security research and helped me locate insecure deserialization paths that were later documented in these investigations: **Brax (v0.14.2)**, **Dopamine (v2.0)**, **PyGlove (v0.4.5)**, **Learned Optimization (v0.0.1)**, and **Vertex AI (v1.147.0)**. Concretely, it made it easy to enumerate where projects deserialize model/artifact blobs and prioritize the high-risk code paths that execute during `pickle` loading flows, accelerating root-cause analysis and PoC development.
 
 - **Brax (v0.14.2)**:
   - **Impact**: Critical RCE on compute nodes and TPU/GPU pods.
@@ -122,6 +122,11 @@ This scanner features a high-performance **parallel execution engine** built on 
   - **Details**: `read_npz` in `learned_optimization.baselines.utils` uses `numpy.load(..., allow_pickle=True)` on researcher-controlled paths (GCS, SMB), enabling the execution of arbitrary Python objects during deserialization.
   - **Pull Request**: https://github.com/google/learned_optimization/pull/342
   - **RCE PoC**: [RCE in learned_optimization v0.0.1](research/learned_optimization_v0.0.1/README.md)
+- **Vertex AI (v1.147.0)**:
+  - **Impact**: Critical RCE on developer workstations, CI/CD runners (MLOps), and research environments.
+  - **Details**: Several sinks in Predictors and Agent/Reasoning engines allow loading malicious artifacts via `pickle`/`cloudpickle` from remote URIs (GCS, SMB/UNC). Vulnerabilities can be chained via `AIP_STORAGE_URI` or `staging_bucket` injection for remote exploitation.
+  - **Pull Request**: https://github.com/googleapis/python-aiplatform/pull/6589
+  - **RCE PoC**: [RCE in google-cloud-aiplatform v1.147.0](research/google_cloud_aiplatform_v1.147.0/README.md)
 
 ## What it does
 
