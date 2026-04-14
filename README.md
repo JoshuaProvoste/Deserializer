@@ -105,15 +105,23 @@ This scanner features a high-performance **parallel execution engine** built on 
 - **Brax (v0.14.2)**:
   - **Impact**: Critical RCE on compute nodes and TPU/GPU pods.
   - **Details**: `load_params` in `brax.io.model` uses `etils.epath` to download and deserialize malicious parameters via `pickle.loads` from remote URIs (SMB, GCS, S3).
+  - **Pull Request**: https://github.com/google/brax/pull/667
+  - **RCE PoC**: [RCE in brax v0.14.2](research/brax_v0.14.2/README.md)
 - **Dopamine (v2.0)**:
   - **Impact**: Critical RCE in distributed research clusters.
   - **Details**: `load_statistics` and `Checkpointer` use `tf.io.gfile` to deserialize pickles from attacker-controlled remote paths or malicious `gin-config` injections.
+  - **Issue**: https://github.com/google/dopamine/issues/236
+  - **RCE PoC**: [RCE in dopamine v2.0](research/dopamine_v2.0/README.md)
 - **PyGlove (v0.4.5)**:
   - **Impact**: Critical RCE via JSON APIs and distributed tuning.
   - **Details**: `_OpaqueObject` allows automatic pickle decoding embedded in JSON. Also vulnerable in `sandbox_call` and `fsspec` URI loading flows.
+  - **Pull Request**: https://github.com/google/pyglove/pull/404
+  - **RCE PoC**: [RCE in pyglove v0.4.5](research/pyglove_v0.4.5/README.md)
 - **Learned Optimization (v0.0.1)**:
   - **Impact**: Critical RCE in HPC research environments and TPU/GPU pods.
   - **Details**: `read_npz` in `learned_optimization.baselines.utils` uses `numpy.load(..., allow_pickle=True)` on researcher-controlled paths (GCS, SMB), enabling the execution of arbitrary Python objects during deserialization.
+  - **Pull Request**: https://github.com/google/learned_optimization/pull/342
+  - **RCE PoC**: [RCE in learned_optimization v0.0.1](research/learned_optimization_v0.0.1/README.md)
 
 ## What it does
 
