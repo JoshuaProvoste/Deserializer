@@ -69,7 +69,7 @@ L:\Pickle-RCE-Finder>
 
 ## Dependencies & Portability
 
-This scanner integrates high-fidelity **AI-Driven Deep Analysis (Phase 4)** by default to perform autonomous manual code reviews. Consequently, the project **requires** the installation of external dependencies for AI orchestration, environment management, and inference.
+This scanner integrates high-fidelity **AI-Driven Deep Analysis (Phase 4)** as an optional module. Consequently, the project **requires** the installation of external dependencies for AI orchestration, environment management, and inference only when the `--agent` flag is used.
 
 **Installation**:
 Before running the scanner, you MUST install the dependencies:
@@ -79,7 +79,7 @@ pip install -r requirements.txt
 
 ### AI-Driven Deep Analysis (Phase 4)
 
-This phase integrates a specialized AI Security Agent to perform deep code reviews and map complex 0-day RCE vectors. Using the **MiniMax-M2.5** model (via Hugging Face), the agent analyzes findings to reverse "self-command-injection" contexts and generate technical reproduction guides with a multi-platform focus (e.g., Attacker UNIX/Raspberry vs Victim Windows).
+This phase integrates a specialized AI Security Agent to perform deep code reviews and map complex 0-day RCE vectors. Using the **MiniMax-M2.5** model (via Hugging Face), the agent analyzes findings to reverse "self-command-injection" contexts and generate technical reproduction guides with a multi-platform focus (e.g., Attacker UNIX/Raspberry vs Victim Windows). **Note: This phase is only executed if the `--agent` flag is provided.**
 
 **Setup Requirements**:
 - **Environment**: Create a `.env` file in the root directory and add your Hugging Face token:
@@ -178,6 +178,12 @@ Use a proprietary ruleset to detect logic-specific calls:
 python pickle_rce_finder.py --rules-file my_custom_rules.json --out legacy_audit.jsonl
 ```
 
+### 7. AI Deep Analysis
+Trigger the AI-Driven Deep Analysis (Phase 4) after the scan and mapping are complete:
+```bash
+python pickle_rce_finder.py --path /path/to/repo --out findings.jsonl --agent
+```
+
 ## CLI Flags
 
 - `--path <dir>`  
@@ -203,6 +209,9 @@ python pickle_rce_finder.py --rules-file my_custom_rules.json --out legacy_audit
 
 - `--no-banner`  
   Disable the ASCII branding banner for cleaner output in scripts.
+
+- `--agent`  
+  Run AI-driven deep analysis (Phase 4). This phase is optional and requires a valid `HF_TOKEN` in the `.env` file.
 
 ## Output format (JSONL)
 
