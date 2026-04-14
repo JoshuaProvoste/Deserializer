@@ -127,6 +127,11 @@ This scanner features a high-performance **parallel execution engine** built on 
   - **Details**: Several sinks in Predictors and Agent/Reasoning engines allow loading malicious artifacts via `pickle`/`cloudpickle` from remote URIs (GCS, SMB/UNC). Vulnerabilities can be chained via `AIP_STORAGE_URI` or `staging_bucket` injection for remote exploitation.
   - **Pull Request**: https://github.com/googleapis/python-aiplatform/pull/6589
   - **RCE PoC**: [RCE in google-cloud-aiplatform v1.147.0](research/google_cloud_aiplatform_v1.147.0/README.md)
+- **Agent Development Kit (ADK) (v1.30.0)**:
+  - **Impact**: Critical RCE on developer workstations and AI infrastructure during session management.
+  - **Details**: Insecure deserialization in the migration loop (`_row_to_event`) and shared state schemas (`DynamicPickleType`) allows for zero-interaction exploitation via remote database URIs (SMB/UNC) or shared database poisoning (MySQL/Spanner).
+  - **Pull Request**: https://github.com/google/adk-python/pull/5333
+  - **RCE PoC**: [RCE in google-adk v1.30.0](research/google_adk_v1.30.0/README.md)
 
 ## What it does
 
