@@ -12,7 +12,26 @@ import ast
 import json
 import os
 import sys
+import signal
 from typing import Dict, List, Optional, Set, Any
+from concurrent.futures import ProcessPoolExecutor, as_completed
+from multiprocessing import cpu_count
+
+def init_worker():
+    """Initializer for worker processes to handle signals and noise."""
+    # Ignore SIGINT in workers so the parent can handle it gracefully
+    signal.signal(signal.SIGINT, signal.SIG_IGN)
+    # Re-route stderr to null to avoid noisy AST parse errors in workers
+    sys.stderr = open(os.devnull, 'w')
+
+def map_finding_worker(finding: Dict[str, Any], repo_path: str) -> Dict[str, Any]:
+    """Top-level worker function for ProcessPoolExecutor."""
+    try:
+        # Lazy initialization of the mapper inside the worker
+        mapper = RelationshipMapper(repo_path)
+        return mapper.map_finding(finding)
+    except Exception as e:
+        return {"error": str(e), "root_finding": finding}
 
 class NotebookCodeExtractor:
     """
@@ -419,15 +438,25 @@ class RelationshipMapper:
 def main(args: List[str]):
     """Command line interface for independent execution."""
     if len(args) < 2:
-        print("Usage: python relationship_mapper.py <input_jsonl> <repo_path> [output_jsonl] [record_index]")
+        print("Usage: python relationship_mapper.py <input_jsonl> <repo_path> [output_path] [record_index] [-j concurrency]")
         sys.exit(1)
     
-    jsonl_path = args[0]
-    repo_path = args[1]
-    output_path = args[2] if len(args) > 2 else None
-    record_index = int(args[3]) if len(args) > 3 else None
-    
-    mapper = RelationshipMapper(repo_path)
+    # Parse potential -j flag
+    concurrency = max(1, cpu_count() - 2)
+    clean_args = []
+    i = 0
+    while i < len(args):
+        if args[i] == '-j' and i + 1 < len(args):
+            concurrency = int(args[i+1])
+            i += 2
+        else:
+            clean_args.append(args[i])
+            i += 1
+            
+    jsonl_path = clean_args[0]
+    repo_path = clean_args[1]
+    output_path = clean_args[2] if len(clean_args) > 2 else None
+    record_index = int(clean_args[3]) if len(clean_args) > 3 else None
     
     try:
         findings = []
@@ -438,6 +467,8 @@ def main(args: List[str]):
         
         results = []
         if record_index is not None:
+            # Single-record mapping (Sequential)
+            mapper = RelationshipMapper(repo_path)
             if 0 < record_index <= len(findings):
                 finding = findings[record_index - 1]
                 result = mapper.map_finding(finding)
@@ -446,22 +477,45 @@ def main(args: List[str]):
                 print(f"Error: record_index {record_index} is out of range.")
                 sys.exit(1)
         else:
-            for finding in findings:
-                result = mapper.map_finding(finding)
-                results.append(result)
-        
+            # Bulk mapping (Multiprocessing)
+            total_findings = len(findings)
+            print(f"Identified {total_findings} findings. Starting bulk mapping (concurrency={concurrency})...")
+            
+            with ProcessPoolExecutor(max_workers=concurrency, initializer=init_worker) as executor:
+                future_to_finding = {executor.submit(map_finding_worker, finding, repo_path): i for i, finding in enumerate(findings)}
+                
+                # We want to maintain order as much as possible, or at least collect everything
+                completed = 0
+                temp_results = [None] * total_findings
+                
+                for future in as_completed(future_to_finding):
+                    idx = future_to_finding[future]
+                    try:
+                        result = future.result()
+                        temp_results[idx] = result
+                        completed += 1
+                        print(f"[{completed}/{total_findings}] Processing: {findings[idx].get('file')}:{findings[idx].get('lineno')}...", end='\r')
+                    except Exception as exc:
+                        print(f"\n[!] Error processing record {idx}: {exc}")
+                
+                results = [r for r in temp_results if r is not None]
+                print(f"\n[+] Bulk Mapping Completed")
+
         if output_path:
             with open(output_path, 'w', encoding='utf-8') as f:
                 for res in results:
                     f.write(json.dumps(res) + '\n')
-            print(f"Mapping completed V4. Results saved to: {output_path}")
+            print(f"Mapping completed. Results saved to: {output_path}")
         else:
             for res in results:
                 print(json.dumps(res, indent=2))
                 
+    except KeyboardInterrupt:
+        print("\n[!] Execution interrupted by user. Shutting down...")
+        sys.exit(130)
     except Exception as e:
         error_msg = json.dumps({"error": str(e)})
-        print(error_msg)
+        print(f"\n{error_msg}")
 
 if __name__ == "__main__":
     main(sys.argv[1:])
