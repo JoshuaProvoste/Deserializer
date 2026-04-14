@@ -765,6 +765,11 @@ def main():
         default=10 * 1024 * 1024,
         help="Maximum file size in bytes to process (default: 10MiB).",
     )
+    ap.add_argument(
+        "--agent",
+        action="store_true",
+        help="Run AI-driven deep analysis (Phase 4, optional).",
+    )
     args = ap.parse_args()
     setup_windows_ansi()
 
@@ -1005,23 +1010,27 @@ def main():
                         print(f"Check the 'reports/' folder to see the results.", file=human)
 
                         # --- PHASE 4: AI ANALYSIS (Integration) ---
-                        print("\n" + "="*80, file=human)
-                        print(" [>] Starting AI-Driven Security Analysis...", file=human)
-                        print("="*80, file=human)
-                        
-                        try:
-                            from modules.ai_orchestrator import AIOrchestrator
-                            orchestrator = AIOrchestrator()
-                            ai_result = orchestrator.run_analysis(project_name, args.path, output_stream=human)
+                        if args.agent:
+                            print("\n" + "="*80, file=human)
+                            print(" [>] Starting AI-Driven Security Analysis...", file=human)
+                            print("="*80, file=human)
                             
-                            print("\n" + "-"*40, file=human)
-                            print(f"AI Analysis Result for {project_name}:", file=human)
-                            print(ai_result, file=human)
-                            print("-" * 40, file=human)
-                        except ImportError:
-                            print("\n[!] Warning: AI Orchestrator module not found. Skipping...", file=human)
-                        except Exception as e:
-                            print(f"\n[!] Error during AI Analysis: {e}", file=human)
+                            try:
+                                from modules.ai_orchestrator import AIOrchestrator
+                                orchestrator = AIOrchestrator()
+                                ai_result = orchestrator.run_analysis(project_name, args.path, output_stream=human)
+                                
+                                print("\n" + "-"*40, file=human)
+                                print(f"AI Analysis Result for {project_name}:", file=human)
+                                print(ai_result, file=human)
+                                print("-" * 40, file=human)
+                            except ImportError:
+                                print("\n[!] Warning: AI Orchestrator module not found. Skipping...", file=human)
+                            except Exception as e:
+                                print(f"\n[!] Error during AI Analysis: {e}", file=human)
+                        else:
+                            # If no agent is requested, we finish here as per requirements.
+                            pass
                     else:
                         print(f"[!] Error: Mapper output {output_mapper} not found.", file=human)
                 except ImportError:
