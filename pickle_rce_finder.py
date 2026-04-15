@@ -179,6 +179,11 @@ def load_rules_json(path: str) -> dict:
     return rules
 
 def iter_py_files(root: Path, skip_dirs):
+    if root.is_file():
+        if root.suffix == ".py":
+            yield root
+        return
+
     skip_dirs = set(skip_dirs)
     for dirpath, dirnames, filenames in os.walk(root):
         dirnames[:] = [d for d in dirnames if d not in skip_dirs and not d.startswith(".")]
@@ -198,6 +203,7 @@ class RefVisitor(ast.NodeVisitor):
         self.name_to_module = {}
         self.findings = []
         self.node_count = 0  # counts visited AST nodes
+        self._call_nodes = set()  # prevent double reporting of call targets
 
         # Precompute allowed import roots from the ruleset
         self.tracked_imports = set()
@@ -230,8 +236,45 @@ class RefVisitor(ast.NodeVisitor):
                 self.name_to_module[local] = base
         self.generic_visit(node)
 
+    def visit_Attribute(self, node: ast.Attribute):
+        if id(node) in self._call_nodes:
+            return self.generic_visit(node)
+        
+        mod, func, qualified = self._resolve_dotted_node(node)
+        if mod and func and self._is_tracked_call(mod, func):
+            self._report(
+                node,
+                "reference",
+                mod,
+                func,
+                qualified_name=qualified,
+                category="reference",
+                severity="medium",
+            )
+        self.generic_visit(node)
+
+    def visit_Name(self, node: ast.Name):
+        if id(node) in self._call_nodes:
+            return self.generic_visit(node)
+
+        mod, func, qualified = self._resolve_dotted_node(node)
+        if mod and func and self._is_tracked_call(mod, func):
+            self._report(
+                node,
+                "reference",
+                mod,
+                func,
+                qualified_name=qualified,
+                category="reference",
+                severity="medium",
+            )
+        self.generic_visit(node)
+
     def visit_Call(self, node: ast.Call):
-        mod, func, qualified = self._resolve_call(node.func)
+        # Mark the function node so visit_Attribute/visit_Name don't double-report it
+        self._call_nodes.add(id(node.func))
+
+        mod, func, qualified = self._resolve_dotted_node(node.func)
         if mod and func and self._is_tracked_call(mod, func):
             # Simple classification for better triage/filtering (does not affect detection logic)
             if mod == "pickle" and func in ("load", "loads"):
@@ -252,7 +295,7 @@ class RefVisitor(ast.NodeVisitor):
             )
         self.generic_visit(node)
 
-    def _resolve_call(self, func_node):
+    def _resolve_dotted_node(self, node):
         # Build a dotted path from nested attributes, e.g.:
         #   pkg.pickle.loads -> ["pkg", "pickle", "loads"]
         #   t.serialization.load -> ["t", "serialization", "load"]
@@ -266,7 +309,7 @@ class RefVisitor(ast.NodeVisitor):
                 return left + [node.attr]
             return None
 
-        parts = _dotted_parts(func_node)
+        parts = _dotted_parts(node)
         if not parts:
             return None, None, None
 
@@ -333,7 +376,9 @@ def scan_tokens_fallback(src: str, path: Path, rules: dict) -> list[dict]:
     def is_tracked_call(mod: str, func: str) -> bool:
         return mod in rules and (mod, func) in rules[mod]["calls"]
 
-    def classify(mod: str, func: str) -> tuple[str, str]:
+    def classify(mod: str, func: str, kind: str = "call") -> tuple[str, str]:
+        if kind == "reference":
+            return "reference", "medium"
         if mod == "pickle" and func in ("load", "loads"):
             return "deserialize", "high"
         if mod == "torch" and func == "load":
@@ -363,11 +408,11 @@ def scan_tokens_fallback(src: str, path: Path, rules: dict) -> list[dict]:
 
         return None, None, None
 
-    def emit_call(mod: str, func: str, qualified: str, lineno: int, col: int) -> None:
-        category, severity = classify(mod, func)
+    def emit_finding(mod: str, func: str, qualified: str, lineno: int, col: int, kind: str = "call") -> None:
+        category, severity = classify(mod, func, kind)
         findings.append(
             {
-                "kind": "call",
+                "kind": kind,
                 "module": mod,
                 "name": func,
                 "alias": None,
@@ -622,10 +667,15 @@ def scan_tokens_fallback(src: str, path: Path, rules: dict) -> list[dict]:
                 if t1.type == tokenize.OP and t1.string == "(":
                     mod, func, qualified = resolve_dotted(parts)
                     if mod and func and qualified and is_tracked_call(mod, func):
-                        emit_call(mod, func, qualified, lineno, col)
+                        emit_finding(mod, func, qualified, lineno, col, kind="call")
                     # do not push back '('
                     break
 
+                # Not followed by '(', but could be a reference
+                mod, func, qualified = resolve_dotted(parts)
+                if mod and func and qualified and is_tracked_call(mod, func):
+                    emit_finding(mod, func, qualified, lineno, col, kind="reference")
+                
                 # any other token breaks the chain
                 push_tok(t1)
                 break
@@ -641,10 +691,9 @@ def scan_regex_fallback(src: str, path: Path, rules: dict) -> list[dict]:
     findings = []
     for spec in rules.values():
         for mod, func in spec.get("calls", set()):
-            # Simple pattern: \bmodule\.function\s*\(
-            pattern = re.compile(rf"\b{re.escape(mod)}\.{re.escape(func)}\s*\(")
-            for m in pattern.finditer(src):
-                # Calculate lineno and col_offset manually
+            # Detect calls: module.func(
+            call_pattern = re.compile(rf"\b{re.escape(mod)}\.{re.escape(func)}\s*\(")
+            for m in call_pattern.finditer(src):
                 preceding = src[:m.start()]
                 lineno = preceding.count('\n') + 1
                 last_newline = preceding.rfind('\n')
@@ -657,8 +706,28 @@ def scan_regex_fallback(src: str, path: Path, rules: dict) -> list[dict]:
                     "lineno": lineno,
                     "col_offset": col,
                     "qualified_name": f"{mod}.{func}",
-                    "category": "regex_fallback",
+                    "category": "regex_fallback_call",
                     "severity": "high",
+                    "parser": "regex_fallback"
+                })
+
+            # Detect references: module.func (not followed by '(')
+            ref_pattern = re.compile(rf"\b{re.escape(mod)}\.{re.escape(func)}\b(?!\s*\()")
+            for m in ref_pattern.finditer(src):
+                preceding = src[:m.start()]
+                lineno = preceding.count('\n') + 1
+                last_newline = preceding.rfind('\n')
+                col = m.start() - last_newline - 1 if last_newline != -1 else m.start()
+                
+                findings.append({
+                    "kind": "reference",
+                    "module": mod,
+                    "name": func,
+                    "lineno": lineno,
+                    "col_offset": col,
+                    "qualified_name": f"{mod}.{func}",
+                    "category": "regex_fallback_ref",
+                    "severity": "medium",
                     "parser": "regex_fallback"
                 })
 def init_worker():
@@ -838,8 +907,8 @@ def main():
             total_errors += 1
             print_error(item)
         else:
-            # findings (calls) are what we print as results
-            if item.get("kind") == "call":
+            # findings (calls and references) are what we print as results
+            if item.get("kind") in ("call", "reference"):
                 total_findings += 1
                 print_finding(item)
 
