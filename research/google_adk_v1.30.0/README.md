@@ -188,6 +188,3 @@ In `google/adk/sessions/schemas/v0.py`, the `DynamicPickleType` handles automati
 
 - **Persistence**: The exploit remains in the DB and triggers on every read, making it extremely difficult to clear without full DB purging.
 - **Privilege Escalation**: Moves from a DB-access context to a Full-Account-Takeover context on the host running the SDK.
-
----
-*Report generated via Pickle-RCE-Finder*
