@@ -1,71 +1,12 @@
-# Pickle RCE Finder (AST-based)
+# Deserializer (AST-based)
 
-```
-L:\Pickle-RCE-Finder>git clone https://github.com/microsoft/agent-framework
-Cloning into 'agent-framework'...
-remote: Enumerating objects: 60315, done.
-remote: Counting objects: 100% (631/631), done.
-remote: Compressing objects: 100% (376/376), done.
-Receiving objects: 100% (60315/60315), 84.32 MiB | 30.38 MiB/s, done.59684 (from 3)
+![Deserializer Banner](docs/images/banner.png)
 
-Resolving deltas: 100% (43682/43682), done.
-Updating files: 100% (3958/3958), done.
-Filtering content: 100% (2/2), 334.47 KiB | 227.00 KiB/s, done.
+**Deserializer** is an advanced Abstract Syntax Tree (AST) static analysis engine designed to identify insecure object reconstruction and state persistence sinks across the Python ecosystem. Far beyond a simple scanner, it provides a generic, high-performance framework for auditing over 120 libraries and formats—including YAML, Msgpack, CBOR, and custom JSON hooks—where traditional trust in "safe" serialization hides critical logic-based RCE vectors like Type Smuggling. By resolving imports, aliases, and complex dotted attributes, the tool serves as a high-fidelity signal amplifier that prioritizes dangerous code paths in modern distributed architectures and AI/ML repositories.
 
-L:\Pickle-RCE-Finder>python pickle_rce_finder.py --path agent-framework --rules-file rules.json -j 4 --out agent-framework/agent-framework.jsonl
+The project operates through a modular, multi-phased workflow that transitions from raw detection to deep technical audit. Following the initial high-velocity SAST scan, the ecosystem leverages specialized relationship mappers to trace execution flows and result processors to generate detailed security reports. This systematic approach ensures that every finding is contextualized within the application's broader architecture, transforming high-volume telemetry into actionable research assets and structured milestones that simplify the mapping of infrastructure-level attack surfaces.
 
-  _____ _      _    _        _____   _____ ______   ______ _           _
- |  __ (_)    | |  | |      |  __ \ / ____|  ____| |  ____(_)         | |
- | |__) |  ___| | _| | ___  | |__) | |    | |__    | |__   _ _ __   __| | ___ _ __
- |  ___/ |/ __| |/ / |/ _ \ |  _  /| |    |  __|   |  __| | | '_ \ / _` |/ _ \ '__|
- | |   | | (__|   <| |  __/ | | \ \| |____| |____  | |    | | | | | (_| |  __/ |
- |_|   |_|\___|_|\_\_|\___| |_|  \_\\_____|______| |_|    |_|_| |_|\__,_|\___|_|
-
-    Pickle Deserialization Parser for Python Source Code
-            coded by @JoshuaProvoste (jp / kw0)
-
-
-================================================================================
- [>] Starting Static Analysis Scan...
-================================================================================
-[HIGH][deserialize] L:\Pickle-RCE-Finder\agent-framework\python\packages\core\agent_framework\_workflows\_checkpoint_encoding.py:270  pickle.loads
-
-Progress: 100.0% | Res: 1 | Scanned: 852/852 | Current: _dependency_bounds_upper_im...
-Scan finished.
-Files scanned: 852
-Findings: 1
-Errors: 0
-
-JSONL output: L:\Pickle-RCE-Finder\agent-framework\agent-framework.jsonl (lines: 1, bytes: 312)
-
-================================================================================
- [>] Starting Relationship Mapping process...
-================================================================================
-Identified 1 findings. Starting bulk mapping...
-
-[1/1] Processing: L:\Pickle-RCE-Finder\agent-framework\python\packages\core\agent_framework\_workflows\_checkpoint_encoding.py:270...
-
-[+] Bulk Mapping Completed
-Total records processed: 1
-Results saved in: agent-framework\relationship_mapper.jsonl
-
- --- Findings Breakdown ---
- - L:\Pickle-RCE-Finder\agent-framework\python\packages\core\agent_framework\_workflows\_checkpoint_encoding.py:270 -> _base64_to_unpickle (1 relationships)
-
---- End of Mapping Phase ---
-
-================================================================================
- [>] Starting Security Report Generation...
-================================================================================
-  [+] Generated: reports\agent-framework\report_1.md
-
-[OK] 1 detailed reports have been generated.
-Check the 'reports/' folder to see the results.
-
-L:\Pickle-RCE-Finder>
-```
-
-**Pickle RCE Finder** is a lightweight, repo-friendly Python static scanner that hunts for risky **Python deserialization entrypoints** (e.g., `pickle.load(s)` and `torch.load`) by parsing source code with the built-in `ast` module. It was designed for quick triage across large codebases: run it on a folder, get **newline-delimited JSON (JSONL)** findings with file/line context, and immediately spot places where an attacker-controlled artifact could turn into **RCE during load**.
+At its most advanced tier, Deserializer integrates an autonomous AI Security Agent (Phase 4) explicitly designed to navigate "self-command-injection" limitations and synthesize functional reproduction guides. This capability has directly powered the discovery of critical vulnerabilities in industry-leading frameworks like TensorFlow, Django, and LangGraph, proving its efficacy in auditing complex MLOps and agentic AI environments. As the project evolves, it continues to define the frontier of automated vulnerability research by bridging the gap between static analysis and functional exploit development.
 
 ## Dependencies & Portability
 
@@ -100,9 +41,10 @@ This scanner features a high-performance **parallel execution engine** built on 
 
 ## Research writeups that this scanner supported
 
-**Pickle RCE Finder** directly supports security research by locating insecure deserialization paths across various large-scale projects and environments. Concretely, it makes it easy to enumerate where applications deserialize model/artifact blobs and prioritize the high-risk code paths that execute during loading flows, accelerating root-cause analysis and PoC development for critical vulnerabilities.
+**Deserializer** directly supports security research by locating insecure deserialization paths across various large-scale projects and environments. Concretely, it makes it easy to enumerate where applications deserialize model/artifact blobs and prioritize the high-risk code paths that execute during loading flows, accelerating root-cause analysis and PoC development for critical vulnerabilities.
 
-### Zero Day Initiative (ZDI) - Trend Micro (Trend AI)
+### Trend AI - Zero Day Initiative (ZDI)
+
 - **TensorFlow (v2.21.0)**:
   - **Impact**: Critical RCE on developer workstations and MLOps infrastructure.
   - **Details**: `saved_model_cli` uses `numpy.load(..., allow_pickle=True)` via `file_io.FileIO` when processing the `--inputs` flag. This allows loading malicious `.npy`/`.npz` files from remote URIs (SMB/UNC), leading to code execution during deserialization.
@@ -116,7 +58,7 @@ This scanner features a high-performance **parallel execution engine** built on 
   - **Details**: `RedisCache` and `PyMemcacheCache` use `pickle.loads()` by default for data retrieval. Attackers with access to the cache layer can inject malicious serialized objects. Additionally, path-based configurations on Windows resolve UNC paths, enabling remote exploitation over SMB.
   - **RCE PoC**: [RCE in django v6.0.4](research/django_v6.0.4/README.md)
 
-### Google Open Source Software Vulnerability Reward Program (OSS VRP)
+### Google - Open Source Software Vulnerability Reward Program (OSS VRP)
 
 - **Brax (v0.14.2)**:
   - **Impact**: Critical RCE on compute nodes and TPU/GPU pods.
@@ -179,43 +121,43 @@ python --version
 ### 1. Basic Scan
 Scan the current directory and print findings to the terminal (writes JSONL to stdout by default):
 ```bash
-python pickle_rce_finder.py
+python deserializer.py
 ```
 
 ### 2. Targeted Audit
 Scan a specific repository and save findings to a JSONL file:
 ```bash
-python pickle_rce_finder.py --path /path/to/my-repo --out audit_results.jsonl
+python deserializer.py --path /path/to/my-repo --out audit_results.jsonl
 ```
 
 ### 3. Turbo Mode (Performance Tuning)
 Use 8 concurrent processes and a 5-second timeout per file to keep the scan moving:
 ```bash
-python pickle_rce_finder.py -j 8 --timeout 5 --out findings.jsonl
+python deserializer.py -j 8 --timeout 5 --out findings.jsonl
 ```
 
 ### 4. CI/CD & Pipeline Integration
 Disable the banner and stream JSONL directly to stdout for pipe processing (human logs will go to stderr):
 ```bash
-python pickle_rce_finder.py --no-banner --out - | jq .
+python deserializer.py --no-banner --out - | jq .
 ```
 
 ### 5. Hardened / Safety Scan
 Limit processing to files under 1MB and skip specific data directories:
 ```bash
-python pickle_rce_finder.py --max-size 1048576 --skip-dirs "data,samples,tests"
+python deserializer.py --max-size 1048576 --skip-dirs "data,samples,tests"
 ```
 
 ### 6. Custom Detection Rules
 Use a proprietary ruleset to detect logic-specific calls:
 ```bash
-python pickle_rce_finder.py --rules-file my_custom_rules.json --out legacy_audit.jsonl
+python deserializer.py --rules-file my_custom_rules.json --out legacy_audit.jsonl
 ```
 
 ### 7. AI Deep Analysis
 Trigger the AI-Driven Deep Analysis (Phase 4) after the scan and mapping are complete:
 ```bash
-python pickle_rce_finder.py --path /path/to/repo --out findings.jsonl --agent
+python deserializer.py --path /path/to/repo --out findings.jsonl --agent
 ```
 
 ## CLI Flags
