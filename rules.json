@@ -1,4 +1,9 @@
 {
+    "msgpack": { "imports": ["msgpack"], "calls": [["msgpack","load"], ["msgpack","unpack"], ["msgpack","unpackb"]] },
+    "ormsgpack": { "imports": ["ormsgpack"], "calls": [["ormsgpack","unpackb"]] },
+    "yaml": { "imports": ["yaml"], "calls": [["yaml","load"], ["yaml","unsafe_load"], ["yaml","full_load"]] },
+    "cbor2": { "imports": ["cbor2"], "calls": [["cbor2","load"], ["cbor2","loads"]]},
+    "pydantic": { "imports": ["pydantic"], "calls": [["pydantic","parse_obj"], ["pydantic","parse_raw"], ["pydantic","model_validate"], ["pydantic","model_validate_json"]]},
     "pickle": {"imports": ["pickle"],"calls": [["pickle", "load"], ["pickle", "dump"],["pickle", "loads"]]},
     "torch": {"imports": ["torch"],"calls": [["torch","load"], ["torch","save"]]},
     "pandas": {"imports": ["pandas"],"calls": [["pandas", "read_pickle"], ["pandas", "to_pickle"]]},
@@ -69,7 +74,6 @@
     "cloudpickle": { "imports": ["cloudpickle"], "calls": [["cloudpickle","dump"], ["cloudpickle","load"], ["cloudpickle","dumps"], ["cloudpickle","loads"]] },
     "dill": { "imports": ["dill"], "calls": [["dill","dump"], ["dill","load"], ["dill","dumps"], ["dill","loads"]] },
     "imblearn": { "imports": ["imblearn"], "calls": [] },
-    "pydantic": { "imports": ["pydantic"], "calls": [] },
     "dgl": { "imports": ["dgl"], "calls": [] },
     "prefect": { "imports": ["prefect"], "calls": [["prefect","PickleSerializer"]] },
     "aiokafka": { "imports": ["aiokafka"], "calls": [] },

@@ -179,7 +179,7 @@ class ASTAnalyzer:
         Implements filtering by framework prefixes (tf/jax) for generic methods.
         """
         callers = []
-        exclude_dirs = {'.venv', '.git', '__pycache__', 'node_modules', '.antigravity', '.gemini', 'tests'}
+        exclude_dirs = {'.venv', '.git', '__pycache__', 'node_modules', 'tests'}
         
         is_generic = target_func_name in self.GENERIC_METHODS
         framework_prefix = None
@@ -253,7 +253,7 @@ class ASTAnalyzer:
     def find_subclasses(self, base_class_name: str, search_path: str) -> List[Dict[str, Any]]:
         """Searches for classes that inherit from a specific base class (V4 Inheritance Analysis)."""
         subclasses = []
-        exclude_dirs = {'.venv', '.git', '__pycache__', 'node_modules', '.antigravity', '.gemini', 'tests'}
+        exclude_dirs = {'.venv', '.git', '__pycache__', 'node_modules', 'tests'}
         
         for root, dirs, files in os.walk(search_path):
             dirs[:] = [d for d in dirs if d not in exclude_dirs]

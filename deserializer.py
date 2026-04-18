@@ -38,15 +38,15 @@ MAX_AST_NODES = 100000  # Max AST nodes visited per file (DoS/anti-pathological 
 # ASCII banner
 def banner(file=sys.stdout):
     b = r"""
-  _____ _      _    _        _____   _____ ______   ______ _           _           
- |  __ (_)    | |  | |      |  __ \ / ____|  ____| |  ____(_)         | |          
- | |__) |  ___| | _| | ___  | |__) | |    | |__    | |__   _ _ __   __| | ___ _ __ 
- |  ___/ |/ __| |/ / |/ _ \ |  _  /| |    |  __|   |  __| | | '_ \ / _` |/ _ \ '__|
- | |   | | (__|   <| |  __/ | | \ \| |____| |____  | |    | | | | | (_| |  __/ |   
- |_|   |_|\___|_|\_\_|\___| |_|  \_\\_____|______| |_|    |_|_| |_|\__,_|\___|_|   
-                                                                                                                                                                  
-    Pickle Deserialization Parser for Python Source Code
-            coded by @JoshuaProvoste (jp / kw0)
+  _____                      _       _ _              
+ |  __ \                    (_)     | (_)             
+ | |  | | ___  ___  ___ _ __ _  __ _| |_ _______ _ __ 
+ | |  | |/ _ \/ __|/ _ \ '__| |/ _` | | |_  / _ \ '__|
+ | |__| |  __/\__ \  __/ |  | | (_| | | |/ /  __/ |   
+ |_____/ \___||___/\___|_|  |_|\__,_|_|_/___\___|_|   
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       
+       Python Deserialization AST based Scanner
+         coded by @JoshuaProvoste (jp / kw0)
 
 """
     print(b, file=file)
@@ -797,7 +797,7 @@ def scan_file(path: Union[str, Path], rules, max_size=10*1024*1024):
 
 def main():
     ap = argparse.ArgumentParser(
-        description="Simple AST-based scanner for module/function references (pickle-focused, extensible)."
+        description="Python Deserialization AST based Scanner."
     )
     ap.add_argument("--path", default=".", help="Root directory to scan (default: .)")
     ap.add_argument("--rules-file", help="Path to rules JSON; if provided, overrides DEFAULT_RULES")

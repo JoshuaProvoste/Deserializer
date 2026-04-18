@@ -100,7 +100,23 @@ This scanner features a high-performance **parallel execution engine** built on 
 
 ## Research writeups that this scanner supported
 
-**Pickle RCE Finder** directly supported my security research and helped me locate insecure deserialization paths that were later documented in these investigations: **Brax (v0.14.2)**, **Dopamine (v2.0)**, **PyGlove (v0.4.5)**, **Learned Optimization (v0.0.1)**, and **Vertex AI (v1.147.0)**. Concretely, it made it easy to enumerate where projects deserialize model/artifact blobs and prioritize the high-risk code paths that execute during `pickle` loading flows, accelerating root-cause analysis and PoC development.
+**Pickle RCE Finder** directly supports security research by locating insecure deserialization paths across various large-scale projects and environments. Concretely, it makes it easy to enumerate where applications deserialize model/artifact blobs and prioritize the high-risk code paths that execute during loading flows, accelerating root-cause analysis and PoC development for critical vulnerabilities.
+
+### Zero Day Initiative (ZDI) - Trend Micro (Trend AI)
+- **TensorFlow (v2.21.0)**:
+  - **Impact**: Critical RCE on developer workstations and MLOps infrastructure.
+  - **Details**: `saved_model_cli` uses `numpy.load(..., allow_pickle=True)` via `file_io.FileIO` when processing the `--inputs` flag. This allows loading malicious `.npy`/`.npz` files from remote URIs (SMB/UNC), leading to code execution during deserialization.
+  - **RCE PoC**: [RCE in tensorflow v2.21.0](research/tensorflow_v2.21.0/README.md)
+- **LangGraph (v1.1.6)**:
+  - **Impact**: Critical RCE on agentic AI infrastructure and GPU/TPU clusters.
+  - **Details**: `JsonPlusSerializer` defaults to a permissive policy (`allowed_msgpack_modules=True`) for `msgpack` extensions. An attacker can craft a `msgpack` payload using extension code 0 (`EXT_CONSTRUCTOR_SINGLE_ARG`) to trigger arbitrary module imports and code execution, bypassing CVE-2026-27794.
+  - **RCE PoC**: [RCE in langgraph v1.1.6](research/langgraph%20_v1.1.6/README.md)
+- **Django (v6.0.4)**:
+  - **Impact**: Critical RCE via cache poisoning (Redis/Memcached) or SMB/UNC path redirection.
+  - **Details**: `RedisCache` and `PyMemcacheCache` use `pickle.loads()` by default for data retrieval. Attackers with access to the cache layer can inject malicious serialized objects. Additionally, path-based configurations on Windows resolve UNC paths, enabling remote exploitation over SMB.
+  - **RCE PoC**: [RCE in django v6.0.4](research/django_v6.0.4/README.md)
+
+### Google Open Source Software Vulnerability Reward Program (OSS VRP)
 
 - **Brax (v0.14.2)**:
   - **Impact**: Critical RCE on compute nodes and TPU/GPU pods.
