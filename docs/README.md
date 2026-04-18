@@ -1,6 +1,6 @@
 # Technical Research Journal & Project Milestones
 
-Welcome to the technical documentation hub for **Pickle RCE Finder**. This directory serves as a repository for major technical landmarks, research discoveries, and architectural evolutions of the project.
+Welcome to the technical documentation hub for **Deserializer**. This directory serves as a repository for major technical landmarks, research discoveries, and architectural evolutions of the project.
 
 ## Project Milestones
 

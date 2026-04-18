@@ -1,10 +1,10 @@
-# Pickle RCE Finder Modules
+# Deserializer Modules
 
 This directory contains a collection of specialized tools and support libraries for the deep analysis of deserialization vulnerabilities in Python. Each module is designed to be functional independently via its Command Line Interface (CLI) or to be integrated into automated workflows through programmatic imports.
 
 ## Dynamic Orchestration and Import Architecture
 
-`pickle_rce_finder.py` serves as the primary engine and orchestrator of the ecosystem. The interaction between the core scanner and the deep analysis submodules is managed through a phased workflow:
+`deserializer.py` serves as the primary engine and orchestrator of the ecosystem. The interaction between the core scanner and the deep analysis submodules is managed through a phased workflow:
 
 1.  **Core Scanning (Phase 1)**: Initial identification of deserialization sinks using AST, Tokenizer, or Regex.
 2.  **Relationship Mapping (Phase 2)**: Deep impact analysis, call graph construction, and inheritance tracing.
@@ -29,7 +29,7 @@ This ensures that the specialized analysis libraries are not loaded into the Pyt
 
 #### 3. Error Handling and Resilience (Graceful Degradation)
 Each module import is encapsulated in a `try...except ImportError` block. This provides two major design advantages:
--   **Modular Distribution**: The core scanner (`pickle_rce_finder.py`) can be deployed as a standalone script in restricted environments (e.g., CI/CD containers) even if the `modules/` directory is not provided.
+-   **Modular Distribution**: The core scanner (`deserializer.py`) can be deployed as a standalone script in restricted environments (e.g., CI/CD containers) even if the `modules/` directory is not provided.
 -   **Fail-Safe Execution**: If a module is corrupted or missing, the orchestrator catches the error and allows the process to terminate gracefully, ensuring that the primary scan results (Phase 1) are never lost due to reporting failures.
 
 #### 4. Disk-Coupled State Transfer
