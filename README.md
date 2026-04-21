@@ -39,58 +39,6 @@ This scanner features a high-performance **parallel execution engine** built on 
 > [!WARNING]
 > **Performance Warning**: When analyzing extremely large or complex files (e.g., over 1MB, 2MB, or 3MB in size), the tool may experience significant slowdowns or appear "stuck" while parsing deep AST trees. If you encounter such bottlenecks, consider using the `--timeout` (to skip slow files) and `--max-size` (to skip huge files) flags to maintain scan velocity.
 
-## Research writeups that this scanner supported
-
-**Deserializer** directly supports security research by locating insecure deserialization paths across various large-scale projects and environments. Concretely, it makes it easy to enumerate where applications deserialize model/artifact blobs and prioritize the high-risk code paths that execute during loading flows, accelerating root-cause analysis and PoC development for critical vulnerabilities.
-
-### Trend AI - Zero Day Initiative (ZDI)
-
-- **TensorFlow (v2.21.0)**:
-  - **Impact**: Critical RCE on developer workstations and MLOps infrastructure.
-  - **Details**: `saved_model_cli` uses `numpy.load(..., allow_pickle=True)` via `file_io.FileIO` when processing the `--inputs` flag. This allows loading malicious `.npy`/`.npz` files from remote URIs (SMB/UNC), leading to code execution during deserialization.
-  - **RCE PoC**: [RCE in tensorflow v2.21.0](research/tensorflow_v2.21.0/README.md)
-- **LangGraph (v1.1.6)**:
-  - **Impact**: Critical RCE on agentic AI infrastructure and GPU/TPU clusters.
-  - **Details**: `JsonPlusSerializer` defaults to a permissive policy (`allowed_msgpack_modules=True`) for `msgpack` extensions. An attacker can craft a `msgpack` payload using extension code 0 (`EXT_CONSTRUCTOR_SINGLE_ARG`) to trigger arbitrary module imports and code execution, bypassing CVE-2026-27794.
-  - **RCE PoC**: [RCE in langgraph v1.1.6](research/langgraph%20_v1.1.6/README.md)
-- **Django (v6.0.4)**:
-  - **Impact**: Critical RCE via cache poisoning (Redis/Memcached) or SMB/UNC path redirection.
-  - **Details**: `RedisCache` and `PyMemcacheCache` use `pickle.loads()` by default for data retrieval. Attackers with access to the cache layer can inject malicious serialized objects. Additionally, path-based configurations on Windows resolve UNC paths, enabling remote exploitation over SMB.
-  - **RCE PoC**: [RCE in django v6.0.4](research/django_v6.0.4/README.md)
-
-### Google - Open Source Software Vulnerability Reward Program (OSS VRP)
-
-- **Brax (v0.14.2)**:
-  - **Impact**: Critical RCE on compute nodes and TPU/GPU pods.
-  - **Details**: `load_params` in `brax.io.model` uses `etils.epath` to download and deserialize malicious parameters via `pickle.loads` from remote URIs (SMB, GCS, S3).
-  - **Pull Request**: https://github.com/google/brax/pull/667
-  - **RCE PoC**: [RCE in brax v0.14.2](research/brax_v0.14.2/README.md)
-- **Dopamine (v2.0)**:
-  - **Impact**: Critical RCE in distributed research clusters.
-  - **Details**: `load_statistics` and `Checkpointer` use `tf.io.gfile` to deserialize pickles from attacker-controlled remote paths or malicious `gin-config` injections.
-  - **Issue**: https://github.com/google/dopamine/issues/236
-  - **RCE PoC**: [RCE in dopamine v2.0](research/dopamine_v2.0/README.md)
-- **PyGlove (v0.4.5)**:
-  - **Impact**: Critical RCE via JSON APIs and distributed tuning.
-  - **Details**: `_OpaqueObject` allows automatic pickle decoding embedded in JSON. Also vulnerable in `sandbox_call` and `fsspec` URI loading flows.
-  - **Pull Request**: https://github.com/google/pyglove/pull/404
-  - **RCE PoC**: [RCE in pyglove v0.4.5](research/pyglove_v0.4.5/README.md)
-- **Learned Optimization (v0.0.1)**:
-  - **Impact**: Critical RCE in HPC research environments and TPU/GPU pods.
-  - **Details**: `read_npz` in `learned_optimization.baselines.utils` uses `numpy.load(..., allow_pickle=True)` on researcher-controlled paths (GCS, SMB), enabling the execution of arbitrary Python objects during deserialization.
-  - **Pull Request**: https://github.com/google/learned_optimization/pull/342
-  - **RCE PoC**: [RCE in learned_optimization v0.0.1](research/learned_optimization_v0.0.1/README.md)
-- **Vertex AI (v1.147.0)**:
-  - **Impact**: Critical RCE on developer workstations, CI/CD runners (MLOps), and research environments.
-  - **Details**: Several sinks in Predictors and Agent/Reasoning engines allow loading malicious artifacts via `pickle`/`cloudpickle` from remote URIs (GCS, SMB/UNC). Vulnerabilities can be chained via `AIP_STORAGE_URI` or `staging_bucket` injection for remote exploitation.
-  - **Pull Request**: https://github.com/googleapis/python-aiplatform/pull/6589
-  - **RCE PoC**: [RCE in google-cloud-aiplatform v1.147.0](research/google_cloud_aiplatform_v1.147.0/README.md)
-- **Agent Development Kit (ADK) (v1.30.0)**:
-  - **Impact**: Critical RCE on developer workstations and AI infrastructure during session management.
-  - **Details**: Insecure deserialization in the migration loop (`_row_to_event`) and shared state schemas (`DynamicPickleType`) allows for zero-interaction exploitation via remote database URIs (SMB/UNC) or shared database poisoning (MySQL/Spanner).
-  - **Pull Request**: https://github.com/google/adk-python/pull/5333
-  - **RCE PoC**: [RCE in google-adk v1.30.0](research/google_adk_v1.30.0/README.md)
-
 ## What it does
 
 - Walks a directory tree and parses `.py` files into AST.
