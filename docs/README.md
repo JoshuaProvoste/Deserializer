@@ -9,3 +9,6 @@ Below is a chronological list of high-relevance technical milestones:
 1.  **Milestone #01**: [The Evolution from Pickle Hunting to Generic Deserialization SAST](./milestones/MILESTONE_01_TECHNICAL_EVOLUTION.md)
     *   *Focus*: Architectural shift to AST-based scanning and the discovery of Type Smuggling in "safe" formats like `msgpack` (LangGraph research).
     *   *Release Context*: `v1.1.0` of **Pickle RCE Finder**
+2.  **Milestone #02**: [Exploit Development - Engineering Robust and Cross-Platform Payloads](./milestones/MILESTONE_02_EXPLOIT_DEVELOPMENT.md)
+    *   *Focus*: Formalizing the distinction between Methods and Hooks, and implementing stable, OS-agnostic execution patterns using the `eval` and `or {}` primitives.
+    *   *Release Context*: Establishment of the `exploit_development/` research core.
