@@ -103,6 +103,18 @@ python --version
 
 ## Usage
 
+Recommended usage:
+
+### Without AI Agent
+```bash
+python deserializer.py --path cloned-repo --rules-file rules.json -j 4 --out cloned-repo/cloned-repo.jsonl
+```
+
+### With AI Agent
+```bash
+python deserializer.py --path cloned-repo --rules-file rules.json -j 4 --out cloned-repo/cloned-repo.jsonl --agent
+```
+
 ### 1. Basic Scan
 Scan the current directory and print findings to the terminal (writes JSONL to stdout by default):
 ```bash
