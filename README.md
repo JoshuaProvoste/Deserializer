@@ -14,10 +14,10 @@ The project is structured into four distinct phases, each designed to shift the 
 
 | Phase | Title | Tooling / Engine | Objective |
 | :--- | :--- | :--- | :--- |
-| **Phase 1** | **High-Velocity Detection** | `deserializer.py` (Triple-Pass) | Perform massive-scale SAST to identify potential deserialization sinks. |
-| **Phase 2** | **Relationship Mapping** | Result Processors / Mappers | Contextualize findings by tracing execution flows and component interdependencies. |
-| **Phase 3** | **Technical Synthesis** | Research Documentation | Formalize findings into technical writeups, mapping infrastructure-level attack surfaces. |
-| **Phase 4** | **Autonomous AI Audit** | AI Security Agent (MiniMax-M2.5) | Automate 0-day discovery and generate functional reproduction guides/exploits. |
+| **1** | **High-Velocity Detection** | `deserializer.py` (Triple-Pass) | Perform massive-scale SAST to identify potential deserialization sinks. |
+| **2** | **Relationship Mapping** | Result Processors / Mappers | Contextualize findings by tracing execution flows and component interdependencies. |
+| **3** | **Technical Synthesis** | Research Documentation | Formalize findings into technical writeups, mapping infrastructure-level attack surfaces. |
+| **4** | **Autonomous AI Audit** | AI Security Agent (MiniMax-M2.5) | Automate 0-day discovery and generate functional reproduction guides/exploits. |
 
 ## Project Structure
 
