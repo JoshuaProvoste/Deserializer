@@ -8,6 +8,17 @@ The project operates through a modular, multi-phased workflow that transitions f
 
 At its most advanced tier, Deserializer integrates an autonomous AI Security Agent (Phase 4) explicitly designed to navigate "self-command-injection" limitations and synthesize functional reproduction guides. This capability has directly powered the discovery of critical vulnerabilities in industry-leading frameworks like TensorFlow, Django, and LangGraph, proving its efficacy in auditing complex MLOps and agentic AI environments. As the project evolves, it continues to define the frontier of automated vulnerability research by bridging the gap between static analysis and functional exploit development.
 
+## The Deserializer Ecosystem: 4 Pillars of Audit
+
+The project is structured into four distinct phases, each designed to shift the analysis from high-volume automated telemetry to deep, functional security research:
+
+| Phase | Title | Tooling / Engine | Objective |
+| :--- | :--- | :--- | :--- |
+| **Phase 1** | **High-Velocity Detection** | `deserializer.py` (Triple-Pass) | Perform massive-scale SAST to identify potential deserialization sinks. |
+| **Phase 2** | **Relationship Mapping** | Result Processors / Mappers | Contextualize findings by tracing execution flows and component interdependencies. |
+| **Phase 3** | **Technical Synthesis** | Research Documentation | Formalize findings into technical writeups, mapping infrastructure-level attack surfaces. |
+| **Phase 4** | **Autonomous AI Audit** | AI Security Agent (MiniMax-M2.5) | Automate 0-day discovery and generate functional reproduction guides/exploits. |
+
 ## Dependencies & Portability
 
 This scanner integrates high-fidelity **AI-Driven Deep Analysis (Phase 4)** as an optional module. Consequently, the project **requires** the installation of external dependencies for AI orchestration, environment management, and inference only when the `--agent` flag is used.
