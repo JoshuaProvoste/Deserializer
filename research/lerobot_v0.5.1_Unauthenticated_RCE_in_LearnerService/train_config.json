@@ -1,0 +1,36 @@
+{
+    "job_name": "poc_hilserl",
+    "output_dir": "outputs/poc_hilserl",
+    "seed": 42,
+    "dataset": {
+        "repo_id": "lerobot/pusht"
+    },
+    "env": {
+        "type": "pusht",
+        "fps": 10
+    },
+    "wandb": {
+        "enable": false
+    },
+    "policy": {
+        "type": "sac",
+        "n_obs_steps": 1,
+        "push_to_hub": false,
+        "input_features": {
+            "observation.state": {
+                "type": "STATE",
+                "shape": [10]
+            }
+        },
+        "output_features": {
+            "action": {
+                "type": "ACTION",
+                "shape": [4]
+            }
+        },
+        "actor_learner_config": {
+            "learner_host": "0.0.0.0",
+            "learner_port": 50051
+        }
+    }
+}

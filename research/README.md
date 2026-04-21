@@ -34,7 +34,14 @@ The fundamental purpose is to consolidate a specialized knowledge repository det
   - **Impact**: Critical RCE on Windows-based AI/ML development pipelines and DevOps automation.
   - **Details**: `load_torch_model()` defaults to `weights_only=False`, allowing unrestricted `pickle.load` via `torch.load()`. On Windows, this is exploitable remotely via **UNC Path Redirection**, where loading a model from a network share (e.g., `\\attacker-ip\share\pytorch_model.bin`) executes an attacker-controlled payload.
   - **RCE PoC**: [RCE in huggingface-hub v1.11.0 (Supply Chain)](huggingface-hub_v1.11.0_Supply_Chain_RCE_via_load_torch_model_Defaults/README.md)
-
+- **LeRobot (v0.5.1) - PolicyServer**:
+  - **Impact**: Critical RCE on robotics research infrastructure and inference servers.
+  - **Details**: `PolicyServer` is an unauthenticated gRPC service that uses `pickle.loads` on incoming `request.data` in `SendPolicyInstructions` and `SendObservations`. Any network-adjacent attacker can execute arbitrary code by sending a malicious serialized object without authentication.
+  - **RCE PoC**: [RCE in lerobot v0.5.1 (PolicyServer)](lerobot_v0.5.1_Unauthenticated_RCE_in_PolicyServer/README.md)
+- **LeRobot (v0.5.1) - LearnerService**:
+  - **Impact**: Critical RCE on GPU-based training clusters and distributed RL infrastructure.
+  - **Details**: `LearnerService` exposes an unauthenticated gRPC stream `SendInteractions` which accepts byte streams. These streams are passed to `bytes_to_python_object` containing an insecure `pickle.load` sink. An attacker spoofing an Actor instance can achieve code execution on the central training server.
+  - **RCE PoC**: [RCE in lerobot v0.5.1 (LearnerService)](lerobot_v0.5.1_Unauthenticated_RCE_in_LearnerService/README.md)
 
 
 ### Google - Open Source Software Vulnerability Reward Program (OSS VRP)
