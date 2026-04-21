@@ -59,6 +59,3 @@ To enable the AI Agent, ensure your environment is correctly configured:
    HF_TOKEN=your_token_here
    ```
 2. **Configuration**: The agent is configured with `max_steps=30` to handle large codebases like the Microsoft Agent Framework.
-
----
-*Developed as part of the Pickle-RCE-Finder Project*
