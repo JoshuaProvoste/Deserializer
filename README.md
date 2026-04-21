@@ -35,13 +35,19 @@ This scanner features a high-performance **parallel execution engine** built on 
 - **Non-Blocking UI**: Features a stable, docked progress bar with a one-line gap for clean results presentation.
 - **Native Signal Handling**: On Windows, it utilizes a native `SetConsoleCtrlHandler` via `ctypes` to ensure that `Ctrl+C` is 100% responsive, even during heavy processing.
 - **Silent Tracebacks**: Worker processes are silented to ensure that interrupts and internal errors don't clutter the technical output.
+- **Native Windows UI Support**: Automatically enables Virtual Terminal Processing via `ctypes` for native ANSI color support in modern CMD and PowerShell environments.
 
 > [!WARNING]
 > **Performance Warning**: When analyzing extremely large or complex files (e.g., over 1MB, 2MB, or 3MB in size), the tool may experience significant slowdowns or appear "stuck" while parsing deep AST trees. If you encounter such bottlenecks, consider using the `--timeout` (to skip slow files) and `--max-size` (to skip huge files) flags to maintain scan velocity.
 
 ## What it does
 
-- Walks a directory tree and parses `.py` files into AST.
+- **Triple-Pass Scanning Engine**: Implements an "unbreakable" multi-tiered approach:
+  - **Pass 1 (AST)**: High-fidelity grammatical decomposition for precise analysis.
+  - **Pass 2 (Token Fallback)**: Automated fallback to a stream-based tokenizer when encountering syntax errors or unparsable sections.
+  - **Pass 3 (Regex Emergency)**: A final pattern-matching layer ensuring coverage in extremely hostile or fragmented source files.
+- **Native Template Neutralization**: Built-in support for sanitizing Jinja2 and Mako tags, allowing the scanner to process web templates and code-generation files without choking on non-Python syntax.
+- **Call & Reference Detection**: Identifies not just direct execution sinks (e.g., `pickle.loads()`) but also **dangerous function references** (e.g., `func = pickle.load`), tracking assignments across the local namespace.
 - Tracks imports/aliases to resolve calls like:
   - `import pickle as p` → `p.loads(...)`
   - `import torch as t` → `t.load(...)`
@@ -50,6 +56,7 @@ This scanner features a high-performance **parallel execution engine** built on 
   - file path + location (`lineno`, `col_offset`)
   - `module`, `name`, `qualified_name`
   - `category` and `severity` (extra fields, backwards-compatible)
+  - `parser`: Metadata indicating which engine pass made the discovery (`ast`, `tokenize_fallback`, or `regex_fallback`).
 - Guards against pathological inputs with:
   - max file size (`MAX_FILE_BYTES`)
   - max visited AST nodes (`MAX_AST_NODES`)
@@ -186,7 +193,7 @@ Example:
 }
 ```
 
-The loader normalizes imports (keeps the root token) and prints warnings to stderr for typos/malformed entries.
+The loader normalizes imports (keeps the root token) and includes a **Heuristic Typo Detector** that prints warnings to stderr if rule definitions contain near-matches to tracked modules (e.g., alerting on `picle` vs `pickle`).
 
 ## Notes on interpretation
 
