@@ -42,6 +42,14 @@ The fundamental purpose is to consolidate a specialized knowledge repository det
   - **Impact**: Critical RCE on GPU-based training clusters and distributed RL infrastructure.
   - **Details**: `LearnerService` exposes an unauthenticated gRPC stream `SendInteractions` which accepts byte streams. These streams are passed to `bytes_to_python_object` containing an insecure `pickle.load` sink. An attacker spoofing an Actor instance can achieve code execution on the central training server.
   - **RCE PoC**: [RCE in lerobot v0.5.1 (LearnerService)](lerobot_v0.5.1_Unauthenticated_RCE_in_LearnerService/README.md)
+- **MuJoCo (v3.7.0) - TimeSeries**:
+  - **Impact**: Critical RCE on robotics research workstations and automated simulation pipelines.
+  - **Details**: `mujoco.sysid.TimeSeries.load_from_disk` utilizes `numpy.load(..., allow_pickle=True)` to process archived signal data. On Windows, providing a Universal Naming Convention (UNC) path redirects the application to fetch and deserialize a malicious payload from an attacker-controlled SMB share.
+  - **RCE PoC**: [RCE in MuJoCo v3.7.0 (UNC Redirection)](mujoco_v3.7.0_RCE_via_UNC_Path_Redirection/README.md)
+- **MuJoCo (v3.7.0) - SystemTrajectory**:
+  - **Impact**: Critical RCE on collaborative robotics platforms and benchmarking workstations.
+  - **Details**: `mujoco.sysid.SystemTrajectory.load_from_disk` uses `numpy.load(..., allow_pickle=True)` to load trajectory archives (`.npz`). This enables a supply chain attack where researchers unknowingly execute code by loading poisoned benchmark datasets distributed in the robotics community.
+  - **RCE PoC**: [RCE in MuJoCo v3.7.0 (Supply Chain)](mujoco_v3.7.0_Supply_Chain_Compromise_via_SystemTrajectory/README.md)
 
 
 ### Google - Open Source Software Vulnerability Reward Program (OSS VRP)

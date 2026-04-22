@@ -32,7 +32,6 @@ def from_pretrained_fastai(repo_id: str, revision: str | None = None):
     return load_learner(os.path.join(storage_folder, "model.pkl")) # <--- CRITICAL SINK
 ```
 
-
 ## Technical Impact Analysis
 
 ### Project Purpose & Context
