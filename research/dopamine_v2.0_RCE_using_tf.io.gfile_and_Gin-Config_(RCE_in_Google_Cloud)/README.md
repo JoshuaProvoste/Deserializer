@@ -9,8 +9,6 @@ Due to the nature and impact of an RCE (before publishing the details via PR in 
 * https://github.com/google/dopamine?tab=contributing-ov-file
 * *"Due to lack of bandwidth, we are not accepting pull requests at this time."*  
 
-**For this reason, I request the support, coordination, or confirmation from the team to obtain a "Bug ID" or whatever is necessary to have authorization to open the Pull Request in the official project repository.**
-
 ## Introduction
 
 **Usually, insecure deserialization vulnerabilities using `pickle` are related to the deserialization of a `.pkl` file (among others), which turns the vulnerability into a sort of out-of-scope "self-command-injection".**
