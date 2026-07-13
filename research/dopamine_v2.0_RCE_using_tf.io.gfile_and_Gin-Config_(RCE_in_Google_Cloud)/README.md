@@ -1,4 +1,4 @@
-# OT2 - `Dopamine` - Version `2.0` (Pre Keras release) / Remote Code Execution (RCE) via Insecure Deserialization
+# `Dopamine` - Version `2.0` (Pre Keras release) / Remote Code Execution (RCE) via Insecure Deserialization
 
 * https://github.com/google/dopamine
 
