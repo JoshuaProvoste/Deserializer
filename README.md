@@ -41,7 +41,7 @@ At its most advanced tier, **Deserializer integrates an autonomous AI Security A
 
 6. **Brax (v0.14.2)**:
     - **Impact**: Critical RCE on compute nodes and TPU/GPU pods.
-    - **RCE PoC**: [RCE in brax v0.14.2](research/brax_v0.14.2_RCE_via_Insecure_Deserialization_based_on_sink_pickle.loads_and_path_resolution/README.md)
+    - **RCE PoC**: [RCE in brax v0.14.2](research/brax_v0.14.2_RCE_ based_on_PKL_File_Deserializaiton/README.md)
     - **Disclosure**: https://hackedalert.com/research/brax-v0-14-2-rce-insecure-deserialization/
 
 7. **TensorFlow (v2.21.0)**:
