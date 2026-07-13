@@ -81,7 +81,7 @@ At its most advanced tier, **Deserializer integrates an autonomous AI Security A
 
 14. **Vertex AI (v1.147.0)**:
     - **Impact**: Critical RCE on developer workstations, CI/CD runners (MLOps), and research environments.
-    - **RCE PoC**: [RCE in google-cloud-aiplatform v1.147.0](research/google_cloud_aiplatform_v1.147.0_RCE_via_Insecure_Deserialization_(Bug Chaining)/README.md)
+    - **RCE PoC**: [RCE in google-cloud-aiplatform v1.147.0](research/google_cloud_aiplatform_v1.147.0_RCE_via_Insecure_Deserialization_(Bug_Chaining)/README.md)
     - **Disclosure**: https://hackedalert.com/research/google-cloud-aiplatform-v1-147-0/
 
 15. **Agent Development Kit (ADK) (v1.30.0)**:
