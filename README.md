@@ -46,12 +46,12 @@ At its most advanced tier, **Deserializer integrates an autonomous AI Security A
 
 7. **TensorFlow (v2.21.0)**:
     - **Impact**: Critical RCE on developer workstations and MLOps infrastructure.
-    - **RCE PoC**: [RCE in tensorflow v2.21.0](research/tensorflow_v2.21.0/README.md)
+    - **RCE PoC**: [RCE in tensorflow v2.21.0](research/tensorflow_v2.21.0_RCE_via_Insecure_Deserialization_based_on_sink_numpy.load_and_saved_model_cli_run_--inputs_as_Entry_Point/README.md)
     - **Disclosure**: https://hackedalert.com/research/tensorflow-v2-21-0-rce-insecure-deserialization/
 
 8. **LangGraph (v1.1.6)**:
     - **Impact**: Critical RCE on agentic AI infrastructure and GPU/TPU clusters.
-    - **RCE PoC**: [RCE in langgraph v1.1.6](research/langgraph%20_v1.1.6/README.md)
+    - **RCE PoC**: [RCE in langgraph v1.1.6](research/langgraph_v1.1.6_RCE_Bypass_of_CVE-2026-27794/README.md)
     - **Disckosure**: https://hackedalert.com/research/langgraph-v1-1-6-rce-insecure-deserialization-bypass/
 
 9. **VibeVoice (v0.0.1)**:
