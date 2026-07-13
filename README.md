@@ -71,32 +71,32 @@ At its most advanced tier, **Deserializer integrates an autonomous AI Security A
 
 12. **PyGlove (v0.4.5)**:
     - **Impact**: Critical RCE via JSON APIs and distributed tuning.
-    - **RCE PoC**: [RCE in pyglove v0.4.5](research/pyglove_v0.4.5/README.md)
+    - **RCE PoC**: [RCE in pyglove v0.4.5](research/pyglove_v0.4.5_Insecure_Deserialization_based_on_OpaqueObject_JSON_data_stream_(Base64)/README.md)
     - **Disclosure**: https://hackedalert.com/research/pyglove-v0-4-5-rce-insecure-deserialization/
 
 13. **Learned Optimization (v0.0.1)**:
     - **Impact**: Critical RCE in HPC research environments and TPU/GPU pods.
-    - **RCE PoC**: [RCE in learned_optimization v0.0.1](research/learned_optimization_v0.0.1/README.md)
+    - **RCE PoC**: [RCE in learned_optimization v0.0.1](research/learned_optimization_v0.0.1_RCE_based_on_numpy.load_Deserialization/README.md)
     - **Disclosure**: https://hackedalert.com/research/learned-optimization-v0-0-1-rce-insecure-deserialization/
 
 14. **Vertex AI (v1.147.0)**:
     - **Impact**: Critical RCE on developer workstations, CI/CD runners (MLOps), and research environments.
-    - **RCE PoC**: [RCE in google-cloud-aiplatform v1.147.0](research/google_cloud_aiplatform_v1.147.0/README.md)
+    - **RCE PoC**: [RCE in google-cloud-aiplatform v1.147.0](research/google_cloud_aiplatform_v1.147.0_RCE_via_Insecure_Deserialization_(Bug Chaining)/README.md)
     - **Disclosure**: https://hackedalert.com/research/google-cloud-aiplatform-v1-147-0/
 
 15. **Agent Development Kit (ADK) (v1.30.0)**:
     - **Impact**: Critical RCE on developer workstations and AI infrastructure during session management.
-    - **RCE PoC**: [RCE in google-adk v1.30.0](research/google_adk_v1.30.0/README.md)
+    - **RCE PoC**: [RCE in google-adk v1.30.0](research/google_adk_v1.30.0_RCE_based_on_SQLAlchemy_DB_Migration/README.md)
     - **Disclosure**: https://hackedalert.com/research/google-adk-v1-30-0-rce-insecure-deserialization/
 
 16. **Dopamine (v2.0)**:
     - **Impact**: Critical RCE in distributed research clusters.
-    - **RCE PoC**: [RCE in dopamine v2.0](research/dopamine_v2.0/README.md)
+    - **RCE PoC**: [RCE in dopamine v2.0](research/dopamine_v2.0_RCE_using_tf.io.gfile_and_Gin-Config_(RCE_in_Google_Cloud)/README.md)
     - **Disclosure**: https://hackedalert.com/research/dopamine-v2-0-rce-insecure-deserialization/
 
 17. **Django (v6.0.4)**:
     - **Impact**: Critical RCE via cache poisoning (Redis/Memcached) or SMB/UNC path redirection.
-    - **RCE PoC**: [RCE in django v6.0.4](research/django_v6.0.4/README.md)
+    - **RCE PoC**: [RCE in django v6.0.4](research/django_v6.0.4_RCE_based_on_Cache_Poisoning_and_REDIS/README.md)
     - **Disclosure**: https://hackedalert.com/research/django-v6-0-4-rce-insecure-deserialization/
 
 ## The Deserializer Ecosystem: 4 Pillars of Audit
