@@ -56,7 +56,7 @@ At its most advanced tier, **Deserializer integrates an autonomous AI Security A
 
 9. **VibeVoice (v0.0.1)**:
     - **Impact**: Critical RCE on developer workstations and AI-as-a-Service (AIaaS) platforms.
-    - **RCE PoC**: [RCE in vibevoice v0.0.1](research/vibevoice_v0.0.1/README.md)
+    - **RCE PoC**: [RCE in vibevoice v0.0.1](research/vibevoice_v0.0.1_RCE_via_Insecure_Deserialization_based_on_sink_torch.load_and_numpy.load/README.md)
     - **Disclosure**: https://hackedalert.com/research/vibevoice-v0-0-1-rce-insecure-deserialization/
 
 10. **Hugging Face Hub (v1.11.0)**:
