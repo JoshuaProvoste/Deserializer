@@ -1,8 +1,6 @@
 # OT2 - `Dopamine` - Version `2.0` (Pre Keras release) / Remote Code Execution (RCE) via Insecure Deserialization
 
-| Project | Tier | Vulnerability Category | Description |
-|---|---|---|---|
-| https://github.com/google/dopamine | OT2 | Product vulnerabilities | Remote Code Execution (RCE) via Insecure Deserialization using `pickle` package |
+* https://github.com/google/dopamine
 
 ## Important
 
@@ -76,8 +74,6 @@ The presence of a Remote Code Execution (RCE) vulnerability in a core Google AI 
 *   **Supply Chain Propagation**: Given its 1,400+ forks, vulnerabilities in the core Dopamine library propagate to numerous downstream projects and specialized industrial AI applications.
 
 ## Attack Scenario
-
-* https://bughunters.google.com/learn/improving-your-reports/how-to-report/write-down-the-attack-scenario
 
 ### Who wants to exploit a particular vulnerability?
 

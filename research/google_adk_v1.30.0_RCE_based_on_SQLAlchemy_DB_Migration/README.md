@@ -1,10 +1,7 @@
-# OT2 - `Agent Development Kit (ADK)` - Version `1.30.0` / Remote Code Execution (RCE) via Insecure Deserialization 
+# `Agent Development Kit (ADK)` - Version `1.30.0` / Remote Code Execution (RCE) via Insecure Deserialization 
 
-| Project | Tier | Vulnerability Category | Description |
-|---|---|---|---|
-| https://pypi.org/project/google-adk/ | OT2 | Product vulnerabilities | Remote Code Execution (RCE) via Insecure Deserialization using `pickle` package |
-
-* Source code: https://github.com/google/adk-python
+* https://pypi.org/project/google-adk/
+* https://github.com/google/adk-python
 
 ## Introduction
 
@@ -15,8 +12,6 @@
 **For this PoC, two (2) different devices were used to simulate the interaction between an attacking machine (Raspberry Pi with IP 192.168.1.90) and a victim machine (Windows with IP 192.168.1.88).**
 
 ## Vulnerability description
-
-
 
 ### The vulnerable code in `google/adk/sessions/migration/migrate_from_sqlalchemy_pickle.py`:
 
@@ -50,11 +45,7 @@ The identified vulnerabilities are rated as **CRITICAL**. By leveraging remote d
 *   **Vector #1 (Migration)**: Allows an attacker to pivot from a malicious remote data source (e.g., an attacker-controlled SQLite file served via SMB) to full RCE on the device performing the migration.
 *   **Vector #2 (Shared State)**: Enables lateral movement and persistent compromise within infrastructure where multiple agents share the same backend database (Spanner/MySQL). Any authenticated read of the "poisoned" events will trigger the exploit.
 
-
-
 ## Attack Scenario
-
-* https://bughunters.google.com/learn/improving-your-reports/how-to-report/write-down-the-attack-scenario
 
 ### Who wants to exploit a particular vulnerability?
 

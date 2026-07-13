@@ -1,4 +1,4 @@
-# OT2 - `Brax` - Version `0.14.2` / Remote Code Execution (RCE) via Insecure Deserialization 
+# `Brax` - Version `0.14.2` / Remote Code Execution (RCE) via Insecure Deserialization 
 
 * https://github.com/google/brax
 
@@ -41,8 +41,6 @@ The vulnerability is rated as **Critical**. While Brax supports secure checkpoin
 
 
 ## Attack Scenario
-
-* https://bughunters.google.com/learn/improving-your-reports/how-to-report/write-down-the-attack-scenario
 
 ### Who wants to exploit a particular vulnerability?
 

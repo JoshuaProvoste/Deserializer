@@ -1,10 +1,7 @@
-# OT2 - `google-cloud-aiplatform` - Version `1.147.0` / Remote Code Execution (RCE) via Insecure Deserialization (Bug Chaining)
+# `google-cloud-aiplatform` - Version `1.147.0` / Remote Code Execution (RCE) via Insecure Deserialization (Bug Chaining)
 
-| Project | Tier | Vulnerability Category | Description |
-|---|---|---|---|
-| https://pypi.org/project/google-cloud-aiplatform/ | OT2 | Product vulnerabilities | Remote Code Execution (RCE) via Insecure Deserialization using `pickle` and `cloudpickle` packages |
-
-* Source code repository: https://github.com/googleapis/python-aiplatform 
+* https://pypi.org/project/google-cloud-aiplatform/
+* https://github.com/googleapis/python-aiplatform 
 
 ## Introduction
 
@@ -50,11 +47,7 @@ The vulnerability is rated as **Critical**. The ability to trigger RCE through n
 *   **Supply Chain Attacks**: Poisoning shared "Staging Buckets" to compromise all developers in a project.
 *   **Lateral Movement**: Pivoting from a compromised researcher's machine to the broader corporate VPC or Cloud project.
 
-
-
 ## Attack Scenario
-
-* https://bughunters.google.com/learn/improving-your-reports/how-to-report/write-down-the-attack-scenario
 
 ### Who wants to exploit a particular vulnerability?
 
@@ -70,8 +63,6 @@ Attackers can leverage several remote vectors:
 1.  **Staging Redirection**: Social-engineering a developer into using an attacker-controlled `staging_bucket` for an "experiment".
 2.  **Artifact Poisoning**: Overwriting remote `.pkl` files in a shared GCS bucket to trigger the TOCTOU race condition during a deployment validation.
 3.  **Collaborative Resource Sharing**: Contributing a "malicious agent" to a public or internal hub that triggers RCE when a victim attempts a local evaluation or preview.
-
-
 
 # Reproduction steps
 

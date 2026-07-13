@@ -1,8 +1,6 @@
-# OT2 - `PyGlove` - Version `0.4.5` / Remote Code Execution (RCE) via Insecure Deserialization
+# `PyGlove` - Version `0.4.5` / Remote Code Execution (RCE) via Insecure Deserialization
 
-| Project | Tier | Vulnerability Category | Description |
-|---|---|---|---|
-| https://github.com/google/pyglove | OT2 | Product vulnerabilities | Remote Code Execution (RCE) via Insecure Deserialization using `pickle` package |
+* https://github.com/google/pyglove
 
 ## Introduction
 
@@ -58,8 +56,6 @@ The vulnerability is **Critical**. The ability to trigger Remote Code Execution 
 
 
 ## Attack Scenario
-
-* https://bughunters.google.com/learn/improving-your-reports/how-to-report/write-down-the-attack-scenario
 
 ### Who wants to exploit a particular vulnerability?
 

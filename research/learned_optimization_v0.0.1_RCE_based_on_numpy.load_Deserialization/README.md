@@ -1,8 +1,6 @@
-# OT2 - `learned_optimization` - Version `v.0.0.1` (`PiperOrigin-RevId: 888266025`) / Remote Code Execution (RCE) via Insecure Deserialization 
+# `learned_optimization` - Version `v.0.0.1` (`PiperOrigin-RevId: 888266025`) / Remote Code Execution (RCE) via Insecure Deserialization 
 
-| Project | Tier | Vulnerability Category | Description |
-|---|---|---|---|
-| https://github.com/google/learned_optimization | OT2 | Product vulnerabilities | Remote Code Execution (RCE) via Insecure Deserialization using `pickle` package |
+* https://github.com/google/learned_optimization
 
 ## Introduction
 
@@ -47,8 +45,6 @@ The vulnerability is rated as **Critical**. The ability to trigger RCE through n
 
 
 ## Attack Scenario
-
-* https://bughunters.google.com/learn/improving-your-reports/how-to-report/write-down-the-attack-scenario
 
 ### Who wants to exploit a particular vulnerability?
 
