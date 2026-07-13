@@ -1,8 +1,6 @@
 # OT2 - `Brax` - Version `0.14.2` / Remote Code Execution (RCE) via Insecure Deserialization 
 
-| Project | Tier | Vulnerability Category | Description |
-|---|---|---|---|
-| https://github.com/google/brax | OT2 | Product vulnerabilities | Remote Code Execution (RCE) via Insecure Deserialization using `pickle` package |
+* https://github.com/google/brax
 
 ## Introduction
 

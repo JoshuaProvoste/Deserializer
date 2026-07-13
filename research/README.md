@@ -50,6 +50,11 @@ The fundamental purpose is to consolidate a specialized knowledge repository det
   - **Impact**: Critical RCE on collaborative robotics platforms and benchmarking workstations.
   - **Details**: `mujoco.sysid.SystemTrajectory.load_from_disk` uses `numpy.load(..., allow_pickle=True)` to load trajectory archives (`.npz`). This enables a supply chain attack where researchers unknowingly execute code by loading poisoned benchmark datasets distributed in the robotics community.
   - **RCE PoC**: [RCE in MuJoCo v3.7.0 (Supply Chain)](mujoco_v3.7.0_Supply_Chain_Compromise_via_SystemTrajectory/README.md)
+- **Genesis World (v0.2.1) - Cache Infrastructure**:
+  - **Impact**: Critical RCE on robotics research workstations and automated physics simulation pipelines.
+  - **Details**: The framework utilizes a global cache for remeshing (`.rm`), tetrahedralization (`.tet`), and particle sampling (`.ptc`) using insecure `pickle.load`. Attackers can achieve RCE by poisoning the shared cache via predictable hashing or by redirecting the cache directory to a remote SMB share using the `GS_CACHE_FILE_PATH` environment variable.
+  - **RCE PoC**: [RCE in genesis-world v0.2.1](PYPI-genesis-world/ATTACK_SURFACE.md)
+
 
 
 ### Google - Open Source Software Vulnerability Reward Program (OSS VRP)
