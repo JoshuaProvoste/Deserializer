@@ -32,9 +32,13 @@ class AIOrchestrator:
 
     REPRODUCTION_PROMPT_TEMPLATE = """
 1. Role: Act as a Senior Exploit Engineer and Security Researcher.
-2. Purpose: Based on the previously generated {project_name}/ATTACK_SURFACE.md, create a detailed, step-by-step reproduction guide for each identified vulnerability vector.
-3. Deliverable: Create a file named {project_name}/REPRODUCTION_GUIDE.md.
-4. Mandatory Instructions:
+2. Important Tool Rules: You MUST use the provided custom tools (directory_navigator, file_inspector, safe_source_reader, markdown_manager) to interact with files.
+   - DO NOT import tool names as Python modules (e.g. `import markdown_manager` is FORBIDDEN). The tools are already available directly in your execution context as functions.
+   - Use `markdown_manager(action='read', target_path='{project_name}/ATTACK_SURFACE.md')` or `safe_source_reader('{project_name}/ATTACK_SURFACE.md')` to read the attack surface.
+   - Use `markdown_manager(action='create', target_path='{project_name}/REPRODUCTION_GUIDE.md', content=...)` or `markdown_manager(action='edit', ...)` to write the deliverable.
+3. Purpose: Based on the previously generated {project_name}/ATTACK_SURFACE.md, create a detailed, step-by-step reproduction guide for each identified vulnerability vector.
+4. Deliverable: Create a file named {project_name}/REPRODUCTION_GUIDE.md.
+5. Mandatory Instructions:
     - Document a step-by-step configuration and deployment process to reproduce the vulnerability for EACH vector identified in the Attack Surface report.
     - For each vector, include a functional Python script for payload or exploit generation.
     - The reproduction MUST be designed to run on localhost for testing purposes.
