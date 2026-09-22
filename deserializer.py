@@ -839,6 +839,22 @@ def main():
         action="store_true",
         help="Run AI-driven deep analysis (Phase 4, optional).",
     )
+    ap.add_argument(
+        "--agent-provider",
+        choices=["huggingface", "local"],
+        default="huggingface",
+        help="LLM inference provider for AI agent: 'huggingface' or 'local' (default: huggingface).",
+    )
+    ap.add_argument(
+        "--llm-api-url",
+        default="http://127.0.0.1:8181/v1",
+        help="Base URL for local LLM inference API (default: http://127.0.0.1:8181/v1).",
+    )
+    ap.add_argument(
+        "--agent-model",
+        default=None,
+        help="Model ID or path name for LLM inference (optional).",
+    )
     args = ap.parse_args()
     setup_windows_ansi()
 
@@ -1080,7 +1096,11 @@ def main():
                             
                             try:
                                 from modules.ai_orchestrator import AIOrchestrator
-                                orchestrator = AIOrchestrator()
+                                orchestrator = AIOrchestrator(
+                                    provider=args.agent_provider,
+                                    llm_api_url=args.llm_api_url,
+                                    model_id=args.agent_model
+                                )
                                 ai_result = orchestrator.run_analysis(project_name, args.path, output_stream=human)
                                 
                                 print("\n" + "-"*40, file=human)
