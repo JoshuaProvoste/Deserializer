@@ -30,6 +30,11 @@ class MarkdownManager(Tool):
 
     def forward(self, action: str, target_path: str, content: Optional[str] = None, source_path: Optional[str] = None) -> str:
         try:
+            from .fs_tools import _clean_path_str
+            target_path = _clean_path_str(target_path)
+            if source_path:
+                source_path = _clean_path_str(source_path)
+
             target = Path(target_path).resolve()
             
             if action == "create":

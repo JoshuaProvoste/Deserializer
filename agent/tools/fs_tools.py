@@ -3,6 +3,16 @@ from pathlib import Path
 from typing import List, Dict, Any, Optional
 from smolagents import Tool
 
+def _clean_path_str(p: str) -> str:
+    if not isinstance(p, str):
+        return p
+    cleaned = p.strip()
+    if cleaned.startswith("[FILE]"):
+        cleaned = cleaned[6:].strip()
+    elif cleaned.startswith("[DIR]"):
+        cleaned = cleaned[5:].strip()
+    return cleaned
+
 class DirectoryNavigator(Tool):
     name = "directory_navigator"
     description = "Navigates directories and subdirectories recursively. Returns a list of files and folders."
@@ -21,6 +31,7 @@ class DirectoryNavigator(Tool):
 
     def forward(self, path: str, recursive: bool = True) -> str:
         try:
+            path = _clean_path_str(path)
             target = Path(path).resolve()
             if not target.is_dir():
                 return f"Error: {path} is not a directory."
@@ -56,6 +67,7 @@ class FileInspector(Tool):
 
     def forward(self, file_path: str) -> str:
         try:
+            file_path = _clean_path_str(file_path)
             target = Path(file_path).resolve()
             if not target.is_file():
                 return f"Error: {file_path} is not a file."
@@ -88,6 +100,7 @@ class SafeSourceReader(Tool):
 
     def forward(self, file_path: str) -> str:
         try:
+            file_path = _clean_path_str(file_path)
             target = Path(file_path).resolve()
             if not target.is_file():
                 return f"Error: {file_path} is not a file."
@@ -133,6 +146,7 @@ class OpenTool(Tool):
 
     def forward(self, file: str, mode: str = "r", encoding: Optional[str] = "utf-8") -> Any:
         try:
+            file = _clean_path_str(file)
             target = Path(file).resolve()
             target.parent.mkdir(parents=True, exist_ok=True)
             if mode and "b" in mode:
