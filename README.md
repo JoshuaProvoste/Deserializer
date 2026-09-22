@@ -12,7 +12,7 @@ The project operates through a modular, multi-phased workflow that transitions f
 
 ## Autonomous AI Security Agent
 
-At its most advanced tier, **Deserializer integrates an autonomous AI Security Agent** (Phase 4), explicitly designed to navigate "self-command-injection" limitations and synthesize functional reproduction guides, based on HuggingFace inference API, Local LLM (like llama.cpp), or OpenAI API compatibles. 
+At its most advanced tier, **Deserializer integrates an autonomous AI Security Agent** (Phase 4), explicitly designed to navigate "self-command-injection" limitations and synthesize functional reproduction guides, based on HuggingFace inference API, Local LLM (like llama.cpp), or OpenAI API compatible. 
 
 This capability has directly powered the discovery of critical vulnerabilities in industry-leading frameworks like TensorFlow, Django, and LangGraph, proving its efficacy in auditing complex MLOps and agentic AI environments. 
 
