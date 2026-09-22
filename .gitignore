@@ -2,6 +2,7 @@
 PYPI-*/
 reports/PYPI-*/
 reports/
+analysis/
 
 # Python environment
 __pycache__/
