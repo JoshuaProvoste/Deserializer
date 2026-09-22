@@ -58,12 +58,20 @@ Before running the scanner, you MUST install the dependencies:
 pip install -r requirements.txt
 ```
 
-### AI-Driven Deep Analysis (Phase 4)
+### AI-Driven Deep Analysis (Phase 4) with an AI Security Agent
 
-This phase integrates a specialized AI Security Agent to perform deep code reviews and map complex 0-day RCE vectors. Using the **MiniMax-M2.5** model (via Hugging Face), the agent analyzes findings to reverse "self-command-injection" contexts and generate technical reproduction guides with a multi-platform focus (e.g., Attacker UNIX/Raspberry vs Victim Windows). **Note: This phase is only executed if the `--agent` flag is provided.**
+This phase integrates a specialized AI Security Agent to perform deep code reviews and map complex 0-day RCE vectors. The agent analyzes findings to reverse "self-command-injection" contexts and generate technical reproduction guides with a multi-platform focus (e.g., Attacker UNIX/Raspberry vs Victim Windows). **Note: This phase is only executed if the `--agent` flag is provided.**
+
+**Inference Providers**:
+- **Hugging Face (Default)**: Uses cloud-based API models such as **MiniMax-M2.5**.
+  - Requires `HF_TOKEN` in a `.env` file or environment variable.
+  - Command: `python deserializer.py --path /path/to/repo --agent --agent-provider huggingface`
+- **Local LLM (`llama.cpp`)**: Uses a local REST server (`llama-server.exe`).
+  - Command example to launch server: `.\llama-server.exe --model .\models\model.gguf --host 127.0.0.1 --port 8181 --ctx-size 600000 --jinja`
+  - Command: `python deserializer.py --path /path/to/repo --agent --agent-provider local --llm-api-url http://127.0.0.1:8181/v1`
 
 **Setup Requirements**:
-- **Environment**: Create a `.env` file in the root directory and add your Hugging Face token:
+- **Environment**: If using Hugging Face, create a `.env` file in the root directory:
   ```env
   HF_TOKEN=your_token_here
   ```
