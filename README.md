@@ -12,7 +12,11 @@ The project operates through a modular, multi-phased workflow that transitions f
 
 ## Autonomous AI Security Agent
 
-At its most advanced tier, **Deserializer integrates an autonomous AI Security Agent** (Phase 4), explicitly designed to navigate "self-command-injection" limitations and synthesize functional reproduction guides. This capability has directly powered the discovery of critical vulnerabilities in industry-leading frameworks like TensorFlow, Django, and LangGraph, proving its efficacy in auditing complex MLOps and agentic AI environments. As the project evolves, it continues to define the frontier of automated vulnerability research by bridging the gap between abstract syntax tree static analysis, relationship mapping, reporting, and functional exploit development based on documented research.
+At its most advanced tier, **Deserializer integrates an autonomous AI Security Agent** (Phase 4), explicitly designed to navigate "self-command-injection" limitations and synthesize functional reproduction guides, based on HuggingFace inference API, Local LLM (like llama.cpp), or OpenAI API compatibles. 
+
+This capability has directly powered the discovery of critical vulnerabilities in industry-leading frameworks like TensorFlow, Django, and LangGraph, proving its efficacy in auditing complex MLOps and agentic AI environments. 
+
+As the project evolves, it continues to define the frontier of automated vulnerability research by bridging the gap between abstract syntax tree static analysis, relationship mapping, reporting, and functional exploit development based on documented research.
 
 ## Research (AI, Robotics, Data Science, Machine Learning and Deep Learning)
 
@@ -27,7 +31,7 @@ The project is structured into four distinct phases, each designed to shift the 
 | **1** | **High-Velocity Detection** | `deserializer.py` (Triple-Pass) | Perform massive-scale SAST to identify potential deserialization sinks. |
 | **2** | **Relationship Mapping** | Result Processors / Mappers | Contextualize findings by tracing execution flows and component interdependencies. |
 | **3** | **Technical Synthesis** | Research Documentation | Formalize findings into technical writeups, mapping infrastructure-level attack surfaces. |
-| **4** | **Autonomous AI Agent** | AI Security Agent (MiniMax-M2.5) | Automate 0-day discovery and generate functional reproduction guides/exploits. |
+| **4** | **Autonomous AI Agent** | AI Security Agent (HuggingFace or Local LLM) | Automate 0-day discovery and generate functional reproduction guides/exploits. |
 
 ## Project Structure
 
@@ -47,34 +51,6 @@ A high-level map of the repository's organization and the technical purpose of e
     A collection of high-fidelity vulnerability writeups, validated Proof-of-Concept (PoC) scripts, and deep audits conducted on modern AI/ML frameworks.
 -   **`templates/`**  
     Standardized reporting and research templates used to maintain technical consistency across vulnerability writeups and correlation reports.
-
-## Dependencies & Portability
-
-This scanner integrates high-fidelity **AI-Driven Deep Analysis (Phase 4)** as an optional module. Consequently, the project **requires** the installation of external dependencies for AI orchestration, environment management, and inference only when the `--agent` flag is used.
-
-**Installation**:
-Before running the scanner, you MUST install the dependencies:
-```bash
-pip install -r requirements.txt
-```
-
-### AI-Driven Deep Analysis (Phase 4) with an AI Security Agent
-
-This phase integrates a specialized AI Security Agent to perform deep code reviews and map complex 0-day RCE vectors. The agent analyzes findings to reverse "self-command-injection" contexts and generate technical reproduction guides with a multi-platform focus (e.g., Attacker UNIX/Raspberry vs Victim Windows). **Note: This phase is only executed if the `--agent` flag is provided.**
-
-**Inference Providers**:
-- **Hugging Face (Default)**: Uses cloud-based API models such as **MiniMax-M2.5**.
-  - Requires `HF_TOKEN` in a `.env` file or environment variable.
-  - Command: `python deserializer.py --path /path/to/repo --agent --agent-provider huggingface`
-- **Local LLM (`llama.cpp`)**: Uses a local REST server (`llama-server.exe`).
-  - Command example to launch server: `.\llama-server.exe --model .\models\model.gguf --host 127.0.0.1 --port 8181 --ctx-size 600000 --jinja`
-  - Command: `python deserializer.py --path /path/to/repo --agent --agent-provider local --llm-api-url http://127.0.0.1:8181/v1`
-
-**Setup Requirements**:
-- **Environment**: If using Hugging Face, create a `.env` file in the root directory:
-  ```env
-  HF_TOKEN=your_token_here
-  ```
 
 ## Performance & Multiprocessing
 
@@ -112,11 +88,24 @@ This scanner features a high-performance **parallel execution engine** built on 
 
 ## Installation
 
-No dependencies.
+**Minimum Python version 3.9+ recommended and 3.10+ tested**.
 
 ```bash
 python --version
 # Python 3.9+ recommended
+```
+
+**Setup Requirements**:
+- **Environment**: If using Hugging Face, create a `.env` file in the root directory:
+  ```env
+  HF_TOKEN=your_token_here
+  ```
+
+Before running the scanner, you MUST install the dependencies:
+```bash
+python -m venv .venv
+.venv\Scripts\activate
+pip install -r requirements.txt
 ```
 
 ## Usage
@@ -130,8 +119,22 @@ python deserializer.py --path cloned-repo --rules-file rules.json -j 4 --out clo
 
 ### With AI Agent
 ```bash
-python deserializer.py --path cloned-repo --rules-file rules.json -j 4 --out cloned-repo/cloned-repo.jsonl --agent
+python deserializer.py --path cloned-repo --rules-file rules.json -j 4 --out cloned-repo/cloned-repo.jsonl --agent --agent-provider local --llm-api-url http://127.0.0.1:8181/v1
+
 ```
+
+### AI-Driven Deep Analysis (Phase 4) with an AI Security Agent
+
+This phase integrates a specialized AI Security Agent to perform deep code reviews and map complex 0-day RCE vectors. The agent analyzes findings to reverse "self-command-injection" contexts and generate technical reproduction guides with a multi-platform focus (e.g., Attacker UNIX/Raspberry vs Victim Windows). **Note: This phase is only executed if the `--agent` flag is provided.**
+
+**Inference Providers**:
+- **Hugging Face (Default)**: Uses cloud-based API models such as **MiniMax-M2.5**.
+  - Requires `HF_TOKEN` in a `.env` file or environment variable.
+  - Command: `python deserializer.py --path /path/to/repo --agent --agent-provider huggingface`
+- **Local LLM (`llama.cpp`)**: Uses a local REST server (`llama-server.exe`).
+  - Command example to launch server: `.\llama-server.exe --model .\models\model.gguf --host 127.0.0.1 --port 8181 --ctx-size 600000 --jinja`
+  - Command: `python deserializer.py --path /path/to/repo --agent --agent-provider local --llm-api-url http://127.0.0.1:8181/v1`
+
 
 ### 1. Basic Scan
 Scan the current directory and print findings to the terminal (writes JSONL to stdout by default):
