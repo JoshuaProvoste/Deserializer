@@ -1,10 +1,10 @@
-# Deserializer (AST-based Static Code Analyzer with Agentic LLM-Powered Relationship Mapping)
+# Deserializer
 
 ![Deserializer Banner](docs/images/banner.png)
 
 ## About the Project
 
-**Deserializer** is an advanced Abstract Syntax Tree (AST) static analysis engine designed to identify insecure object reconstruction and state persistence sinks across the Python ecosystem, **with strong focus on AI, LLM, Robotics, Data Science, Machine Learning and Deep Learning fields** (but not limited; **Deserializer** was designed to scan and analyse any king of project based on Python source code, like apps, scripts, frameworks, libraries, Python pip packages, and much more.
+**Deserializer** is an advanced Abstract Syntax Tree (AST) static analysis engine designed to identify insecure object reconstruction and state persistence sinks across the Python ecosystem, with strong focus on AI, LLM, Robotics, Data Science, Machine Learning and Deep Learning fields (but not limited; **Deserializer** was designed to scan and analyse any king of project based on Python source code, like apps, scripts, frameworks, libraries, Python pip packages, and much more.
 
 Far beyond a traditional scanner, it provides a generic, high-performance framework for auditing over 120 libraries and formats—including YAML, Msgpack, CBOR, and custom JSON hooks—where traditional trust in "safe" serialization hides critical logic-based RCE vectors like *Type Smuggling*. By resolving imports, aliases, and complex dotted attributes, the tool serves as a high-fidelity signal amplifier that prioritizes dangerous code paths in modern distributed architectures and AI/ML repositories.
 
@@ -22,7 +22,7 @@ As the project evolves, it continues to define the frontier of automated vulnera
 
 **Deserializer** directly supports security research by locating RCE and Insecure Deserialization paths across various large-scale AI, Robotics, and Data Science projects and environments, like Genesis World (v0.2.1), MuJoCo (v3.7.0), LeRobot (v0.5.1), Brax (v0.14.2), TensorFlow (v2.21.0), LangGraph (v1.1.6), VibeVoice (v0.0.1), Hugging Face Hub (v1.11.0), PyGlove (v0.4.5), and many others.
 
-## The Deserializer Ecosystem: 4 Pillars of Audit
+## The 4 Phases of Deserializer
 
 The project is structured into four distinct phases, each designed to shift the analysis from high-volume automated telemetry to deep, functional security research:
 
@@ -31,7 +31,7 @@ The project is structured into four distinct phases, each designed to shift the 
 | **1** | **High-Velocity Detection** | `deserializer.py` (Triple-Pass) | Perform massive-scale SAST to identify potential deserialization sinks. |
 | **2** | **Relationship Mapping** | Result Processors / Mappers | Contextualize findings by tracing execution flows and component interdependencies. |
 | **3** | **Technical Synthesis** | Research Documentation | Formalize findings into technical writeups, mapping infrastructure-level attack surfaces. |
-| **4** | **Autonomous AI Agent** | AI Security Agent (HuggingFace or Local LLM) | Automate 0-day discovery and generate functional reproduction guides/exploits. |
+| **4** | **Autonomous AI Agent** | AI Security Agent | Automate 0-day discovery and generate functional reproduction guides/exploits using HuggingFace inference API, Local LLM (like llama.cpp), or OpenAI API compatible. |
 
 ## Project Structure
 
