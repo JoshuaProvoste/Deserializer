@@ -56,13 +56,14 @@ class SecurityAnalystAgent:
 
         # Initialize the agent
         # CodeAgent allows for more flexibility in navigating and analyzing code
+        max_steps = 10 if self.provider == "local" else 20
         self.agent = CodeAgent(
             model=self.model,
             tools=self.tools,
             additional_authorized_imports=["os", "shutil", "json", "pathlib"],
             name="SecurityAnalystAgent",
             description="Agent specialized in 0-day vulnerability hunting and RCE manual code review.",
-            max_steps=30,
+            max_steps=max_steps,
             verbosity_level=1
         )
 

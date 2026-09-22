@@ -19,6 +19,7 @@ class AIOrchestrator:
    - Use `markdown_manager(action='copy', source_path='templates/attack_surface/ATTACK_SURFACE_UNIFIED_TEMPLATE.md', target_path='{project_name}/ATTACK_SURFACE.md')` to initialize the attack surface file.
    - Use `markdown_manager(action='edit', target_path='{project_name}/ATTACK_SURFACE.md', content=...)` to update its content.
    - MANDATORY FINAL STEP: Inside your Python code snippet, immediately after `markdown_manager(...)`, you MUST call `final_answer("Analysis complete and ATTACK_SURFACE.md generated.")`. DO NOT use `print(...)` to finish; you MUST call `final_answer(...)`.
+   - REPETITION RULE: If a Python code block yields empty or unchanged output, DO NOT execute the exact same code block in the next step. Proceed with your analysis or generate the output file and call `final_answer(...)`.
 3. General Context: Insecure deserialization vulnerabilities using pickle are generally related to the deserialization of a .pkl file (etc.). However, if such a report is sent to a bug bounty platform, it is rejected because "impact cannot be demonstrated," even though it is possible to convert it into command injection, because "access to the server or the user's machine is required to modify the file being deserialized," turning the vulnerability into a sort of out-of-scope "self-command-injection."
 4. Objective: 
     - Act as a 0-day Vulnerability Hunter and Senior Exploit Developer, specialist in Manual Code Review, and use the "Guidelines for reversing the given context" to perform a technical analysis that allows identifying WITH CERTAINTY AND TECHNICAL FIDELITY whether alternatives exist that break the "self-command-injection" logic, and what they are, determining a new context where an attacker has control, and as much as possible and conditions allow (if not possible, it doesn't matter, but it must be verified), pathways or forms of attack without authentication and/or without requiring the "victim" user's interaction.
@@ -38,6 +39,7 @@ class AIOrchestrator:
    - Use `markdown_manager(action='read', target_path='{project_name}/ATTACK_SURFACE.md')` or `safe_source_reader('{project_name}/ATTACK_SURFACE.md')` to read the attack surface.
    - Use `markdown_manager(action='create', target_path='{project_name}/REPRODUCTION_GUIDE.md', content=...)` or `markdown_manager(action='edit', ...)` to write the deliverable.
    - MANDATORY FINAL STEP: Inside your Python code snippet, immediately after `markdown_manager(...)`, you MUST call `final_answer("Reproduction guide complete and REPRODUCTION_GUIDE.md generated.")`. DO NOT use `print(...)` to finish; you MUST call `final_answer(...)`.
+   - REPETITION RULE: If a Python code block yields empty or unchanged output, DO NOT execute the exact same code block in the next step. Proceed directly to create the file and call `final_answer(...)`.
 3. Purpose: Based on the previously generated {project_name}/ATTACK_SURFACE.md, create a detailed, step-by-step reproduction guide for each identified vulnerability vector.
 4. Deliverable: Create a file named {project_name}/REPRODUCTION_GUIDE.md.
 5. Mandatory Instructions:
