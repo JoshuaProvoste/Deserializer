@@ -46,9 +46,11 @@ class DirectoryNavigator(Tool):
                     for f in files:
                         items.append(f"[FILE] {prefix}{f}")
             else:
+                clean_prefix = str(target).replace("\\", "/")
                 for entry in target.iterdir():
                     kind = "[DIR] " if entry.is_dir() else "[FILE]"
-                    items.append(f"{kind} {entry.name}")
+                    rel_path = f"{os.path.relpath(entry, Path('.').resolve())}".replace("\\", "/")
+                    items.append(f"{kind} {rel_path}")
             
             return "\n".join(items) if items else "Directory is empty."
         except Exception as e:

@@ -14,7 +14,8 @@ class AIOrchestrator:
     PROMPT_TEMPLATE = """
 1. General Instruction: Act as a 0-day Vulnerability Hunter and Senior Exploit Developer, specialist in Manual Code Review.
 2. Important Tool Rules: You MUST use the provided custom tools (directory_navigator, file_inspector, safe_source_reader, markdown_manager) to interact with files and directories. 
-   - Use `directory_navigator(path='reports/{project_name}/', recursive=False)` to find all report filenames. Note that `markdown_manager(action='read', ...)` expects a specific file path, NOT a directory path.
+   - Note: `directory_navigator(...)` returns a MULTI-LINE STRING. To get a Python list of files, split the output string by newlines (e.g. `raw_output.splitlines()`).
+   - Use `directory_navigator(path='reports/{project_name}/', recursive=False)` to find all report file paths.
    - Use `markdown_manager(action='copy', source_path='templates/attack_surface/ATTACK_SURFACE_UNIFIED_TEMPLATE.md', target_path='{project_name}/ATTACK_SURFACE.md')` to initialize the attack surface file.
    - Use `markdown_manager(action='edit', target_path='{project_name}/ATTACK_SURFACE.md', content=...)` to update its content.
 3. General Context: Insecure deserialization vulnerabilities using pickle are generally related to the deserialization of a .pkl file (etc.). However, if such a report is sent to a bug bounty platform, it is rejected because "impact cannot be demonstrated," even though it is possible to convert it into command injection, because "access to the server or the user's machine is required to modify the file being deserialized," turning the vulnerability into a sort of out-of-scope "self-command-injection."
