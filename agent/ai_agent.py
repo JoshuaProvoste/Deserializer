@@ -2,7 +2,7 @@ import os
 from typing import Optional
 from dotenv import load_dotenv
 from smolagents import CodeAgent, InferenceClientModel, OpenAIServerModel
-from .tools.fs_tools import DirectoryNavigator, FileInspector, SafeSourceReader
+from .tools.fs_tools import DirectoryNavigator, FileInspector, SafeSourceReader, OpenTool
 from .tools.report_tools import MarkdownManager
 
 class SecurityAnalystAgent:
@@ -26,7 +26,8 @@ class SecurityAnalystAgent:
             DirectoryNavigator(),
             FileInspector(),
             SafeSourceReader(),
-            MarkdownManager()
+            MarkdownManager(),
+            OpenTool()
         ]
 
         # Initialize model based on provider

@@ -109,3 +109,35 @@ class SafeSourceReader(Tool):
             return content
         except Exception as e:
             return f"Error in safe reader: {str(e)}"
+
+class OpenTool(Tool):
+    name = "open"
+    description = "Opens a file and returns a file stream object (supports standard modes like 'r', 'w', 'a')."
+    inputs = {
+        "file": {
+            "type": "string",
+            "description": "Path to the file to open."
+        },
+        "mode": {
+            "type": "string",
+            "description": "Mode in which the file is opened ('r', 'w', 'a', etc.).",
+            "nullable": True
+        },
+        "encoding": {
+            "type": "string",
+            "description": "Encoding for text modes.",
+            "nullable": True
+        }
+    }
+    output_type = "any"
+
+    def forward(self, file: str, mode: str = "r", encoding: Optional[str] = "utf-8") -> Any:
+        try:
+            target = Path(file).resolve()
+            target.parent.mkdir(parents=True, exist_ok=True)
+            if mode and "b" in mode:
+                return open(target, mode)
+            return open(target, mode or "r", encoding=encoding or "utf-8", errors="replace")
+        except Exception as e:
+            raise RuntimeError(f"Error opening file {file}: {e}")
+
