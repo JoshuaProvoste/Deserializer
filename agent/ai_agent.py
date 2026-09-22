@@ -58,6 +58,7 @@ class SecurityAnalystAgent:
         self.agent = CodeAgent(
             model=self.model,
             tools=self.tools,
+            additional_authorized_imports=["os", "shutil", "json", "pathlib"],
             name="SecurityAnalystAgent",
             description="Agent specialized in 0-day vulnerability hunting and RCE manual code review.",
             max_steps=30,
