@@ -956,6 +956,7 @@ def main():
     else:
         out_path = Path(args.out).expanduser().resolve()
         out_desc = str(out_path)
+        out_path.parent.mkdir(parents=True, exist_ok=True)
         sink = out_path.open("w", encoding="utf-8")
 
     # Sink established, proceed to scanning logic.

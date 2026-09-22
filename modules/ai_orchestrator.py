@@ -13,18 +13,20 @@ class AIOrchestrator:
 
     PROMPT_TEMPLATE = """
 1. General Instruction: Act as a 0-day Vulnerability Hunter and Senior Exploit Developer, specialist in Manual Code Review.
-2. Important Tool Rules: You MUST use the provided custom tools (directory_navigator, file_inspector, safe_source_reader, markdown_manager) to interact with files and directories. DO NOT call or execute any built-in Python functions like open(), os.listdir(), os.path directly or any other.
+2. Important Tool Rules: You MUST use the provided custom tools (directory_navigator, file_inspector, safe_source_reader, markdown_manager) to interact with files and directories. 
+   - Use `directory_navigator(path='reports/{project_name}/', recursive=False)` to find all report filenames. Note that `markdown_manager(action='read', ...)` expects a specific file path, NOT a directory path.
+   - Use `markdown_manager(action='copy', source_path='templates/attack_surface/ATTACK_SURFACE_UNIFIED_TEMPLATE.md', target_path='{project_name}/ATTACK_SURFACE.md')` to initialize the attack surface file.
+   - Use `markdown_manager(action='edit', target_path='{project_name}/ATTACK_SURFACE.md', content=...)` to update its content.
 3. General Context: Insecure deserialization vulnerabilities using pickle are generally related to the deserialization of a .pkl file (etc.). However, if such a report is sent to a bug bounty platform, it is rejected because "impact cannot be demonstrated," even though it is possible to convert it into command injection, because "access to the server or the user's machine is required to modify the file being deserialized," turning the vulnerability into a sort of out-of-scope "self-command-injection."
 4. Objective: 
     - Act as a 0-day Vulnerability Hunter and Senior Exploit Developer, specialist in Manual Code Review, and use the "Guidelines for reversing the given context" to perform a technical analysis that allows identifying WITH CERTAINTY AND TECHNICAL FIDELITY whether alternatives exist that break the "self-command-injection" logic, and what they are, determining a new context where an attacker has control, and as much as possible and conditions allow (if not possible, it doesn't matter, but it must be verified), pathways or forms of attack without authentication and/or without requiring the "victim" user's interaction.
 5. Guidelines for reversing the given context:
-    - Read and analyze the markdown reports documented in the path: reports/{project_name}/ using `markdown_manager(action='read', target_path=...)` or `safe_source_reader`.
+    - List the files in `reports/{project_name}/` using `directory_navigator`, then read each file with `safe_source_reader`.
     - Use these markdown reports as technical navigation maps of the project's source code in the path: {project_name}/
     - Follow the routes and execution flows of the deserializations, related files, affected classes (etc.), and perform the analysis required in "Objective" to reverse the "General Context."
     - The result of the analysis should aim to achieve results equal, similar, or superior to the research documented in the path: research/
     - The result of the analysis must be documented in markdown format at the following path: {project_name}/ATTACK_SURFACE.md
-    - To create the ATTACK_SURFACE.md file, you must make a copy of the template located at the following path: templates/attack_surface/ATTACK_SURFACE_UNIFIED_TEMPLATE.md using `markdown_manager`.
-    - The ATTACK_SURFACE_UNIFIED_TEMPLATE.md template has a generalist structure; therefore, you MUST NOT modify its structure, but rather intelligently fill in the corresponding content, understanding that although the template only has 2 vector enumerations, as a result of the technical analysis, you will possibly be able to identify more than 2 vectors; therefore, you must follow the enumeration and document all identified vectors.
+    - To create the ATTACK_SURFACE.md file, copy the template from `templates/attack_surface/ATTACK_SURFACE_UNIFIED_TEMPLATE.md` using `markdown_manager`. Fill in the corresponding content, keeping its structure intact.
 """
 
     REPRODUCTION_PROMPT_TEMPLATE = """
