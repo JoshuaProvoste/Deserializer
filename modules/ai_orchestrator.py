@@ -14,6 +14,7 @@ class AIOrchestrator:
     PROMPT_TEMPLATE = """
 1. General Instruction: Act as a 0-day Vulnerability Hunter and Senior Exploit Developer, specialist in Manual Code Review.
 2. Important Tool Rules: You MUST use the provided custom tools (directory_navigator, file_inspector, safe_source_reader, markdown_manager) to interact with files and directories. 
+   - DO NOT import tool names or modules (e.g. `from custom_tools import ...` or `import markdown_manager` is STRICTLY FORBIDDEN). All tools are already loaded into your global scope.
    - Note: `directory_navigator(...)` returns a MULTI-LINE STRING. To get a Python list of files, split the output string by newlines (e.g. `raw_output.splitlines()`).
    - Use `directory_navigator(path='reports/{project_name}/', recursive=False)` to find all report file paths.
    - Use `markdown_manager(action='copy', source_path='templates/attack_surface/ATTACK_SURFACE_UNIFIED_TEMPLATE.md', target_path='{project_name}/ATTACK_SURFACE.md')` to initialize the attack surface file.
