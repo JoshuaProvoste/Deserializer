@@ -2,102 +2,21 @@
 
 ![Deserializer Banner](docs/images/banner.png)
 
-**Deserializer** is an advanced Abstract Syntax Tree (AST) static analysis engine designed to identify insecure object reconstruction and state persistence sinks across the Python ecosystem, **with strong focus on AI, LLM, Robotics, Data Science, Machine Learning and Deep Learning fields** (but not limited).
+## About the Project
+
+**Deserializer** is an advanced Abstract Syntax Tree (AST) static analysis engine designed to identify insecure object reconstruction and state persistence sinks across the Python ecosystem, **with strong focus on AI, LLM, Robotics, Data Science, Machine Learning and Deep Learning fields** (but not limited; **Deserializer** was designed to scan and analyse any king of project based on Python source code, like apps, scripts, frameworks, libraries, Python pip packages, and much more.
 
 Far beyond a traditional scanner, it provides a generic, high-performance framework for auditing over 120 libraries and formats—including YAML, Msgpack, CBOR, and custom JSON hooks—where traditional trust in "safe" serialization hides critical logic-based RCE vectors like *Type Smuggling*. By resolving imports, aliases, and complex dotted attributes, the tool serves as a high-fidelity signal amplifier that prioritizes dangerous code paths in modern distributed architectures and AI/ML repositories.
 
 The project operates through a modular, multi-phased workflow that transitions from raw detection to deep technical audit. **Following the initial high-velocity SAST scan, the ecosystem leverages specialized relationship mappers to trace execution flows and result processors to generate detailed security reports. This systematic approach ensures that every finding is contextualized within the application's broader architecture, transforming high-volume telemetry into actionable research assets and structured milestones that simplify the mapping of infrastructure-level attack surfaces**.
 
-At its most advanced tier, **Deserializer integrates an autonomous AI Security Agent** (Phase 4), explicitly designed to navigate "self-command-injection" limitations and synthesize functional reproduction guides. This capability has directly powered the discovery of critical vulnerabilities in industry-leading frameworks like TensorFlow, Django, and LangGraph, proving its efficacy in auditing complex MLOps and agentic AI environments. As the project evolves, it continues to define the frontier of automated vulnerability research by bridging the gap between static analysis and functional exploit development.
+## Autonomous AI Security Agent
 
-## Research writeups supported by Deserializer (AI, Robotics, Data Science, Machine Learning and Deep Learning)
+At its most advanced tier, **Deserializer integrates an autonomous AI Security Agent** (Phase 4), explicitly designed to navigate "self-command-injection" limitations and synthesize functional reproduction guides. This capability has directly powered the discovery of critical vulnerabilities in industry-leading frameworks like TensorFlow, Django, and LangGraph, proving its efficacy in auditing complex MLOps and agentic AI environments. As the project evolves, it continues to define the frontier of automated vulnerability research by bridging the gap between abstract syntax tree static analysis, relationship mapping, reporting, and functional exploit development based on documented research.
 
-**Deserializer** directly supports security research by locating RCE and Insecure Deserialization paths across various large-scale AI, Robotics, and Data Science projects and environments.
+## Research (AI, Robotics, Data Science, Machine Learning and Deep Learning)
 
-1. **Genesis World (v0.2.1) - Cache Infrastructure**:
-    - **Impact**: Critical RCE on robotics research workstations and automated physics simulation pipelines.
-    - **RCE PoC**: [RCE in genesis-world v0.2.1](research/genesis-world_v0.4.6_RCE_via_Global_Cache_Poisoning_based_on_Predictable_Asset_Hashing/README.md)
-    - **Disclosure**: https://hackedalert.com/research/genesis-world-v0-4-6-rce-global-cache-poisoning/
-
-2. **MuJoCo (v3.7.0) - TimeSeries**:
-    - **Impact**: Critical RCE on robotics research workstations and automated simulation pipelines.
-    - **RCE PoC**: [RCE in MuJoCo v3.7.0 (UNC Redirection)](research/mujoco_v3.7.0_RCE_via_UNC_Path_Redirection/README.md)
-    - **Disclosure**: https://hackedalert.com/research/mujoco-v3-7-0-rce-via-unc-path-redirection/
-
-3. **MuJoCo (v3.7.0) - SystemTrajectory**:
-    - **Impact**: Critical RCE on collaborative robotics platforms and benchmarking workstations.
-    - **RCE PoC**: [RCE in MuJoCo v3.7.0 (Supply Chain)](research/mujoco_v3.7.0_Supply_Chain_Compromise_via_SystemTrajectory/README.md)
-    - **Disclosure**: https://hackedalert.com/research/mujoco-v3-7-0-supply-chain-compromise-systemtrajectory/
-
-4. **LeRobot (v0.5.1) - PolicyServer**:
-    - **Impact**: Critical RCE on robotics research infrastructure and inference servers.
-    - **RCE PoC**: [RCE in lerobot v0.5.1 (PolicyServer)](research/lerobot_v0.5.1_Unauthenticated_RCE_in_PolicyServer/README.md)
-    - **Disclosure**: https://hackedalert.com/research/lerobot-v0-5-1-unauthenticated-rce-policy-server/
-
-5. **LeRobot (v0.5.1) - LearnerService**:
-    - **Impact**: Critical RCE on GPU-based training clusters and distributed RL infrastructure.
-    - **RCE PoC**: [RCE in lerobot v0.5.1 (LearnerService)](research/lerobot_v0.5.1_Unauthenticated_RCE_in_LearnerService/README.md)
-    - **Disclosure**: https://hackedalert.com/research/lerobot-v0-5-1-unauthenticated-rce-learner-service/
-
-6. **Brax (v0.14.2)**:
-    - **Impact**: Critical RCE on compute nodes and TPU/GPU pods.
-    - **RCE PoC**: [RCE in brax v0.14.2](research/brax_v0.14.2_RCE_based_on_PKL_File_Deserialization/README.md)
-    - **Disclosure**: https://hackedalert.com/research/brax-v0-14-2-rce-insecure-deserialization/
-
-7. **TensorFlow (v2.21.0)**:
-    - **Impact**: Critical RCE on developer workstations and MLOps infrastructure.
-    - **RCE PoC**: [RCE in tensorflow v2.21.0](research/tensorflow_v2.21.0_RCE_via_Insecure_Deserialization_based_on_sink_numpy.load_and_saved_model_cli_run_--inputs_as_Entry_Point/README.md)
-    - **Disclosure**: https://hackedalert.com/research/tensorflow-v2-21-0-rce-insecure-deserialization/
-
-8. **LangGraph (v1.1.6)**:
-    - **Impact**: Critical RCE on agentic AI infrastructure and GPU/TPU clusters.
-    - **RCE PoC**: [RCE in langgraph v1.1.6](research/langgraph_v1.1.6_RCE_Bypass_of_CVE-2026-27794/README.md)
-    - **Disckosure**: https://hackedalert.com/research/langgraph-v1-1-6-rce-insecure-deserialization-bypass/
-
-9. **VibeVoice (v0.0.1)**:
-    - **Impact**: Critical RCE on developer workstations and AI-as-a-Service (AIaaS) platforms.
-    - **RCE PoC**: [RCE in vibevoice v0.0.1](research/vibevoice_v0.0.1_RCE_via_Insecure_Deserialization_based_on_sink_torch.load_and_numpy.load/README.md)
-    - **Disclosure**: https://hackedalert.com/research/vibevoice-v0-0-1-rce-insecure-deserialization/
-
-10. **Hugging Face Hub (v1.11.0)**:
-    - **Impact**: Critical RCE on Data Science workstations and Automated ML Training Pipelines.
-    - **RCE PoC**: [RCE in huggingface-hub v1.11.0](research/huggingface-hub_v1.11.0_Hub-to-RCE_via_from_pretrained_fastai/README.md)
-    - **Disclosure**: https://hackedalert.com/research/huggingface-hub-v1-11-0-hub-to-rce-via-from-pretrained-fastai/
-
-11. **Hugging Face Hub (v1.11.0)**:
-    - **Impact**: Critical RCE on Windows-based AI/ML development pipelines and DevOps automation.
-    - **RCE PoC**: [RCE in huggingface-hub v1.11.0 (Supply Chain)](research/huggingface-hub_v1.11.0_Supply_Chain_RCE_via_load_torch_model_Defaults/README.md)
-    - **Disclosure**: https://hackedalert.com/research/huggingface-hub-v1-11-0-supply-chain-rce-via-load-torch-model-defaults/
-
-12. **PyGlove (v0.4.5)**:
-    - **Impact**: Critical RCE via JSON APIs and distributed tuning.
-    - **RCE PoC**: [RCE in pyglove v0.4.5](research/pyglove_v0.4.5_Insecure_Deserialization_based_on_OpaqueObject_JSON_data_stream_(Base64)/README.md)
-    - **Disclosure**: https://hackedalert.com/research/pyglove-v0-4-5-rce-insecure-deserialization/
-
-13. **Learned Optimization (v0.0.1)**:
-    - **Impact**: Critical RCE in HPC research environments and TPU/GPU pods.
-    - **RCE PoC**: [RCE in learned_optimization v0.0.1](research/learned_optimization_v0.0.1_RCE_based_on_numpy.load_Deserialization/README.md)
-    - **Disclosure**: https://hackedalert.com/research/learned-optimization-v0-0-1-rce-insecure-deserialization/
-
-14. **Vertex AI (v1.147.0)**:
-    - **Impact**: Critical RCE on developer workstations, CI/CD runners (MLOps), and research environments.
-    - **RCE PoC**: [RCE in google-cloud-aiplatform v1.147.0](research/google_cloud_aiplatform_v1.147.0_RCE_via_Insecure_Deserialization_(Bug_Chaining)/README.md)
-    - **Disclosure**: https://hackedalert.com/research/google-cloud-aiplatform-v1-147-0/
-
-15. **Agent Development Kit (ADK) (v1.30.0)**:
-    - **Impact**: Critical RCE on developer workstations and AI infrastructure during session management.
-    - **RCE PoC**: [RCE in google-adk v1.30.0](research/google_adk_v1.30.0_RCE_based_on_SQLAlchemy_DB_Migration/README.md)
-    - **Disclosure**: https://hackedalert.com/research/google-adk-v1-30-0-rce-insecure-deserialization/
-
-16. **Dopamine (v2.0)**:
-    - **Impact**: Critical RCE in distributed research clusters.
-    - **RCE PoC**: [RCE in dopamine v2.0](research/dopamine_v2.0_RCE_using_tf.io.gfile_and_Gin-Config_(RCE_in_Google_Cloud)/README.md)
-    - **Disclosure**: https://hackedalert.com/research/dopamine-v2-0-rce-insecure-deserialization/
-
-17. **Django (v6.0.4)**:
-    - **Impact**: Critical RCE via cache poisoning (Redis/Memcached) or SMB/UNC path redirection.
-    - **RCE PoC**: [RCE in django v6.0.4](research/django_v6.0.4_RCE_based_on_Cache_Poisoning_and_REDIS/README.md)
-    - **Disclosure**: https://hackedalert.com/research/django-v6-0-4-rce-insecure-deserialization/
+**Deserializer** directly supports security research by locating RCE and Insecure Deserialization paths across various large-scale AI, Robotics, and Data Science projects and environments, like Genesis World (v0.2.1), MuJoCo (v3.7.0), LeRobot (v0.5.1), Brax (v0.14.2), TensorFlow (v2.21.0), LangGraph (v1.1.6), VibeVoice (v0.0.1), Hugging Face Hub (v1.11.0), PyGlove (v0.4.5), and many others.
 
 ## The Deserializer Ecosystem: 4 Pillars of Audit
 
@@ -108,7 +27,7 @@ The project is structured into four distinct phases, each designed to shift the 
 | **1** | **High-Velocity Detection** | `deserializer.py` (Triple-Pass) | Perform massive-scale SAST to identify potential deserialization sinks. |
 | **2** | **Relationship Mapping** | Result Processors / Mappers | Contextualize findings by tracing execution flows and component interdependencies. |
 | **3** | **Technical Synthesis** | Research Documentation | Formalize findings into technical writeups, mapping infrastructure-level attack surfaces. |
-| **4** | **Autonomous AI Audit** | AI Security Agent (MiniMax-M2.5) | Automate 0-day discovery and generate functional reproduction guides/exploits. |
+| **4** | **Autonomous AI Agent** | AI Security Agent (MiniMax-M2.5) | Automate 0-day discovery and generate functional reproduction guides/exploits. |
 
 ## Project Structure
 
