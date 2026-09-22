@@ -40,17 +40,28 @@ class AIOrchestrator:
     - Content Fidelity: Ensure all paths, class names, and technical details match the actual project source code and the identified vulnerabilities.
 """
 
-    def __init__(self, token: Optional[str] = None):
-        # Ensure we are using the .venv packages
-        # Load environment variables
-        if not token:
-            load_dotenv()
-            self.token = os.getenv("HF_TOKEN")
+    def __init__(
+        self,
+        token: Optional[str] = None,
+        provider: str = "huggingface",
+        llm_api_url: str = "http://127.0.0.1:8181/v1",
+        model_id: Optional[str] = None
+    ):
+        self.provider = provider.lower()
+        self.llm_api_url = llm_api_url
+        self.model_id = model_id
+
+        if self.provider == "huggingface":
+            if not token:
+                load_dotenv()
+                self.token = os.getenv("HF_TOKEN")
+            else:
+                self.token = token
+
+            if not self.token:
+                raise ValueError("HF_TOKEN missing. Please provide it in .env or via argument.")
         else:
             self.token = token
-
-        if not self.token:
-            raise ValueError("HF_TOKEN missing. Please provide it in .env or via argument.")
 
     def run_analysis(self, project_name: str, repo_path: str, output_stream=sys.stdout) -> str:
         """
@@ -61,7 +72,12 @@ class AIOrchestrator:
             from agent.ai_agent import SecurityAnalystAgent
             
             # Initialize agent once to preserve context if possible (though smolagents calls are atomic)
-            agent = SecurityAnalystAgent(token=self.token)
+            agent = SecurityAnalystAgent(
+                token=self.token,
+                provider=self.provider,
+                llm_api_url=self.llm_api_url,
+                model_id=self.model_id
+            )
             
             print(f"\n[+] AI Agent initialized for project: {project_name}", file=output_stream)
             print(f"================================================================================", file=output_stream)
