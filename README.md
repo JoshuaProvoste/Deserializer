@@ -103,9 +103,13 @@ python --version
 ```
 
 **Setup Requirements**:
-- **Environment**: If using Hugging Face, create a `.env` file in the root directory:
+- **Environment**: Create a `.env` file in the root directory depending on your provider:
   ```env
+  # For Hugging Face provider
   HF_TOKEN=your_token_here
+
+  # For OpenAI / Hackedalert LLM provider
+  HA_LLM_TOKEN=your_jwt_token_here
   ```
 
 Before running the scanner, you MUST install the dependencies:
@@ -141,7 +145,8 @@ This phase integrates a specialized AI Security Agent to perform deep code revie
 - **Local LLM (`llama.cpp`)**: Uses a local REST server (`llama-server.exe`).
   - Command example to launch server: `.\llama-server.exe --model .\models\model.gguf --host 127.0.0.1 --port 8181 --ctx-size 600000 --jinja`
   - Command: `python deserializer.py --path /path/to/repo --agent --agent-provider local --llm-api-url http://127.0.0.1:8181/v1`
-- **Uncensored LLM Coder API (Hackedalert.com)**:
+- **OpenAI Compatible / Uncensored LLM Coder API (Hackedalert.com)**:
+  - Requires `HA_LLM_TOKEN` (or `OPENAI_API_KEY`) in `.env`.
   - Command: `python deserializer.py --path /path/to/repo --agent --agent-provider openai --llm-api-url https://api-llm.hackedalert.com/v1`
 
 ### 1. Basic Scan
@@ -213,7 +218,13 @@ python deserializer.py --path /path/to/repo --out findings.jsonl --agent
   Disable the ASCII branding banner for cleaner output in scripts.
 
 - `--agent`  
-  Run AI-driven deep analysis (Phase 4). This phase is optional and requires a valid `HF_TOKEN` in the `.env` file.
+  Run AI-driven deep analysis (Phase 4). Optional; requires valid credentials (`HF_TOKEN` or `HA_LLM_TOKEN`) in `.env` or local LLM server.
+
+- `--agent-provider <provider>`  
+  LLM inference provider for AI agent: `huggingface`, `local`, or `openai` (default: `huggingface`).
+
+- `--llm-api-url <url>`  
+  Base URL for LLM inference API (default: `http://127.0.0.1:8181/v1`).
 
 ## Output format (JSONL)
 
