@@ -17,13 +17,13 @@ The project operates through a modular, multi-phased workflow that transitions f
 
 At its most advanced tier, **Deserializer integrates an autonomous AI Security Agent** (Phase 4), explicitly designed to navigate "self-command-injection" limitations and synthesize functional reproduction guides, based on HuggingFace inference API, Local LLM (like llama.cpp), or OpenAI API compatible (for example, Uncensored LLM Coder API of Hackedalert.com). 
 
-This capability has directly powered the discovery of critical vulnerabilities in industry-leading frameworks like TensorFlow, Django, and LangGraph, proving its efficacy in auditing complex MLOps and agentic AI environments. 
-
 As the project evolves, it continues to define the frontier of automated vulnerability research by bridging the gap between abstract syntax tree static analysis, relationship mapping, reporting, and functional exploit development based on documented research.
 
 ## Research (AI, Robotics, Data Science, Machine Learning and Deep Learning)
 
 **Deserializer** directly supports security research by locating RCE and Insecure Deserialization paths across various large-scale AI, Robotics, and Data Science projects and environments, like Genesis World (v0.2.1), MuJoCo (v3.7.0), LeRobot (v0.5.1), Brax (v0.14.2), TensorFlow (v2.21.0), LangGraph (v1.1.6), VibeVoice (v0.0.1), Hugging Face Hub (v1.11.0), PyGlove (v0.4.5), and many others.
+
+Its capabilities have directly powered the discovery of critical vulnerabilities in industry-leading frameworks, proving its efficacy in auditing complex MLOps and agentic AI environments.
 
 ## Uncensored LLM Coder API (Hackedalert.com)
 

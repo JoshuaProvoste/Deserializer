@@ -38,6 +38,22 @@ class SecurityAnalystAgent:
                 api_base=self.llm_api_url,
                 api_key="none"
             )
+        elif self.provider == "openai":
+            if not token:
+                load_dotenv()
+                self.token = os.getenv("HA_LLM_TOKEN") or os.getenv("OPENAI_API_KEY")
+            else:
+                self.token = token
+
+            if not self.token:
+                raise ValueError("HA_LLM_TOKEN or OPENAI_API_KEY must be provided in .env or as an argument when using OpenAI provider.")
+
+            chosen_model = model_id or "gpt-4o"
+            self.model = OpenAIServerModel(
+                model_id=chosen_model,
+                api_base=self.llm_api_url,
+                api_key=self.token
+            )
         else:
             if not token:
                 load_dotenv()
