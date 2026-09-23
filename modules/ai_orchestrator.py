@@ -73,6 +73,15 @@ class AIOrchestrator:
 
             if not self.token:
                 raise ValueError("HF_TOKEN missing. Please provide it in .env or via argument.")
+        elif self.provider == "openai":
+            if not token:
+                load_dotenv()
+                self.token = os.getenv("HA_LLM_TOKEN") or os.getenv("OPENAI_API_KEY")
+            else:
+                self.token = token
+
+            if not self.token:
+                raise ValueError("HA_LLM_TOKEN or OPENAI_API_KEY missing. Please provide it in .env or via argument.")
         else:
             self.token = token
 
