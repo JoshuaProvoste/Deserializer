@@ -131,7 +131,11 @@ python deserializer.py --path cloned-repo --rules-file rules.json -j 4 --out clo
 ### With AI Agent (Local LLM)
 ```bash
 python deserializer.py --path cloned-repo --rules-file rules.json -j 4 --out cloned-repo/cloned-repo.jsonl --agent --agent-provider local --llm-api-url http://127.0.0.1:8181/v1
+```
 
+### With AI Agent (OpenAI / Hackedalert LLM)
+```bash
+python deserializer.py --path cloned-repo --rules-file rules.json -j 4 --out cloned-repo/cloned-repo.jsonl --agent --agent-provider openai --llm-api-url https://api-llm.hackedalert.com/v1
 ```
 
 ### AI-Driven Deep Analysis (Phase 4) with an AI Security Agent
