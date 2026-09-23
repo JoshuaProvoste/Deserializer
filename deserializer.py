@@ -841,9 +841,9 @@ def main():
     )
     ap.add_argument(
         "--agent-provider",
-        choices=["huggingface", "local"],
+        choices=["huggingface", "local", "openai"],
         default="huggingface",
-        help="LLM inference provider for AI agent: 'huggingface' or 'local' (default: huggingface).",
+        help="LLM inference provider for AI agent: 'huggingface', 'local', or 'openai' (default: huggingface).",
     )
     ap.add_argument(
         "--llm-api-url",
