@@ -9,13 +9,13 @@
 
 ## Key technical capabilities
 
-Far beyond a traditional scanner, it provides a generic, high-performance framework for auditing over 120 libraries and formats—including YAML, Msgpack, CBOR, and custom JSON hooks—where traditional trust in "safe" serialization hides critical logic-based RCE vectors like *Type Smuggling*. By resolving imports, aliases, and complex dotted attributes, the tool serves as a high-fidelity signal amplifier that prioritizes dangerous code paths in modern distributed architectures and AI/ML repositories.
+Far beyond a traditional scanner, it provides a generic, high-performance framework for auditing over 120 libraries and formats—including YAML, Msgpack, CBOR, and custom JSON hooks—where traditional trust in "safe" serialization hides critical logic-based RCE vectors. By resolving imports, aliases, and complex dotted attributes, the tool serves as a high-fidelity signal amplifier that prioritizes dangerous code paths in modern distributed architectures and AI/ML repositories.
 
 The project operates through a modular, multi-phased workflow that transitions from raw detection to deep technical audit. **Following the initial high-velocity SAST scan, the ecosystem leverages specialized relationship mappers to trace execution flows and result processors to generate detailed security reports. This systematic approach ensures that every finding is contextualized within the application's broader architecture, transforming high-volume telemetry into actionable research assets and structured milestones that simplify the mapping of infrastructure-level attack surfaces**.
 
 ## Autonomous AI Security Agent
 
-At its most advanced tier, **Deserializer integrates an autonomous AI Security Agent** (Phase 4), explicitly designed to navigate "self-command-injection" limitations and synthesize functional reproduction guides, based on HuggingFace inference API, Local LLM (like llama.cpp), or OpenAI API compatible (for example, Uncensored LLM Coder API of Hackedalert.com). 
+At its most advanced tier, **Deserializer integrates an autonomous AI Security Agent** (Phase 4), explicitly designed to navigate "self-command-injection" limitations and synthesize functional reproduction guides, based on HuggingFace inference API, Local LLM (like llama.cpp), or OpenAI API compatible. 
 
 As the project evolves, it continues to define the frontier of automated vulnerability research by bridging the gap between abstract syntax tree static analysis, relationship mapping, reporting, and functional exploit development based on documented research.
 
@@ -24,10 +24,6 @@ As the project evolves, it continues to define the frontier of automated vulnera
 **Deserializer** directly supports security research by locating RCE and Insecure Deserialization paths across various large-scale AI, Robotics, and Data Science projects and environments, like Genesis World (v0.2.1), MuJoCo (v3.7.0), LeRobot (v0.5.1), Brax (v0.14.2), TensorFlow (v2.21.0), LangGraph (v1.1.6), VibeVoice (v0.0.1), Hugging Face Hub (v1.11.0), PyGlove (v0.4.5), and many others.
 
 Its capabilities have directly powered the discovery of critical vulnerabilities in industry-leading frameworks, proving its efficacy in auditing complex MLOps and agentic AI environments.
-
-## Uncensored LLM Coder API (Hackedalert.com)
-
-WL INC is providing an LLM API inference service of open-source "coder" models, unlocked and without censorship or guardrails, enabled for exploit development. Request more information at contacto@wl-inc.cl
 
 ## The 4 Phases of Deserializer
 
@@ -38,7 +34,7 @@ The project is structured into four distinct phases, each designed to shift the 
 | **1** | **High-Velocity Detection** | `deserializer.py` (Triple-Pass) | Perform massive-scale SAST to identify potential deserialization sinks. |
 | **2** | **Relationship Mapping** | Result Processors / Mappers | Contextualize findings by tracing execution flows and component interdependencies. |
 | **3** | **Technical Synthesis** | Research Documentation | Formalize findings into technical writeups, mapping infrastructure-level attack surfaces. |
-| **4** | **Autonomous AI Agent** | AI Security Agent | Automate 0-day discovery and generate functional reproduction guides/exploits using HuggingFace inference API, Local LLM (like llama.cpp), or OpenAI API compatible (for example, Uncensored LLM Coder API of Hackedalert.com). |
+| **4** | **Autonomous AI Agent** | AI Security Agent | Automate 0-day discovery and generate functional reproduction guides/exploits using HuggingFace inference API, Local LLM (like llama.cpp), or OpenAI API compatible. |
 
 ## Project Structure
 
@@ -108,7 +104,7 @@ python --version
   # For Hugging Face provider
   HF_TOKEN=your_token_here
 
-  # For OpenAI / Hackedalert LLM provider
+  # For OpenAI / Local LLM provider
   HA_LLM_TOKEN=your_jwt_token_here
   ```
 
@@ -133,9 +129,9 @@ python deserializer.py --path cloned-repo --rules-file rules.json -j 4 --out clo
 python deserializer.py --path cloned-repo --rules-file rules.json -j 4 --out cloned-repo/cloned-repo.jsonl --agent --agent-provider local --llm-api-url http://127.0.0.1:8181/v1
 ```
 
-### With AI Agent (OpenAI / Hackedalert LLM)
+### With AI Agent (OpenAI / Local LLM)
 ```bash
-python deserializer.py --path cloned-repo --rules-file rules.json -j 4 --out cloned-repo/cloned-repo.jsonl --agent --agent-provider openai --llm-api-url https://api-llm.hackedalert.com/v1
+python deserializer.py --path cloned-repo --rules-file rules.json -j 4 --out cloned-repo/cloned-repo.jsonl --agent --agent-provider openai --llm-api-url http://127.0.0.1:8181/v1
 ```
 
 ### AI-Driven Deep Analysis (Phase 4) with an AI Security Agent
@@ -149,9 +145,9 @@ This phase integrates a specialized AI Security Agent to perform deep code revie
 - **Local LLM (`llama.cpp`)**: Uses a local REST server (`llama-server.exe`).
   - Command example to launch server: `.\llama-server.exe --model .\models\model.gguf --host 127.0.0.1 --port 8181 --ctx-size 600000 --jinja`
   - Command: `python deserializer.py --path /path/to/repo --agent --agent-provider local --llm-api-url http://127.0.0.1:8181/v1`
-- **OpenAI Compatible / Uncensored LLM Coder API (Hackedalert.com)**:
+- **OpenAI Compatible**:
   - Requires `HA_LLM_TOKEN` (or `OPENAI_API_KEY`) in `.env`.
-  - Command: `python deserializer.py --path /path/to/repo --agent --agent-provider openai --llm-api-url https://api-llm.hackedalert.com/v1`
+  - Command: `python deserializer.py --path /path/to/repo --agent --agent-provider openai --llm-api-url http://127.0.0.1:8181/v1`
 
 ### 1. Basic Scan
 Scan the current directory and print findings to the terminal (writes JSONL to stdout by default):
