@@ -3,14 +3,33 @@ from pathlib import Path
 from typing import List, Dict, Any, Optional
 from smolagents import Tool
 
+import re
+
 def _clean_path_str(p: str) -> str:
     if not isinstance(p, str):
         return p
     cleaned = p.strip()
-    if cleaned.startswith("[FILE]"):
-        cleaned = cleaned[6:].strip()
-    elif cleaned.startswith("[DIR]"):
-        cleaned = cleaned[5:].strip()
+    # 1. Eliminar cualquier etiqueta [FILE] o [DIR] que se haya colado en cualquier posición
+    cleaned = re.sub(r'\[(FILE|DIR)\]\s*', '', cleaned).strip()
+    cleaned = cleaned.replace("\\", "/")
+
+    # Si la ruta limpia existe directamente como archivo o directorio, retornarla
+    if Path(cleaned).exists():
+        return cleaned
+
+    # 2. Manejar duplicaciones por concatenación accidental del agente (ej. base_path + rel_path)
+    # Ej: 'reports/PYPI-hermes-agent-0.19.0/reports/PYPI-hermes-agent-0.19.0/report_1.md'
+    parts = [part for part in cleaned.split("/") if part]
+    for i in range(len(parts)):
+        subpath = "/".join(parts[i:])
+        if Path(subpath).exists():
+            return subpath
+
+    # 3. Fallback para archivos nuevos pendientes de creación (desduplicar secuencias repetidas)
+    for i in range(1, len(parts) // 2 + 1):
+        if parts[:i] == parts[i:2*i]:
+            return "/".join(parts[i:])
+
     return cleaned
 
 class DirectoryNavigator(Tool):
@@ -40,17 +59,15 @@ class DirectoryNavigator(Tool):
             if recursive:
                 for root, dirs, files in os.walk(target):
                     rel_root = os.path.relpath(root, target)
-                    prefix = "" if rel_root == "." else rel_root + "/"
-                    for d in dirs:
-                        items.append(f"[DIR]  {prefix}{d}")
-                    for f in files:
-                        items.append(f"[FILE] {prefix}{f}")
+                    prefix = "" if rel_root == "." else rel_root.replace("\\", "/") + "/"
+                    for d in sorted(dirs):
+                        items.append(f"{prefix}{d}")
+                    for f in sorted(files):
+                        items.append(f"{prefix}{f}")
             else:
-                clean_prefix = str(target).replace("\\", "/")
-                for entry in target.iterdir():
-                    kind = "[DIR] " if entry.is_dir() else "[FILE]"
+                for entry in sorted(target.iterdir()):
                     rel_path = f"{os.path.relpath(entry, Path('.').resolve())}".replace("\\", "/")
-                    items.append(f"{kind} {rel_path}")
+                    items.append(rel_path)
             
             return "\n".join(items) if items else "Directory is empty."
         except Exception as e:
