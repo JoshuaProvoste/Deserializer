@@ -46,12 +46,13 @@ class AIOrchestrator:
 3. Purpose: Based on the previously generated {project_name}/ATTACK_SURFACE.md, create a detailed, step-by-step reproduction guide for each identified vulnerability vector.
 4. Deliverable: Create a file named {project_name}/REPRODUCTION_GUIDE.md.
 5. Mandatory Instructions:
+    - Context Focus: Analyze the current project {project_name} and create a summary —no longer than one paragraph— that explains what it is, its purpose, its features, the contexts in which it is used, and so on, to help clarify the next steps you need to take.
+    - Technical Focus: Use your project summary to prioritize scenarios where the attack is based on the project features and characteristics; for example, if the analized project is a web crawler, the vulnerability will be ennable to exploit executing the scraper and parsing content into the crawled target page or URL; other example: if the analyzed project is an OCR system, the deserialization vulnerability will be triggered by procesing a PDF or image file for OCR purposes. Then consider other vector attacks that enable an API endpoint, use Samba shares, or exploit network-accessible serialization sinks to demonstrate infrastructure-level RCE.
     - Document a step-by-step configuration and deployment process to reproduce the vulnerability for EACH vector identified in the Attack Surface report.
     - For each vector, include a functional Python script for payload or exploit generation based on exploit_development/README.md
     - The reproduction MUST be designed to run on localhost for testing purposes.
     - Base the style and technical depth on the examples found in the research/ directory.
     - Multi-platform Context: Use a Raspberry Pi (UNIX-based) as the ATTACKER and a Windows machine as the VICTIM, mimicking the high-fidelity scenarios in research/.
-    - Technical Focus: Prioritize scenarios that enable an API endpoint, use Samba shares, or exploit network-accessible serialization sinks to demonstrate infrastructure-level RCE.
     - Content Fidelity: Ensure all paths, class names, and technical details match the actual project source code and the identified vulnerabilities. Once completed, invoke `final_answer(...)` inside your Python code.
 """
 
