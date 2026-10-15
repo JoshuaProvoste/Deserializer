@@ -30,7 +30,7 @@ class AIOrchestrator:
     - List the files in `reports/{project_name}/` using `directory_navigator`, then read each file with `safe_source_reader`.
     - Use these markdown reports as technical navigation maps of the project's source code in the path: {project_name}/
     - Follow the routes and execution flows of the deserializations, related files, affected classes (etc.), and perform the analysis required in "Objective" to reverse, break's and solve's the "General Context (Technical)". 
-    - The result of the analysis should aim to achieve results technically superior to the research documented in the path research/, because we need "0" user interaction. In other words, we need for example, an HTTP request under total control of the attacker to trigger the deserialization vulnerability with RCE or CI result, without user interaction, or social engineering procedures.
+    - The result of the analysis should aim to achieve results technically superior to the research documented in the path research/, because we need "0" user interaction.
     - The result of the analysis must be documented in markdown format at the following path: {project_name}/ATTACK_SURFACE.md
     - To create the ATTACK_SURFACE.md file, copy the template from `templates/attack_surface/ATTACK_SURFACE_UNIFIED_TEMPLATE.md` using `markdown_manager`. Fill in the corresponding content, keeping its structure intact. Once completed, invoke `final_answer(...)` inside your Python code.
 """
@@ -47,7 +47,7 @@ class AIOrchestrator:
 4. Deliverable: Create a file named {project_name}/REPRODUCTION_GUIDE.md.
 5. Mandatory Instructions:
     - Document a step-by-step configuration and deployment process to reproduce the vulnerability for EACH vector identified in the Attack Surface report.
-    - For each vector, include a functional Python script for payload or exploit generation.
+    - For each vector, include a functional Python script for payload or exploit generation based on exploit_development/README.md
     - The reproduction MUST be designed to run on localhost for testing purposes.
     - Base the style and technical depth on the examples found in the research/ directory.
     - Multi-platform Context: Use a Raspberry Pi (UNIX-based) as the ATTACKER and a Windows machine as the VICTIM, mimicking the high-fidelity scenarios in research/.
