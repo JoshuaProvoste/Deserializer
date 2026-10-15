@@ -5,6 +5,38 @@ from smolagents import CodeAgent, InferenceClientModel, OpenAIServerModel
 from .tools.fs_tools import DirectoryNavigator, FileInspector, SafeSourceReader, OpenTool
 from .tools.report_tools import MarkdownManager
 
+class ResilientInferenceClientModel(InferenceClientModel):
+    """
+    Subclase resiliente de InferenceClientModel que amplía el timeout por defecto
+    y aplica reintentos automáticos ante congestión o timeouts en router.huggingface.co.
+    """
+    def __init__(self, *args, max_retries: int = 3, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.max_retries = max_retries
+
+    def generate(self, *args, **kwargs):
+        import time
+
+        for attempt in range(1, self.max_retries + 1):
+            try:
+                return super().generate(*args, **kwargs)
+            except Exception as e:
+                err_str = str(e).lower()
+                is_transient = (
+                    "read timed out" in err_str
+                    or "readtimeouterror" in err_str
+                    or "timeout" in err_str
+                    or "504" in err_str
+                    or "503" in err_str
+                    or "502" in err_str
+                    or "connection error" in err_str
+                )
+                if not is_transient or attempt == self.max_retries:
+                    raise
+                wait_time = attempt * 10
+                print(f"\n[!] Hugging Face API timeout o congestión detectada (intento {attempt}/{self.max_retries}). Reintentando en {wait_time}s...")
+                time.sleep(wait_time)
+
 class SecurityAnalystAgent:
     """
     Main AI Agent responsible for performing manual code review
@@ -72,9 +104,12 @@ class SecurityAnalystAgent:
                 raise ValueError("HF_TOKEN must be provided in .env or as an argument when using Hugging Face provider.")
 
             chosen_model = model_id or "MiniMaxAI/MiniMax-M2.5"
-            self.model = InferenceClientModel(
+            hf_timeout = int(os.getenv("HF_TIMEOUT", "300"))
+            self.model = ResilientInferenceClientModel(
                 model_id=chosen_model,
-                token=self.token
+                token=self.token,
+                timeout=hf_timeout,
+                max_retries=3
             )
 
         # Initialize the agent
