@@ -178,17 +178,26 @@ def load_rules_json(path: str) -> dict:
 
     return rules
 
-def iter_py_files(root: Path, skip_dirs):
+def iter_py_files(root: Path, skip_dirs, skip_tests: bool = True):
     if root.is_file():
         if root.suffix == ".py":
+            if skip_tests and "test" in root.name.lower():
+                return
             yield root
         return
 
     skip_dirs = set(skip_dirs)
     for dirpath, dirnames, filenames in os.walk(root):
-        dirnames[:] = [d for d in dirnames if d not in skip_dirs and not d.startswith(".")]
+        dirnames[:] = [
+            d for d in dirnames
+            if d not in skip_dirs
+            and not d.startswith(".")
+            and (not skip_tests or "test" not in d.lower())
+        ]
         for fn in filenames:
             if fn.endswith(".py"):
+                if skip_tests and "test" in fn.lower():
+                    continue
                 yield Path(dirpath) / fn
 
 class AstNodeLimitExceeded(Exception):
@@ -817,6 +826,11 @@ def main():
         help="Comma-separated directory names to skip while walking (default: built-in SKIP_DIRS).",
     )
     ap.add_argument(
+        "--no-skip-tests",
+        action="store_true",
+        help="Do not skip files and folders containing 'test' in their name (by default, test files and directories are ignored).",
+    )
+    ap.add_argument(
         "-j", "--concurrency",
         type=int,
         default=max(1, (os.cpu_count() or 1) - 2),
@@ -915,6 +929,11 @@ def main():
 
     def emit(sink, item: dict):
         nonlocal total_findings, total_errors, jsonl_lines
+        if not args.no_skip_tests:
+            file_str = str(item.get("file", "")).replace("\\", "/").lower()
+            if any("test" in seg for seg in file_str.split("/")):
+                return
+
         sink.write(json.dumps(item, ensure_ascii=False) + "\n")
         sink.flush()
         jsonl_lines += 1
@@ -928,7 +947,7 @@ def main():
                 total_findings += 1
                 print_finding(item)
 
-    all_files = list(iter_py_files(root, skip_dirs))
+    all_files = list(iter_py_files(root, skip_dirs, skip_tests=not args.no_skip_tests))
     total_files = len(all_files)
 
     def print_progress(current, py_path=None):
