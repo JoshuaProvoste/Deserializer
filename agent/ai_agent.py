@@ -32,11 +32,16 @@ class SecurityAnalystAgent:
 
         # Initialize model based on provider
         if self.provider == "local":
+            if not token:
+                load_dotenv()
+                self.token = os.getenv("HA_LLM_TOKEN") or os.getenv("OPENAI_API_KEY") or os.getenv("LOCAL_LLM_KEY") or "none"
+            else:
+                self.token = token
             chosen_model = model_id or "local-model"
             self.model = OpenAIServerModel(
                 model_id=chosen_model,
                 api_base=self.llm_api_url,
-                api_key="none"
+                api_key=self.token
             )
         elif self.provider == "openai":
             if not token:

@@ -83,7 +83,11 @@ class AIOrchestrator:
             if not self.token:
                 raise ValueError("HA_LLM_TOKEN or OPENAI_API_KEY missing. Please provide it in .env or via argument.")
         else:
-            self.token = token
+            if not token:
+                load_dotenv()
+                self.token = os.getenv("HA_LLM_TOKEN") or os.getenv("OPENAI_API_KEY") or os.getenv("LOCAL_LLM_KEY")
+            else:
+                self.token = token
 
     def run_analysis(self, project_name: str, repo_path: str, output_stream=sys.stdout) -> str:
         """
