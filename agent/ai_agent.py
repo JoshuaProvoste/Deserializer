@@ -16,10 +16,12 @@ class SecurityAnalystAgent:
         token: Optional[str] = None,
         provider: str = "huggingface",
         llm_api_url: str = "http://127.0.0.1:8181/v1",
-        model_id: Optional[str] = None
+        model_id: Optional[str] = None,
+        max_steps: int = 25
     ):
         self.provider = provider.lower()
         self.llm_api_url = llm_api_url
+        self.max_steps = max_steps
 
         # Initialize tools
         self.tools = [
@@ -77,14 +79,13 @@ class SecurityAnalystAgent:
 
         # Initialize the agent
         # CodeAgent allows for more flexibility in navigating and analyzing code
-        max_steps = 10 if self.provider == "local" else 20
         self.agent = CodeAgent(
             model=self.model,
             tools=self.tools,
             additional_authorized_imports=["os", "shutil", "json", "pathlib"],
             name="SecurityAnalystAgent",
             description="Agent specialized in 0-day vulnerability hunting and RCE manual code review.",
-            max_steps=max_steps,
+            max_steps=self.max_steps,
             verbosity_level=1
         )
 

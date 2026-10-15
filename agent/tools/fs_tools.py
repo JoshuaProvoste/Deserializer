@@ -32,6 +32,8 @@ def _clean_path_str(p: str) -> str:
 
     return cleaned
 
+SKIP_DIRS = {".git", "__pycache__", ".venv", "venv", ".mypy_cache", ".pytest_cache", "env", "node_modules"}
+
 class DirectoryNavigator(Tool):
     name = "directory_navigator"
     description = "Navigates directories and subdirectories recursively. Returns a list of files and folders."
@@ -58,14 +60,20 @@ class DirectoryNavigator(Tool):
             items = []
             if recursive:
                 for root, dirs, files in os.walk(target):
+                    dirs[:] = [d for d in dirs if d not in SKIP_DIRS and not d.startswith('.')]
                     rel_root = os.path.relpath(root, target)
                     prefix = "" if rel_root == "." else rel_root.replace("\\", "/") + "/"
                     for d in sorted(dirs):
-                        items.append(f"{prefix}{d}")
+                        items.append(f"{prefix}{d}/")
                     for f in sorted(files):
                         items.append(f"{prefix}{f}")
+                    if len(items) > 200:
+                        items.append("... [truncated: limit of 200 items reached]")
+                        break
             else:
                 for entry in sorted(target.iterdir()):
+                    if entry.name in SKIP_DIRS or entry.name.startswith('.'):
+                        continue
                     rel_path = f"{os.path.relpath(entry, Path('.').resolve())}".replace("\\", "/")
                     items.append(rel_path)
             

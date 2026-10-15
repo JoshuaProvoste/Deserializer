@@ -18,9 +18,11 @@ class AIOrchestrator:
    - Note: `directory_navigator(...)` returns a MULTI-LINE STRING. To get a Python list of files, split the output string by newlines (e.g. `raw_output.splitlines()`).
    - Use `directory_navigator(path='reports/{project_name}/', recursive=False)` to find all report file paths.
    - Use `markdown_manager(action='copy', source_path='templates/attack_surface/ATTACK_SURFACE_UNIFIED_TEMPLATE.md', target_path='{project_name}/ATTACK_SURFACE.md')` to initialize the attack surface file.
-   - Use `markdown_manager(action='edit', target_path='{project_name}/ATTACK_SURFACE.md', content=...)` to update its content.
-   - MANDATORY FINAL STEP: Inside your Python code snippet, immediately after `markdown_manager(...)`, you MUST call `final_answer("Analysis complete and ATTACK_SURFACE.md generated.")`. DO NOT use `print(...)` to finish; you MUST call `final_answer(...)`.
-   - REPETITION RULE: If a Python code block yields empty or unchanged output, DO NOT execute the exact same code block in the next step. Proceed with your analysis or generate the output file and call `final_answer(...)`.
+    - Use `markdown_manager(action='edit', target_path='{project_name}/ATTACK_SURFACE.md', content=...)` to update its content.
+    - MANDATORY FINAL STEP: Inside your Python code snippet, immediately after `markdown_manager(...)`, you MUST call `final_answer("Analysis complete and ATTACK_SURFACE.md generated.")`. DO NOT use `print(...)` to finish; you MUST call `final_answer(...)`.
+    - REPETITION RULE: If a Python code block yields empty or unchanged output, DO NOT execute the exact same code block in the next step. Proceed with your analysis or generate the output file and call `final_answer(...)`.
+    - SCOPE RULE: Stay strictly within `reports/{project_name}/` and `{project_name}/`. DO NOT explore parent, root or system directories (never search outside `{project_name}/`).
+    - EXECUTION DISCIPLINE: Read the finding report in `reports/{project_name}/`, inspect the vulnerable code lines, copy the template with `markdown_manager(action='copy', ...)` and update `{project_name}/ATTACK_SURFACE.md` with `markdown_manager(action='edit', ...)`. Then immediately invoke `final_answer(...)`.
 3. General Context (Technical): Insecure deserialization vulnerabilities on Python source code are generally related to the deserialization of a "pickle file" or a Python object (etc.). However, if the vulnerability requires user interaction (user victim) and social engineering procedures (like for example, sending a specially crafted email containing malicious pickle file or convince the victim user to execute a malicious file themselves) to be exploited, the deserialization can't be categorized as valid vulnerability and it is rejected on Bug Bounty platforms, because "impact cannot be demonstrated," even though it is possible to convert it into command injection over the Operating System, because the bug bounty triagers argue "access to the server or the user's machine is required to modify the file being deserialized," turning the vulnerability into a sort of out-of-scope "self-command-injection." for every experienced, and/or senior, and/or expert bug bounty triager.
 4. Objective: 
     - Act as a 0-day Vulnerability Hunter and Senior Exploit Developer, specialist in Manual Code Review, and use the following "Guidelines for reversing and solve the 'General Context (Technical)'" to perform a technical analysis that allows identifying WITH CERTAINTY AND TECHNICAL FIDELITY the real alternatives that break's and solve's the set of problems raised into the "General Context (Technical)", providing a new context where an attacker has control to execute a deserialization without authentication (unauthenticated Remote Code Execution or Code Injection) and without requiring the "user victim" interaction.
@@ -58,11 +60,13 @@ class AIOrchestrator:
         token: Optional[str] = None,
         provider: str = "huggingface",
         llm_api_url: str = "http://127.0.0.1:8181/v1",
-        model_id: Optional[str] = None
+        model_id: Optional[str] = None,
+        max_steps: int = 25
     ):
         self.provider = provider.lower()
         self.llm_api_url = llm_api_url
         self.model_id = model_id
+        self.max_steps = max_steps
 
         if self.provider == "huggingface":
             if not token:
@@ -102,7 +106,8 @@ class AIOrchestrator:
                 token=self.token,
                 provider=self.provider,
                 llm_api_url=self.llm_api_url,
-                model_id=self.model_id
+                model_id=self.model_id,
+                max_steps=self.max_steps
             )
             
             print(f"\n[+] AI Agent initialized for project: {project_name}", file=output_stream)
@@ -115,6 +120,16 @@ class AIOrchestrator:
             discovery_result = agent.run(discovery_prompt)
             
             print(f"\n[+] Phase 4.1 Completed.", file=output_stream)
+
+            # Resiliencia: verificar si ATTACK_SURFACE.md se generó; si no, inicializar desde plantilla para la Fase 4.2
+            attack_surface_file = Path(project_name) / "ATTACK_SURFACE.md"
+            if not attack_surface_file.is_file():
+                template_file = Path("templates/attack_surface/ATTACK_SURFACE_UNIFIED_TEMPLATE.md")
+                if template_file.is_file():
+                    import shutil
+                    attack_surface_file.parent.mkdir(parents=True, exist_ok=True)
+                    shutil.copy2(template_file, attack_surface_file)
+                    print(f" [!] Notice: Inicializado {attack_surface_file} desde plantilla como respaldo para la Fase 4.2.", file=output_stream)
             
             # Phase 4.2: Reproduction Guide
             print(f"================================================================================", file=output_stream)
