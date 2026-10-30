@@ -816,6 +816,11 @@ def main():
         help="Output JSONL file (use '-' for stdout; default: '-')",
     )
     ap.add_argument(
+        "--reports-dir",
+        default=None,
+        help="Directory for generated Markdown reports (default: 'reports' folder next to --out).",
+    )
+    ap.add_argument(
         "--no-banner",
         action="store_true",
         help="Do not print the banner (avoids polluting stdout when using --out -).",
@@ -1056,7 +1061,9 @@ def main():
             if findings:
                 from modules.result_processor import ResultProcessor
                 project_name = ResultProcessor.infer_project_name(findings[0].get("file", ""))
-                output_mapper = os.path.join(project_name, "relationship_mapper.jsonl")
+                # Mapper output lives next to the --out JSONL (never relative to CWD)
+                output_mapper = str(out_path.parent / "relationship_mapper.jsonl")
+                os.makedirs(os.path.dirname(output_mapper) or ".", exist_ok=True)
 
                 print(f"Identified {len(findings)} findings. Starting bulk mapping...\n", file=human)
                 
@@ -1087,7 +1094,8 @@ def main():
                 
                 try:
                     from modules.result_processor import ResultProcessor
-                    processor = ResultProcessor(output_base_dir="reports")
+                    reports_dir = args.reports_dir or str(out_path.parent / "reports")
+                    processor = ResultProcessor(output_base_dir=reports_dir)
                     
                     if os.path.exists(output_mapper):
                         count = 0
@@ -1106,7 +1114,7 @@ def main():
                                 count += 1
                         
                         print(f"\n[OK] {count} detailed reports have been generated.", file=human)
-                        print(f"Check the 'reports/' folder to see the results.", file=human)
+                        print(f"Check the '{reports_dir}' folder to see the results.", file=human)
 
                         # --- PHASE 4: AI ANALYSIS (Integration) ---
                         if args.agent:
