@@ -32,19 +32,38 @@ class ResultProcessor:
         self.output_base_dir = output_base_dir
 
     @staticmethod
-    def infer_project_name(file_path: str) -> str:
+    def infer_project_name(file_path: str, scan_root: str = None) -> str:
         """
         Infers the project name robustly, handling both absolute 
         Windows paths and relative paths.
         
+        Resolution order:
+          1. Folder right above an environment/dependency marker
+             (.venv, venv, site-packages, node_modules, ...).
+          2. Basename of the scanned root (scan_root), if provided.
+          3. Legacy CWD-relative / drive-stripped heuristics.
+        
         Args:
             file_path (str): Path to the finding's file.
+            scan_root (str): Root directory passed to the scanner (optional).
             
         Returns:
             str: Suggested name for the project folder.
         """
         if not file_path:
             return "unknown_project"
+
+        markers = {".venv", "venv", ".env", "env", "site-packages",
+                   "dist-packages", "node_modules"}
+        norm_parts = [p for p in os.path.normpath(os.path.abspath(file_path)).split(os.sep) if p]
+        for i, part in enumerate(norm_parts):
+            if part.lower() in markers and i > 0:
+                return norm_parts[i - 1]
+
+        if scan_root:
+            root_name = os.path.basename(os.path.normpath(os.path.abspath(scan_root)))
+            if root_name:
+                return root_name
         
         # 1. Normalize and get absolute path if possible to compare with CWD
         abs_path = os.path.abspath(file_path)

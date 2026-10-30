@@ -1060,7 +1060,7 @@ def main():
             
             if findings:
                 from modules.result_processor import ResultProcessor
-                project_name = ResultProcessor.infer_project_name(findings[0].get("file", ""))
+                project_name = ResultProcessor.infer_project_name(findings[0].get("file", ""), args.path)
                 # Mapper output lives next to the --out JSONL (never relative to CWD)
                 output_mapper = str(out_path.parent / "relationship_mapper.jsonl")
                 os.makedirs(os.path.dirname(output_mapper) or ".", exist_ok=True)
@@ -1106,7 +1106,8 @@ def main():
                                 
                                 # Use robust inference logic built into the module
                                 project_name = ResultProcessor.infer_project_name(
-                                    result.get("root_finding", {}).get("file", "")
+                                    result.get("root_finding", {}).get("file", ""),
+                                    args.path
                                 )
                                 
                                 report_file = processor.generate_report(result, idx, project_name)
