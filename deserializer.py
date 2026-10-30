@@ -818,7 +818,7 @@ def main():
     ap.add_argument(
         "--reports-dir",
         default=None,
-        help="Directory for generated Markdown reports (default: 'reports' folder next to --out).",
+        help="Directory for generated Markdown reports (default: 'reports' folder in the Deserializer install directory).",
     )
     ap.add_argument(
         "--no-banner",
@@ -1094,7 +1094,7 @@ def main():
                 
                 try:
                     from modules.result_processor import ResultProcessor
-                    reports_dir = args.reports_dir or str(out_path.parent / "reports")
+                    reports_dir = args.reports_dir or str(Path(__file__).resolve().parent / "reports")
                     processor = ResultProcessor(output_base_dir=reports_dir)
                     
                     if os.path.exists(output_mapper):
