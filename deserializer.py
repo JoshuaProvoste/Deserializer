@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+import sys
+# Never generate __pycache__ / .pyc files (must run before importing project modules).
+sys.dont_write_bytecode = True
 import argparse, ast, json, os, re, sys, io, shutil
 import concurrent.futures
 import multiprocessing
