@@ -39,7 +39,7 @@
     "nltk": { "imports": ["nltk"], "calls": [] },
     "django": { "imports": ["django"], "calls": [] },
     "matplotlib": { "imports": ["matplotlib"], "calls": [] },
-    "ZODB": { "imports": ["ZODB"], "calls": [] },
+    "ZODB": { "imports": ["ZODB"], "calls": [["ZODB", "root"], ["ZODB", "get"]] },
     "allennlp": { "imports": ["allennlp"], "calls": [["allennlp","load_archive"]] },
     "transformers": { "imports": ["transformers"], "calls": [["transformers", "from_pretrained"]] },
     "keras": { "imports": ["keras"], "calls": [["keras", "load_model"]] },
