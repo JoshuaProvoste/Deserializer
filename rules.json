@@ -103,5 +103,8 @@
     "construct": { "imports": ["construct"], "calls": [["construct", "parse"], ["construct", "parse_stream"], ["construct", "parse_file"]] },
     "mongoengine": { "imports": ["mongoengine"], "calls": [["mongoengine", "from_json"]] },
     "casadi": { "imports": ["casadi"], "calls": [["casadi", "load"], ["casadi", "deserialize"]] },
-    "_jsonnet": { "imports": ["_jsonnet"], "calls": [["_jsonnet", "evaluate_file"], ["_jsonnet", "evaluate_snippet"]] }
+    "_jsonnet": { "imports": ["_jsonnet"], "calls": [["_jsonnet", "evaluate_file"], ["_jsonnet", "evaluate_snippet"]] },
+    "wasmtime": { "imports": ["wasmtime"], "calls": [["wasmtime", "deserialize"]] },
+    "dukpy": { "imports": ["dukpy"], "calls": [["dukpy", "evaljs"]] },
+    "logging": { "imports": ["logging"], "calls": [["logging", "dictConfig"], ["logging", "fileConfig"]] }
 }
