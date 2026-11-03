@@ -133,6 +133,6 @@
     "cudf": { "imports": ["cudf"], "calls": [] },
     "stable_baselines": { "imports": ["stable_baselines"], "calls": [] },
     "aiocache": { "imports": ["aiocache"], "calls": [] },
-    "beaker": { "imports": ["beaker"], "calls": [] },
+    "beaker": { "imports": ["beaker"], "calls": [["beaker", "get"]] },
     "pickleshare": { "imports": ["pickleshare"], "calls": [] }
 }
