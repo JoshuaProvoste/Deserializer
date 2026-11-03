@@ -6,6 +6,7 @@
     "pydantic": { "imports": ["pydantic"], "calls": [["pydantic","parse_raw"]]},
     "pickle": {"imports": ["pickle"],"calls": [["pickle", "load"],["pickle", "loads"]]},
     "_pickle": {"imports": ["_pickle"],"calls": [["_pickle", "load"], ["_pickle", "loads"]]},
+    "zodbpickle": {"imports": ["zodbpickle"],"calls": [["zodbpickle", "load"], ["zodbpickle", "loads"]]},
     "marshal": {"imports": ["marshal"],"calls": [["marshal", "load"], ["marshal", "loads"]]},
     "importlib": {"imports": ["importlib"],"calls": [["importlib", "import_module"]]},
     "runpy": {"imports": ["runpy"],"calls": [["runpy", "run_module"], ["runpy", "run_path"]]},
