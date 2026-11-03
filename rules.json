@@ -71,7 +71,7 @@
     "sqlitedict": { "imports": ["sqlitedict"], "calls": [["sqlitedict","SqliteDict"]] },
     "igraph": { "imports": ["igraph"], "calls": [] },
     "concurrent": { "imports": ["concurrent"], "calls": [] },
-    "cloudpickle": { "imports": ["cloudpickle"], "calls": [["cloudpickle","dump"], ["cloudpickle","load"], ["cloudpickle","dumps"], ["cloudpickle","loads"]] },
+    "cloudpickle": { "imports": ["cloudpickle"], "calls": [["cloudpickle","load"], ["cloudpickle","loads"]] },
     "dill": { "imports": ["dill"], "calls": [["dill","dump"], ["dill","load"], ["dill","dumps"], ["dill","loads"]] },
     "imblearn": { "imports": ["imblearn"], "calls": [] },
     "dgl": { "imports": ["dgl"], "calls": [] },
