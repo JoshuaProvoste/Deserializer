@@ -122,7 +122,7 @@
     "dogpile": { "imports": ["dogpile"], "calls": [["dogpile", "get"]] },
     "polars": { "imports": ["polars"], "calls": [["polars", "deserialize"]] },
     "shapely": { "imports": ["shapely"], "calls": [] },
-    "pylibmc": { "imports": ["pylibmc"], "calls": [] },
+    "pylibmc": { "imports": ["pylibmc"], "calls": [["pylibmc", "get"]] },
     "gpytorch": { "imports": ["gpytorch"], "calls": [] },
     "kornia": { "imports": ["kornia"], "calls": [] },
     "autosklearn": { "imports": ["autosklearn"], "calls": [] },
