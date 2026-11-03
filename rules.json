@@ -63,7 +63,7 @@
     "river": { "imports": ["river"], "calls": [] },
     "airflow": { "imports": ["airflow"], "calls": [] },
     "multiprocessing": { "imports": ["multiprocessing"], "calls": [] },
-    "diskcache": { "imports": ["diskcache"], "calls": [] },
+    "diskcache": { "imports": ["diskcache"], "calls": [["diskcache", "get"]] },
     "zmq": { "imports": ["zmq"], "calls": [["zmq", "recv_pyobj"], ["zmq", "recv_serialized"]] },
     "kombu": { "imports": ["kombu"], "calls": [["kombu", "loads"]] },
     "dramatiq": { "imports": ["dramatiq"], "calls": [] },
