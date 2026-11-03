@@ -6,7 +6,7 @@
     "pydantic": { "imports": ["pydantic"], "calls": [["pydantic","parse_obj"], ["pydantic","parse_raw"], ["pydantic","model_validate"], ["pydantic","model_validate_json"]]},
     "pickle": {"imports": ["pickle"],"calls": [["pickle", "load"],["pickle", "loads"]]},
     "torch": {"imports": ["torch"],"calls": [["torch","load"]]},
-    "pandas": {"imports": ["pandas"],"calls": [["pandas", "read_pickle"], ["pandas", "to_pickle"]]},
+    "pandas": {"imports": ["pandas"],"calls": [["pandas", "read_pickle"]]},
     "numpy": {"imports": ["numpy"],"calls": [["numpy", "save"], ["numpy", "load"]]},
     "joblib": {"imports": ["joblib"],"calls": [["joblib","dump"], ["joblib","load"]]},
     "networkx": {"imports": ["networkx"],"calls": [["networkx","write_gpickle"], ["networkx","read_gpickle"]]},
