@@ -1,5 +1,5 @@
 {
-    "msgpack": { "imports": ["msgpack"], "calls": [["msgpack","load"], ["msgpack","unpack"], ["msgpack","unpackb"]] },
+    "msgpack": { "imports": ["msgpack"], "calls": [["msgpack","load"], ["msgpack","loads"], ["msgpack","unpack"], ["msgpack","unpackb"]] },
     "ormsgpack": { "imports": ["ormsgpack"], "calls": [["ormsgpack","unpackb"]] },
     "yaml": { "imports": ["yaml"], "calls": [["yaml","load"], ["yaml","unsafe_load"], ["yaml","full_load"]] },
     "cbor2": { "imports": ["cbor2"], "calls": [["cbor2","load"], ["cbor2","loads"]]},
