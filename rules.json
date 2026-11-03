@@ -8,7 +8,7 @@
     "torch": {"imports": ["torch"],"calls": [["torch","load"]]},
     "pandas": {"imports": ["pandas"],"calls": [["pandas", "read_pickle"]]},
     "numpy": {"imports": ["numpy"],"calls": [["numpy", "load"]]},
-    "joblib": {"imports": ["joblib"],"calls": [["joblib","dump"], ["joblib","load"]]},
+    "joblib": {"imports": ["joblib"],"calls": [["joblib","load"]]},
     "networkx": {"imports": ["networkx"],"calls": [["networkx","write_gpickle"], ["networkx","read_gpickle"]]},
     "statsmodels": {"imports": ["statsmodels"],"calls": [["statsmodels","load"]]},
     "dask": {"imports": ["dask"],"calls": [["dask","to_pickle"], ["dask","read_pickle"]]},
