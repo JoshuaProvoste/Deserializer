@@ -126,7 +126,7 @@
     "autosklearn": { "imports": ["autosklearn"], "calls": [] },
     "tpot": { "imports": ["tpot"], "calls": [] },
     "hdbscan": { "imports": ["hdbscan"], "calls": [] },
-    "scvi": { "imports": ["scvi"], "calls": [] },
+    "scvi": { "imports": ["scvi"], "calls": [["scvi", "load"]] },
     "botorch": { "imports": ["botorch"], "calls": [] },
     "cudf": { "imports": ["cudf"], "calls": [] },
     "stable_baselines": { "imports": ["stable_baselines"], "calls": [] },
