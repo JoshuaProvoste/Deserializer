@@ -16,6 +16,7 @@
     "cattrs": {"imports": ["cattrs"],"calls": [["cattrs", "structure"], ["cattrs", "structure_attrs_fromdict"]]},
     "dataclasses_json": {"imports": ["dataclasses_json"],"calls": [["dataclasses_json", "from_json"]]},
     "marshmallow": {"imports": ["marshmallow"],"calls": [["marshmallow", "load"], ["marshmallow", "loads"]]},
+    "pyarrow": {"imports": ["pyarrow"],"calls": [["pyarrow", "deserialize"], ["pyarrow", "read_serialized"]]},
     "torch": {"imports": ["torch"],"calls": [["torch","load"], ["torch","load_url"], ["torch","load_state_dict_from_url"]]},
     "pandas": {"imports": ["pandas"],"calls": [["pandas", "read_pickle"], ["pandas", "read_hdf"]]},
     "numpy": {"imports": ["numpy"],"calls": [["numpy", "load"]]},
