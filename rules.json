@@ -88,7 +88,7 @@
     "optuna": { "imports": ["optuna"], "calls": [["optuna", "load_study"]] },
     "mmdet": { "imports": ["mmdet"], "calls": [] },
     "mmengine": { "imports": ["mmengine"], "calls": [["mmengine","load_checkpoint"]] },
-    "IPython": { "imports": ["IPython"], "calls": [] },
+    "IPython": { "imports": ["IPython"], "calls": [["IPython", "unpickle"]] },
     "ipyparallel": { "imports": ["ipyparallel"], "calls": [] },
     "xarray": { "imports": ["xarray"], "calls": [] },
     "torchaudio": { "imports": ["torchaudio"], "calls": [] },
