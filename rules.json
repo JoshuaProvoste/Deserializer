@@ -90,7 +90,7 @@
     "deepspeed": { "imports": ["deepspeed"], "calls": [["deepspeed","load_checkpoint"]] },
     "apache_beam": { "imports": ["apache_beam"], "calls": [] },
     "timm": { "imports": ["timm"], "calls": [] },
-    "mmcv": { "imports": ["mmcv"], "calls": [["mmcv","save_checkpoint"], ["mmcv","load_checkpoint"]] },
+    "mmcv": { "imports": ["mmcv"], "calls": [["mmcv","load_checkpoint"]] },
     "huey": { "imports": ["huey"], "calls": [] },
     "dagster": { "imports": ["dagster"], "calls": [["dagster","PickledObjectFilesystemIOManager"]] },
     "klepto": { "imports": ["klepto"], "calls": [["klepto","file_archive"]] },
