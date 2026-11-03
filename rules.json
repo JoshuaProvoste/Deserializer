@@ -12,6 +12,7 @@
     "jsonpickle": {"imports": ["jsonpickle"],"calls": [["jsonpickle", "decode"], ["jsonpickle", "loads"]]},
     "json_tricks": {"imports": ["json_tricks"],"calls": [["json_tricks", "load"], ["json_tricks", "loads"]]},
     "hydra": {"imports": ["hydra"],"calls": [["hydra", "instantiate"], ["hydra", "call"]]},
+    "omegaconf": {"imports": ["omegaconf"],"calls": [["omegaconf", "to_object"]]},
     "torch": {"imports": ["torch"],"calls": [["torch","load"], ["torch","load_url"], ["torch","load_state_dict_from_url"]]},
     "pandas": {"imports": ["pandas"],"calls": [["pandas", "read_pickle"], ["pandas", "read_hdf"]]},
     "numpy": {"imports": ["numpy"],"calls": [["numpy", "load"]]},
