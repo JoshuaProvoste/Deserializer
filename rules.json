@@ -69,7 +69,7 @@
     "flask_caching": { "imports": ["flask_caching"], "calls": [] },
     "sktime": { "imports": ["sktime"], "calls": [] },
     "sympy": { "imports": ["sympy"], "calls": [] },
-    "ultralytics": { "imports": ["ultralytics"], "calls": [] },
+    "ultralytics": { "imports": ["ultralytics"], "calls": [["ultralytics", "torch_safe_load"], ["ultralytics", "YOLO"]] },
     "torchvision": { "imports": ["torchvision"], "calls": [] },
     "torch_geometric": { "imports": ["torch_geometric"], "calls": [] },
     "sqlitedict": { "imports": ["sqlitedict"], "calls": [] },
