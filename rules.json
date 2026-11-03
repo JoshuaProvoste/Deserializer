@@ -64,7 +64,7 @@
     "airflow": { "imports": ["airflow"], "calls": [] },
     "multiprocessing": { "imports": ["multiprocessing"], "calls": [] },
     "diskcache": { "imports": ["diskcache"], "calls": [] },
-    "zmq": { "imports": ["zmq"], "calls": [] },
+    "zmq": { "imports": ["zmq"], "calls": [["zmq", "recv_pyobj"], ["zmq", "recv_serialized"]] },
     "kombu": { "imports": ["kombu"], "calls": [["kombu", "loads"]] },
     "dramatiq": { "imports": ["dramatiq"], "calls": [] },
     "requests_cache": { "imports": ["requests_cache"], "calls": [] },
