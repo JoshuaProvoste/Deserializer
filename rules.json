@@ -119,7 +119,7 @@
     "lightfm": { "imports": ["lightfm"], "calls": [] },
     "implicit": { "imports": ["implicit"], "calls": [] },
     "lifelines": { "imports": ["lifelines"], "calls": [] },
-    "dogpile": { "imports": ["dogpile"], "calls": [] },
+    "dogpile": { "imports": ["dogpile"], "calls": [["dogpile", "get"]] },
     "polars": { "imports": ["polars"], "calls": [["polars", "deserialize"]] },
     "shapely": { "imports": ["shapely"], "calls": [] },
     "pylibmc": { "imports": ["pylibmc"], "calls": [] },
