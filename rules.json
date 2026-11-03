@@ -68,7 +68,7 @@
     "kombu": { "imports": ["kombu"], "calls": [["kombu", "loads"]] },
     "dramatiq": { "imports": ["dramatiq"], "calls": [] },
     "requests_cache": { "imports": ["requests_cache"], "calls": [] },
-    "flask_caching": { "imports": ["flask_caching"], "calls": [] },
+    "flask_caching": { "imports": ["flask_caching"], "calls": [["flask_caching", "get"]] },
     "sktime": { "imports": ["sktime"], "calls": [] },
     "sympy": { "imports": ["sympy"], "calls": [] },
     "ultralytics": { "imports": ["ultralytics"], "calls": [["ultralytics", "torch_safe_load"], ["ultralytics", "YOLO"]] },
