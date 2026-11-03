@@ -65,7 +65,7 @@
     "multiprocessing": { "imports": ["multiprocessing"], "calls": [] },
     "diskcache": { "imports": ["diskcache"], "calls": [] },
     "zmq": { "imports": ["zmq"], "calls": [] },
-    "kombu": { "imports": ["kombu"], "calls": [] },
+    "kombu": { "imports": ["kombu"], "calls": [["kombu", "loads"]] },
     "dramatiq": { "imports": ["dramatiq"], "calls": [] },
     "requests_cache": { "imports": ["requests_cache"], "calls": [] },
     "flask_caching": { "imports": ["flask_caching"], "calls": [] },
