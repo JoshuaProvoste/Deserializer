@@ -46,7 +46,7 @@
     "detectron2": { "imports": ["detectron2"], "calls": [] },
     "fairseq": { "imports": ["fairseq"], "calls": [["fairseq","load_model_ensemble_and_task"]] },
     "monai": { "imports": ["monai"], "calls": [] },
-    "sqlalchemy": { "imports": ["sqlalchemy"], "calls": [["sqlalchemy","PickleType"]] },
+    "sqlalchemy": { "imports": ["sqlalchemy"], "calls": [] },
     "scrapy": { "imports": ["scrapy"], "calls": [] },
     "accelerate": { "imports": ["accelerate"], "calls": [["accelerate","load_state"]] },
     "skopt": { "imports": ["skopt"], "calls": [["skopt","load"]] },
