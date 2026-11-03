@@ -46,7 +46,7 @@
     "tensorflow": { "imports": ["tensorflow"], "calls": [["tensorflow", "load_model"]] },
     "lightning": { "imports": ["lightning"], "calls": [["lightning", "load_from_checkpoint"]] },
     "skorch": { "imports": ["skorch"], "calls": [["skorch", "load_params"]] },
-    "celery": { "imports": ["celery"], "calls": [] },
+    "celery": { "imports": ["celery"], "calls": [["celery", "decode"]] },
     "rq": { "imports": ["rq"], "calls": [] },
     "spacy": { "imports": ["spacy"], "calls": [["spacy", "load"]] },
     "langchain_core": { "imports": ["langchain_core"], "calls": [["langchain_core", "loads"]] },
