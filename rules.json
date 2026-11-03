@@ -99,5 +99,6 @@
     "aiocache": { "imports": ["aiocache"], "calls": [["aiocache", "loads"]] },
     "beaker": { "imports": ["beaker"], "calls": [["beaker", "get"]] },
     "pickleshare": { "imports": ["pickleshare"], "calls": [["pickleshare", "get"]] },
-    "obspy": { "imports": ["obspy"], "calls": [["obspy", "read"]] }
+    "obspy": { "imports": ["obspy"], "calls": [["obspy", "read"]] },
+    "construct": { "imports": ["construct"], "calls": [["construct", "parse"]] }
 }
