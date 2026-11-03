@@ -115,7 +115,7 @@
     "implicit": { "imports": ["implicit"], "calls": [] },
     "lifelines": { "imports": ["lifelines"], "calls": [] },
     "dogpile": { "imports": ["dogpile"], "calls": [] },
-    "polars": { "imports": ["polars"], "calls": [] },
+    "polars": { "imports": ["polars"], "calls": [["polars", "deserialize"]] },
     "shapely": { "imports": ["shapely"], "calls": [] },
     "pylibmc": { "imports": ["pylibmc"], "calls": [] },
     "gpytorch": { "imports": ["gpytorch"], "calls": [] },
