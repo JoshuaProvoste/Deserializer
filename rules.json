@@ -43,6 +43,7 @@
     "allennlp": { "imports": ["allennlp"], "calls": [["allennlp","load_archive"]] },
     "transformers": { "imports": ["transformers"], "calls": [["transformers", "from_pretrained"]] },
     "keras": { "imports": ["keras"], "calls": [["keras", "load_model"]] },
+    "tensorflow": { "imports": ["tensorflow"], "calls": [["tensorflow", "load_model"]] },
     "skorch": { "imports": ["skorch"], "calls": [] },
     "celery": { "imports": ["celery"], "calls": [] },
     "rq": { "imports": ["rq"], "calls": [] },
