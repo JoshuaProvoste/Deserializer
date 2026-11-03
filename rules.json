@@ -9,7 +9,7 @@
     "pandas": {"imports": ["pandas"],"calls": [["pandas", "read_pickle"]]},
     "numpy": {"imports": ["numpy"],"calls": [["numpy", "load"]]},
     "joblib": {"imports": ["joblib"],"calls": [["joblib","load"]]},
-    "statsmodels": {"imports": ["statsmodels"],"calls": [["statsmodels","load"]]},
+    "statsmodels": {"imports": ["statsmodels"],"calls": [["statsmodels","load_pickle"]]},
     "dask": {"imports": ["dask"],"calls": [["dask","read_pickle"]]},
     "pyspark": {"imports": ["pyspark"],"calls": [["pyspark","pickleFile"]]},
     "pytorch_lightning": {"imports": ["pytorch_lightning"],"calls": [["pytorch_lightning","load"]]},
