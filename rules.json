@@ -92,7 +92,7 @@
     "timm": { "imports": ["timm"], "calls": [] },
     "mmcv": { "imports": ["mmcv"], "calls": [["mmcv","load_checkpoint"]] },
     "huey": { "imports": ["huey"], "calls": [] },
-    "dagster": { "imports": ["dagster"], "calls": [["dagster","PickledObjectFilesystemIOManager"]] },
+    "dagster": { "imports": ["dagster"], "calls": [] },
     "klepto": { "imports": ["klepto"], "calls": [["klepto","file_archive"]] },
     "pytorch3d": { "imports": ["pytorch3d"], "calls": [] },
     "faiss": { "imports": ["faiss"], "calls": [] },
