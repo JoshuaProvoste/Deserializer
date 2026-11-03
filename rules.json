@@ -48,7 +48,7 @@
     "monai": { "imports": ["monai"], "calls": [["monai","CheckpointSaver"]] },
     "sqlalchemy": { "imports": ["sqlalchemy"], "calls": [["sqlalchemy","PickleType"]] },
     "scrapy": { "imports": ["scrapy"], "calls": [] },
-    "accelerate": { "imports": ["accelerate"], "calls": [["accelerate","save_state"], ["accelerate","load_state"]] },
+    "accelerate": { "imports": ["accelerate"], "calls": [["accelerate","load_state"]] },
     "skopt": { "imports": ["skopt"], "calls": [["skopt","dump"], ["skopt","load"]] },
     "river": { "imports": ["river"], "calls": [] },
     "surprise": { "imports": ["surprise"], "calls": [["surprise","dump"]] },
