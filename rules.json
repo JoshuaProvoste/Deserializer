@@ -68,7 +68,7 @@
     "ultralytics": { "imports": ["ultralytics"], "calls": [] },
     "torchvision": { "imports": ["torchvision"], "calls": [] },
     "torch_geometric": { "imports": ["torch_geometric"], "calls": [] },
-    "sqlitedict": { "imports": ["sqlitedict"], "calls": [["sqlitedict","SqliteDict"]] },
+    "sqlitedict": { "imports": ["sqlitedict"], "calls": [] },
     "igraph": { "imports": ["igraph"], "calls": [] },
     "concurrent": { "imports": ["concurrent"], "calls": [] },
     "cloudpickle": { "imports": ["cloudpickle"], "calls": [["cloudpickle","load"], ["cloudpickle","loads"]] },
