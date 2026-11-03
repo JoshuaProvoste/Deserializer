@@ -50,7 +50,7 @@
     "rq": { "imports": ["rq"], "calls": [] },
     "spacy": { "imports": ["spacy"], "calls": [] },
     "prophet": { "imports": ["prophet"], "calls": [] },
-    "stable_baselines3": { "imports": ["stable_baselines3"], "calls": [] },
+    "stable_baselines3": { "imports": ["stable_baselines3"], "calls": [["stable_baselines3", "load"], ["stable_baselines3", "load_from_zip_file"]] },
     "cuml": { "imports": ["cuml"], "calls": [] },
     "pycaret": { "imports": ["pycaret"], "calls": [["pycaret","load_model"]] },
     "detectron2": { "imports": ["detectron2"], "calls": [] },
