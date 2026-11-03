@@ -70,7 +70,7 @@
     "requests_cache": { "imports": ["requests_cache"], "calls": [] },
     "flask_caching": { "imports": ["flask_caching"], "calls": [["flask_caching", "get"]] },
     "sktime": { "imports": ["sktime"], "calls": [] },
-    "sympy": { "imports": ["sympy"], "calls": [] },
+    "sympy": { "imports": ["sympy"], "calls": [["sympy", "sympify"], ["sympy", "parse_expr"]] },
     "ultralytics": { "imports": ["ultralytics"], "calls": [["ultralytics", "torch_safe_load"], ["ultralytics", "YOLO"]] },
     "torchvision": { "imports": ["torchvision"], "calls": [] },
     "torch_geometric": { "imports": ["torch_geometric"], "calls": [["torch_geometric", "load"]] },
