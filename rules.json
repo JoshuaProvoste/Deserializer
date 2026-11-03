@@ -55,7 +55,7 @@
     "bentoml": { "imports": ["bentoml"], "calls": [["bentoml","load_model"]] },
     "airflow": { "imports": ["airflow"], "calls": [] },
     "luigi": { "imports": ["luigi"], "calls": [["luigi","LocalTarget"]] },
-    "peewee": { "imports": ["peewee"], "calls": [["peewee","PickledField"]] },
+    "peewee": { "imports": ["peewee"], "calls": [] },
     "multiprocessing": { "imports": ["multiprocessing"], "calls": [] },
     "diskcache": { "imports": ["diskcache"], "calls": [] },
     "zmq": { "imports": ["zmq"], "calls": [] },
