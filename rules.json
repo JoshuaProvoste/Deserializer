@@ -78,7 +78,7 @@
     "cloudpickle": { "imports": ["cloudpickle"], "calls": [["cloudpickle","load"], ["cloudpickle","loads"]] },
     "dill": { "imports": ["dill"], "calls": [["dill","load"], ["dill","loads"], ["dill","load_session"]] },
     "imblearn": { "imports": ["imblearn"], "calls": [] },
-    "dgl": { "imports": ["dgl"], "calls": [] },
+    "dgl": { "imports": ["dgl"], "calls": [["dgl", "load_graphs"]] },
     "prefect": { "imports": ["prefect"], "calls": [] },
     "aiokafka": { "imports": ["aiokafka"], "calls": [] },
     "tinydb": { "imports": ["tinydb"], "calls": [] },
