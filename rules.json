@@ -93,7 +93,7 @@
     "torchtext": { "imports": ["torchtext"], "calls": [] },
     "deepspeed": { "imports": ["deepspeed"], "calls": [["deepspeed","load_checkpoint"]] },
     "apache_beam": { "imports": ["apache_beam"], "calls": [] },
-    "timm": { "imports": ["timm"], "calls": [] },
+    "timm": { "imports": ["timm"], "calls": [["timm", "load_state_dict_from_url"]] },
     "mmcv": { "imports": ["mmcv"], "calls": [["mmcv","load_checkpoint"]] },
     "huey": { "imports": ["huey"], "calls": [] },
     "dagster": { "imports": ["dagster"], "calls": [] },
