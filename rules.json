@@ -45,7 +45,7 @@
     "pycaret": { "imports": ["pycaret"], "calls": [["pycaret","load_model"]] },
     "detectron2": { "imports": ["detectron2"], "calls": [] },
     "fairseq": { "imports": ["fairseq"], "calls": [["fairseq","load_model_ensemble_and_task"]] },
-    "monai": { "imports": ["monai"], "calls": [["monai","CheckpointSaver"]] },
+    "monai": { "imports": ["monai"], "calls": [] },
     "sqlalchemy": { "imports": ["sqlalchemy"], "calls": [["sqlalchemy","PickleType"]] },
     "scrapy": { "imports": ["scrapy"], "calls": [] },
     "accelerate": { "imports": ["accelerate"], "calls": [["accelerate","load_state"]] },
