@@ -49,7 +49,7 @@
     "sqlalchemy": { "imports": ["sqlalchemy"], "calls": [["sqlalchemy","PickleType"]] },
     "scrapy": { "imports": ["scrapy"], "calls": [] },
     "accelerate": { "imports": ["accelerate"], "calls": [["accelerate","load_state"]] },
-    "skopt": { "imports": ["skopt"], "calls": [["skopt","dump"], ["skopt","load"]] },
+    "skopt": { "imports": ["skopt"], "calls": [["skopt","load"]] },
     "river": { "imports": ["river"], "calls": [] },
     "surprise": { "imports": ["surprise"], "calls": [["surprise","dump"]] },
     "bentoml": { "imports": ["bentoml"], "calls": [["bentoml","save_model"], ["bentoml","load_model"]] },
