@@ -85,7 +85,7 @@
     "aiokafka": { "imports": ["aiokafka"], "calls": [] },
     "tinydb": { "imports": ["tinydb"], "calls": [] },
     "gymnasium": { "imports": ["gymnasium"], "calls": [] },
-    "optuna": { "imports": ["optuna"], "calls": [] },
+    "optuna": { "imports": ["optuna"], "calls": [["optuna", "load_study"]] },
     "mmdet": { "imports": ["mmdet"], "calls": [] },
     "mmengine": { "imports": ["mmengine"], "calls": [["mmengine","load_checkpoint"]] },
     "IPython": { "imports": ["IPython"], "calls": [] },
