@@ -67,7 +67,6 @@
     "zmq": { "imports": ["zmq"], "calls": [["zmq", "recv_pyobj"], ["zmq", "recv_serialized"]] },
     "kombu": { "imports": ["kombu"], "calls": [["kombu", "loads"]] },
     "dramatiq": { "imports": ["dramatiq"], "calls": [] },
-    "requests_cache": { "imports": ["requests_cache"], "calls": [] },
     "flask_caching": { "imports": ["flask_caching"], "calls": [["flask_caching", "get"]] },
     "sktime": { "imports": ["sktime"], "calls": [] },
     "sympy": { "imports": ["sympy"], "calls": [["sympy", "sympify"], ["sympy", "parse_expr"]] },
