@@ -38,7 +38,6 @@
     "prophet": { "imports": ["prophet"], "calls": [] },
     "stable_baselines3": { "imports": ["stable_baselines3"], "calls": [] },
     "cuml": { "imports": ["cuml"], "calls": [] },
-    "shap": { "imports": ["shap"], "calls": [["shap","load"]] },
     "pycaret": { "imports": ["pycaret"], "calls": [["pycaret","load_model"]] },
     "detectron2": { "imports": ["detectron2"], "calls": [] },
     "fairseq": { "imports": ["fairseq"], "calls": [["fairseq","load_model_ensemble_and_task"]] },
