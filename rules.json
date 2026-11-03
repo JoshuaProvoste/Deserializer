@@ -48,7 +48,7 @@
     "skorch": { "imports": ["skorch"], "calls": [["skorch", "load_params"]] },
     "celery": { "imports": ["celery"], "calls": [] },
     "rq": { "imports": ["rq"], "calls": [] },
-    "spacy": { "imports": ["spacy"], "calls": [] },
+    "spacy": { "imports": ["spacy"], "calls": [["spacy", "load"]] },
     "prophet": { "imports": ["prophet"], "calls": [] },
     "stable_baselines3": { "imports": ["stable_baselines3"], "calls": [["stable_baselines3", "load"], ["stable_baselines3", "load_from_zip_file"]] },
     "cuml": { "imports": ["cuml"], "calls": [] },
