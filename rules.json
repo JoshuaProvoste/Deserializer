@@ -103,7 +103,7 @@
     "pytorch3d": { "imports": ["pytorch3d"], "calls": [] },
     "faiss": { "imports": ["faiss"], "calls": [] },
     "PIL": { "imports": ["PIL"], "calls": [] },
-    "persistqueue": { "imports": ["persistqueue"], "calls": [] },
+    "persistqueue": { "imports": ["persistqueue"], "calls": [["persistqueue", "get"]] },
     "Orange": { "imports": ["Orange"], "calls": [] },
     "diffusers": { "imports": ["diffusers"], "calls": [["diffusers","from_pretrained"]] },
     "sentence_transformers": { "imports": ["sentence_transformers"], "calls": [] },
