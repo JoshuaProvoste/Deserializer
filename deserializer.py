@@ -47,7 +47,7 @@ def banner(file=sys.stdout):
  | |  | |/ _ \/ __|/ _ \ '__| |/ _` | | |_  / _ \ '__|
  | |__| |  __/\__ \  __/ |  | | (_| | | |/ /  __/ |   
  |_____/ \___||___/\___|_|  |_|\__,_|_|_/___\___|_|   
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       
+
        Python Deserialization AST based Scanner
          coded by @JoshuaProvoste (jp / kw0)
 
@@ -68,6 +68,120 @@ def setup_windows_ansi():
                     kernel32.SetConsoleMode(h, mode.value | 0x0004)
         except Exception:
             pass
+
+class _ConsoleScreenBufferInfo(ctypes.Structure):
+    """Minimal CONSOLE_SCREEN_BUFFER_INFO (ctypes.wintypes does not expose it)."""
+    _fields_ = [
+        ("dwSize", ctypes.c_short * 2),            # COORD
+        ("dwCursorPosition", ctypes.c_short * 2),  # COORD
+        ("wAttributes", ctypes.c_ushort),          # WORD
+        ("srWindow", ctypes.c_short * 4),          # SMALL_RECT: Left, Top, Right, Bottom
+        ("dwMaximumWindowSize", ctypes.c_short * 2),  # COORD
+    ]
+
+
+def _terminal_columns(stream=None, default=100):
+    """
+    Visible width (in columns) of the terminal hosting `stream`; best effort.
+
+    On Windows the console *window* rect is preferred because
+    os.get_terminal_size() may report the (usually wider) screen buffer instead,
+    and over-estimating the width is exactly what makes an in-place status line
+    wrap and duplicate. Falls back to os/shutil detection and then to `default`.
+    """
+    if os.name == "nt" and stream is not None:
+        try:
+            kernel32 = ctypes.windll.kernel32
+            # STD_ERROR_HANDLE / STD_OUTPUT_HANDLE
+            handle = kernel32.GetStdHandle(-12 if stream is sys.stderr else -11)
+            info = _ConsoleScreenBufferInfo()
+            if kernel32.GetConsoleScreenBufferInfo(handle, ctypes.byref(info)):
+                left, _top, right, _bottom = (
+                    info.srWindow[0], info.srWindow[1], info.srWindow[2], info.srWindow[3]
+                )
+                width = right - left + 1
+                # Sanity check as well: a wrong struct layout would yield garbage.
+                if info.dwSize[0] > 0 and 20 <= width <= 1000:
+                    return int(width)
+        except Exception:
+            pass
+    if stream is not None:
+        try:
+            return int(os.get_terminal_size(stream.fileno()).columns)
+        except Exception:
+            pass
+    try:
+        return int(shutil.get_terminal_size((default, 24)).columns)
+    except Exception:
+        return default
+
+
+class _StatusLine:
+    """
+    Single, in-place dynamic status/progress line.
+
+    Portable by construction: it only uses a carriage return ('\\r') plus space
+    padding to repaint the very same terminal row, so it behaves identically on
+    Windows CMD, PowerShell, Windows Terminal and any Unix PTY/dumb terminal.
+    It deliberately avoids ANSI cursor-up/down escapes: those drift, scroll and
+    duplicate lines as soon as the rendered text is wider than the window.
+
+    When the stream is not a TTY (piped/redirected/CI) it is a no-op, so
+    machine-readable output is never polluted.
+    """
+
+    def __init__(self, stream):
+        self._stream = stream
+        try:
+            self.enabled = bool(stream.isatty())
+        except Exception:
+            self.enabled = False
+        self._text = ""
+        self._width = 0
+
+    def _write(self, data):
+        try:
+            self._stream.write(data)
+            self._stream.flush()
+            return True
+        except (OSError, ValueError):
+            # Closed/broken stream (consumer went away): degrade silently.
+            self.enabled = False
+            return False
+
+    def update(self, text):
+        """Repaint the status line with `text`, keeping the cursor on that row."""
+        if not self.enabled:
+            return
+        # Keep the last cell free: writing the final column would push the cursor
+        # to the next row and break the in-place repaint.
+        columns = max(20, _terminal_columns(self._stream) - 1)
+        if len(text) > columns:
+            text = text[:columns - 3] + "..." if columns > 3 else text[:columns]
+        padding = ""
+        if self._width > len(text):
+            padding = " " * (self._width - len(text))
+        if not self._write("\r" + text + padding):
+            return
+        self._text = text
+        self._width = len(text)
+
+    def clear(self):
+        """Erase the status line, leaving the cursor at column 0."""
+        if not self.enabled or self._width == 0:
+            return
+        if not self._write("\r" + " " * self._width + "\r"):
+            return
+        self._width = 0
+
+    def redraw(self):
+        """Repaint the last status text (cursor is expected at column 0)."""
+        if not self.enabled or not self._text:
+            return
+        if not self._write(self._text):
+            return
+        self._width = len(self._text)
+
 
 def sanitize_template_syntax(src: str) -> str:
     """
@@ -903,6 +1017,7 @@ def main():
     # Human-readable output goes to stdout when writing JSONL to a file,
     # and to stderr when writing JSONL to stdout (to avoid corrupting JSONL).
     human = sys.stderr if args.out == "-" else sys.stdout
+    status = _StatusLine(human)
 
     if not args.no_banner:
         banner(file=human)
@@ -915,25 +1030,24 @@ def main():
     files_scanned = 0
     jsonl_lines = 0
     def print_finding(item: dict):
-        if human.isatty():
-            # Move down to clear the progress bar line if it exists
-            human.write('\033[B\r' + ' ' * 140 + '\r\033[A')
-            human.flush()
+        # Erase the dynamic status line first so the finding scrolls above it;
+        # it is repainted right below afterwards (single-line progress display).
+        status.clear()
         # Compact CLI line (restored variables after compaction)
         sev = item.get("severity", "-")
         cat = item.get("category", "-")
         qn = item.get("qualified_name") or f"{item.get('module')}.{item.get('name')}"
         loc = f"{item.get('file')}:{item.get('lineno')}"
         print(f"[{sev.upper()}][{cat}] {loc}  {qn}", file=human)
+        status.redraw()
 
     def print_error(item: dict):
-        if human.isatty():
-            # Move down to clear the progress bar line if it exists
-            human.write('\033[B\r' + ' ' * 140 + '\r\033[A')
-            human.flush()
+        # Erase the dynamic status line first so the error scrolls above it.
+        status.clear()
         loc = item.get("file", "?")
         err = item.get("error", "unknown_error")
         print(f"[ERROR] {loc}  {err}", file=human)
+        status.redraw()
 
     def emit(sink, item: dict):
         nonlocal total_findings, total_errors, jsonl_lines
@@ -959,21 +1073,19 @@ def main():
     total_files = len(all_files)
 
     def print_progress(current, py_path=None):
-        if not human.isatty(): return
         if total_files == 0: return
 
-        # Draw a gap, then the progress bar, then move back UP to the gap line.
-        # This keeps the cursor at the spot where the NEXT finding should be printed.
         pct = (current / total_files) * 100
-        
+
         fn = py_path.name if py_path else "..."
         limit = 30
         display_fn = (fn[:limit-3] + "...") if len(fn) > limit else fn
-        
-        msg = f"\n\rProgress: {pct:5.1f}% | Res: {total_findings} | Scanned: {current}/{total_files} | Current: {display_fn}"
-        human.write(msg.ljust(120))
-        human.write("\033[A") # Move back up to the gap line
-        human.flush()
+
+        # A single line, repainted in place on every tick (see _StatusLine).
+        status.update(
+            f"Progress: {pct:5.1f}% | Res: {total_findings} | Scanned: {current}/{total_files}"
+            f" | Current: {display_fn}"
+        )
 
     # Determine output sink
     if args.out == "-":
@@ -1014,6 +1126,7 @@ def main():
                             emit(sink, {"file": str(py), "error": f"executor_error:{exc}"})
                 except KeyboardInterrupt:
                     # Emergency shutdown on Windows/Linux
+                    status.clear()
                     if args.out != "-": sink.close()
                     print("\n\n[!] Scan interrupted by user (Ctrl+C). Exiting...", file=sys.stderr)
                     os._exit(130)
@@ -1033,6 +1146,7 @@ def main():
                 out_size = None
 
     # Summary
+    status.clear()
     print("\n\nScan finished.", file=human)
     print(f"Files scanned: {files_scanned}", file=human)
     print(f"Findings: {total_findings}", file=human)
