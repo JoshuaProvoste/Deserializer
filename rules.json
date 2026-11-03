@@ -12,7 +12,7 @@
     "networkx": {"imports": ["networkx"],"calls": [["networkx","read_gpickle"]]},
     "statsmodels": {"imports": ["statsmodels"],"calls": [["statsmodels","load"]]},
     "dask": {"imports": ["dask"],"calls": [["dask","read_pickle"]]},
-    "pyspark": {"imports": ["pyspark"],"calls": [["pyspark","saveAsPickleFile"], ["pyspark","pickleFile"]]},
+    "pyspark": {"imports": ["pyspark"],"calls": [["pyspark","pickleFile"]]},
     "pytorch_lightning": {"imports": ["pytorch_lightning"],"calls": [["pytorch_lightning","load"]]},
     "kedro": {"imports": ["kedro"],"calls": [["kedro","PickleDataSet"]]},
     "shelve": {"imports": ["shelve"],"calls": [["shelve","open"]]},
