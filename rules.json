@@ -1,7 +1,7 @@
 {
     "msgpack": { "imports": ["msgpack"], "calls": [["msgpack","load"], ["msgpack","loads"], ["msgpack","unpack"], ["msgpack","unpackb"]] },
     "ormsgpack": { "imports": ["ormsgpack"], "calls": [["ormsgpack","unpackb"]] },
-    "yaml": { "imports": ["yaml"], "calls": [["yaml","load"], ["yaml","unsafe_load"], ["yaml","full_load"]] },
+    "yaml": { "imports": ["yaml"], "calls": [["yaml","load"], ["yaml","load_all"], ["yaml","unsafe_load"], ["yaml","unsafe_load_all"], ["yaml","full_load"]] },
     "cbor2": { "imports": ["cbor2"], "calls": [["cbor2","load"], ["cbor2","loads"]]},
     "pydantic": { "imports": ["pydantic"], "calls": [["pydantic","parse_raw"]]},
     "pickle": {"imports": ["pickle"],"calls": [["pickle", "load"],["pickle", "loads"]]},
