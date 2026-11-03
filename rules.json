@@ -41,7 +41,7 @@
     "matplotlib": { "imports": ["matplotlib"], "calls": [] },
     "ZODB": { "imports": ["ZODB"], "calls": [] },
     "allennlp": { "imports": ["allennlp"], "calls": [["allennlp","load_archive"]] },
-    "transformers": { "imports": ["transformers"], "calls": [] },
+    "transformers": { "imports": ["transformers"], "calls": [["transformers", "from_pretrained"]] },
     "skorch": { "imports": ["skorch"], "calls": [] },
     "celery": { "imports": ["celery"], "calls": [] },
     "rq": { "imports": ["rq"], "calls": [] },
