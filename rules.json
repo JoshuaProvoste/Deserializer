@@ -81,7 +81,7 @@
     "gymnasium": { "imports": ["gymnasium"], "calls": [] },
     "optuna": { "imports": ["optuna"], "calls": [] },
     "mmdet": { "imports": ["mmdet"], "calls": [] },
-    "mmengine": { "imports": ["mmengine"], "calls": [["mmengine","save_checkpoint"], ["mmengine","load_checkpoint"]] },
+    "mmengine": { "imports": ["mmengine"], "calls": [["mmengine","load_checkpoint"]] },
     "IPython": { "imports": ["IPython"], "calls": [] },
     "ipyparallel": { "imports": ["ipyparallel"], "calls": [] },
     "xarray": { "imports": ["xarray"], "calls": [] },
