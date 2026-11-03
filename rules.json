@@ -15,6 +15,7 @@
     "hydra": {"imports": ["hydra"],"calls": [["hydra", "instantiate"], ["hydra", "call"]]},
     "omegaconf": {"imports": ["omegaconf"],"calls": [["omegaconf", "to_object"]]},
     "cattrs": {"imports": ["cattrs"],"calls": [["cattrs", "structure"], ["cattrs", "structure_attrs_fromdict"]]},
+    "cattr": {"imports": ["cattr"],"calls": [["cattr", "structure"], ["cattr", "structure_attrs_fromdict"]]},
     "dataclasses_json": {"imports": ["dataclasses_json"],"calls": [["dataclasses_json", "from_dict"], ["dataclasses_json", "from_json"]]},
     "marshmallow": {"imports": ["marshmallow"],"calls": [["marshmallow", "load"], ["marshmallow", "loads"]]},
     "schematics": {"imports": ["schematics"],"calls": [["schematics", "import_data"]]},
@@ -96,5 +97,6 @@
     "stable_baselines": { "imports": ["stable_baselines"], "calls": [["stable_baselines", "load"]] },
     "aiocache": { "imports": ["aiocache"], "calls": [["aiocache", "loads"]] },
     "beaker": { "imports": ["beaker"], "calls": [["beaker", "get"]] },
-    "pickleshare": { "imports": ["pickleshare"], "calls": [["pickleshare", "get"]] }
+    "pickleshare": { "imports": ["pickleshare"], "calls": [["pickleshare", "get"]] },
+    "obspy": { "imports": ["obspy"], "calls": [["obspy", "read"]] }
 }
