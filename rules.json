@@ -17,6 +17,7 @@
     "dataclasses_json": {"imports": ["dataclasses_json"],"calls": [["dataclasses_json", "from_dict"], ["dataclasses_json", "from_json"]]},
     "marshmallow": {"imports": ["marshmallow"],"calls": [["marshmallow", "load"], ["marshmallow", "loads"]]},
     "schematics": {"imports": ["schematics"],"calls": [["schematics", "import_data"]]},
+    "mashumaro": {"imports": ["mashumaro"],"calls": [["mashumaro", "from_dict"], ["mashumaro", "from_json"], ["mashumaro", "from_msgpack"], ["mashumaro", "from_yaml"]]},
     "pyarrow": {"imports": ["pyarrow"],"calls": [["pyarrow", "deserialize"], ["pyarrow", "read_serialized"]]},
     "torch": {"imports": ["torch"],"calls": [["torch","load"], ["torch","load_url"], ["torch","load_state_dict_from_url"]]},
     "pandas": {"imports": ["pandas"],"calls": [["pandas", "read_pickle"], ["pandas", "read_hdf"]]},
