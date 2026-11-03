@@ -5,7 +5,7 @@
     "cbor2": { "imports": ["cbor2"], "calls": [["cbor2","load"], ["cbor2","loads"]]},
     "pydantic": { "imports": ["pydantic"], "calls": [["pydantic","parse_obj"], ["pydantic","parse_raw"], ["pydantic","model_validate"], ["pydantic","model_validate_json"]]},
     "pickle": {"imports": ["pickle"],"calls": [["pickle", "load"],["pickle", "loads"]]},
-    "torch": {"imports": ["torch"],"calls": [["torch","load"], ["torch","save"]]},
+    "torch": {"imports": ["torch"],"calls": [["torch","load"]]},
     "pandas": {"imports": ["pandas"],"calls": [["pandas", "read_pickle"], ["pandas", "to_pickle"]]},
     "numpy": {"imports": ["numpy"],"calls": [["numpy", "save"], ["numpy", "load"]]},
     "joblib": {"imports": ["joblib"],"calls": [["joblib","dump"], ["joblib","load"]]},
