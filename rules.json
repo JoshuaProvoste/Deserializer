@@ -75,7 +75,7 @@
     "dill": { "imports": ["dill"], "calls": [["dill","load"], ["dill","loads"]] },
     "imblearn": { "imports": ["imblearn"], "calls": [] },
     "dgl": { "imports": ["dgl"], "calls": [] },
-    "prefect": { "imports": ["prefect"], "calls": [["prefect","PickleSerializer"]] },
+    "prefect": { "imports": ["prefect"], "calls": [] },
     "aiokafka": { "imports": ["aiokafka"], "calls": [] },
     "tinydb": { "imports": ["tinydb"], "calls": [] },
     "gymnasium": { "imports": ["gymnasium"], "calls": [] },
