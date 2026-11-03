@@ -126,7 +126,7 @@
     "botorch": { "imports": ["botorch"], "calls": [] },
     "cudf": { "imports": ["cudf"], "calls": [] },
     "stable_baselines": { "imports": ["stable_baselines"], "calls": [] },
-    "aiocache": { "imports": ["aiocache"], "calls": [["aiocache","PickleSerializer"]] },
+    "aiocache": { "imports": ["aiocache"], "calls": [] },
     "beaker": { "imports": ["beaker"], "calls": [] },
     "pickleshare": { "imports": ["pickleshare"], "calls": [] }
 }
