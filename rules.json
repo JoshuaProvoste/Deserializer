@@ -47,7 +47,7 @@
     "lightning": { "imports": ["lightning"], "calls": [["lightning", "load_from_checkpoint"]] },
     "skorch": { "imports": ["skorch"], "calls": [["skorch", "load_params"]] },
     "celery": { "imports": ["celery"], "calls": [["celery", "decode"]] },
-    "rq": { "imports": ["rq"], "calls": [] },
+    "rq": { "imports": ["rq"], "calls": [["rq", "restore"], ["rq", "loads"]] },
     "spacy": { "imports": ["spacy"], "calls": [["spacy", "load"]] },
     "langchain_core": { "imports": ["langchain_core"], "calls": [["langchain_core", "loads"]] },
     "langgraph": { "imports": ["langgraph"], "calls": [["langgraph", "loads"]] },
