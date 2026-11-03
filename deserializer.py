@@ -1215,17 +1215,39 @@ def main():
                 # phase can be slow on big trees, so the *same* single dynamic
                 # line is reused to show its progress (the mapper keeps its own
                 # console output silent when a callback is provided).
-                def mapping_progress(done, total):
-                    pct = (done / total) * 100 if total else 100.0
-                    status.update(f"Mapping: {pct:5.1f}% ({done}/{total} findings)")
+                def short_label(raw):
+                    """'<ruta>:<linea>' -> 'ruta/relativa/al/path:linea' (cabe en la linea)."""
+                    if not raw:
+                        return "-"
+                    path_part, _, line_part = raw.rpartition(":")
+                    if not line_part.isdigit():
+                        path_part, line_part = raw, ""
+                    try:
+                        rel = os.path.relpath(path_part, args.path)
+                    except Exception:
+                        rel = path_part
+                    if rel.startswith(".."):
+                        rel = os.path.basename(path_part)
+                    rel = rel.replace("\\", "/")
+                    return f"{rel}:{line_part}" if line_part else rel
 
-                status.update(f"Mapping: {0.0:5.1f}% (0/{len(findings)} findings)")
+                def mapping_line(done, total, label=None):
+                    pct = (done / total) * 100 if total else 100.0
+                    txt = f"Mapping: {pct:5.1f}% ({done}/{total})"
+                    if label:
+                        txt += f" | Current: {label}"
+                    return txt
+
+                def mapping_progress(done, total, label=None):
+                    status.update(mapping_line(done, total, short_label(label)))
+
+                status.update(mapping_line(0, len(findings)))
                 mapper_results = mapper.map_bulk(findings, args.concurrency,
                                                  progress_cb=mapping_progress)
                 mapped = len(mapper_results)
                 status.finish(
                     f"Mapping: {mapped / len(findings) * 100:5.1f}%"
-                    f" ({mapped}/{len(findings)} findings)"
+                    f" ({mapped}/{len(findings)}) | Completed"
                 )
                 
                 # Persist results

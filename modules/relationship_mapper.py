@@ -441,8 +441,9 @@ class RelationshipMapper:
         Executes bulk mapping of findings using Multiprocessing.
         This provides a programmatic way to leverage the parallel engine from other scripts.
 
-        If `progress_cb(done, total)` is given, per-record progress is reported
-        through it and the mapper's own console output is kept silent, so the
+        If `progress_cb(done, total, label)` is given, per-record progress is
+        reported through it (label = "<file>:<lineno>" of the record that just
+        finished) and the mapper's own console output is kept silent, so the
         caller can render the progress on a single dynamic line. When it is not
         given, behaviour is exactly the same as before.
         """
@@ -464,7 +465,9 @@ class RelationshipMapper:
                     completed += 1
                     # Progress update for console-based tools
                     if progress_cb is not None:
-                        progress_cb(completed, total_findings)
+                        record = findings[idx]
+                        progress_cb(completed, total_findings,
+                                    f"{record.get('file')}:{record.get('lineno')}")
                     else:
                         print(f"[{completed}/{total_findings}] Processing: {findings[idx].get('file')}:{findings[idx].get('lineno')}...", end='\r', flush=True)
                 except Exception as exc:
