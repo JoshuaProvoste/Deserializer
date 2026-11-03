@@ -105,7 +105,7 @@
     "Orange": { "imports": ["Orange"], "calls": [] },
     "diffusers": { "imports": ["diffusers"], "calls": [["diffusers","from_pretrained"]] },
     "sentence_transformers": { "imports": ["sentence_transformers"], "calls": [] },
-    "flair": { "imports": ["flair"], "calls": [] },
+    "flair": { "imports": ["flair"], "calls": [["flair", "load"]] },
     "mpi4py": { "imports": ["mpi4py"], "calls": [] },
     "featuretools": { "imports": ["featuretools"], "calls": [["featuretools","load_features"]] },
     "autogluon": { "imports": ["autogluon"], "calls": [["autogluon", "load"]] },
