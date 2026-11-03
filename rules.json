@@ -53,7 +53,7 @@
     "stable_baselines3": { "imports": ["stable_baselines3"], "calls": [["stable_baselines3", "load"], ["stable_baselines3", "load_from_zip_file"]] },
     "cuml": { "imports": ["cuml"], "calls": [] },
     "pycaret": { "imports": ["pycaret"], "calls": [["pycaret","load_model"]] },
-    "detectron2": { "imports": ["detectron2"], "calls": [] },
+    "detectron2": { "imports": ["detectron2"], "calls": [["detectron2", "resume_or_load"]] },
     "fairseq": { "imports": ["fairseq"], "calls": [["fairseq","load_model_ensemble_and_task"]] },
     "scrapy": { "imports": ["scrapy"], "calls": [] },
     "accelerate": { "imports": ["accelerate"], "calls": [["accelerate","load_state"], ["accelerate","load_checkpoint_in_model"]] },
