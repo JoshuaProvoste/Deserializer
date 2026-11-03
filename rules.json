@@ -75,7 +75,7 @@
     "torchvision": { "imports": ["torchvision"], "calls": [] },
     "torch_geometric": { "imports": ["torch_geometric"], "calls": [["torch_geometric", "load"]] },
     "sqlitedict": { "imports": ["sqlitedict"], "calls": [] },
-    "igraph": { "imports": ["igraph"], "calls": [] },
+    "igraph": { "imports": ["igraph"], "calls": [["igraph", "Read_Pickle"], ["igraph", "Read_Picklez"]] },
     "concurrent": { "imports": ["concurrent"], "calls": [] },
     "cloudpickle": { "imports": ["cloudpickle"], "calls": [["cloudpickle","load"], ["cloudpickle","loads"]] },
     "dill": { "imports": ["dill"], "calls": [["dill","load"], ["dill","loads"], ["dill","load_session"]] },
