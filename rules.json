@@ -69,6 +69,7 @@
     "cloudpickle": { "imports": ["cloudpickle"], "calls": [["cloudpickle","load"], ["cloudpickle","loads"]] },
     "dill": { "imports": ["dill"], "calls": [["dill","load"], ["dill","loads"], ["dill","load_session"]] },
     "numba": { "imports": ["numba"], "calls": [["numba","loads"]] },
+    "cython": { "imports": ["cython"], "calls": [["cython","inline"]] },
     "dgl": { "imports": ["dgl"], "calls": [["dgl", "load_graphs"]] },
     "prefect": { "imports": ["prefect"], "calls": [["prefect", "loads"]] },
     "optuna": { "imports": ["optuna"], "calls": [["optuna", "load_study"]] },
