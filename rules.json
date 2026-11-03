@@ -47,7 +47,6 @@
     "surprise": { "imports": ["surprise"], "calls": [] },
     "bentoml": { "imports": ["bentoml"], "calls": [["bentoml","load_model"]] },
     "airflow": { "imports": ["airflow"], "calls": [] },
-    "peewee": { "imports": ["peewee"], "calls": [] },
     "multiprocessing": { "imports": ["multiprocessing"], "calls": [] },
     "diskcache": { "imports": ["diskcache"], "calls": [] },
     "zmq": { "imports": ["zmq"], "calls": [] },
