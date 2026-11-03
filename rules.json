@@ -10,6 +10,7 @@
     "marshal": {"imports": ["marshal"],"calls": [["marshal", "load"], ["marshal", "loads"]]},
     "importlib": {"imports": ["importlib"],"calls": [["importlib", "import_module"]]},
     "runpy": {"imports": ["runpy"],"calls": [["runpy", "run_module"], ["runpy", "run_path"]]},
+    "pkgutil": {"imports": ["pkgutil"],"calls": [["pkgutil", "read_code"], ["pkgutil", "resolve_name"]]},
     "jsonpickle": {"imports": ["jsonpickle"],"calls": [["jsonpickle", "decode"], ["jsonpickle", "loads"]]},
     "json_tricks": {"imports": ["json_tricks"],"calls": [["json_tricks", "load"], ["json_tricks", "loads"]]},
     "hydra": {"imports": ["hydra"],"calls": [["hydra", "instantiate"], ["hydra", "call"]]},
