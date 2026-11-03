@@ -38,7 +38,6 @@
     "rq": { "imports": ["rq"], "calls": [] },
     "spacy": { "imports": ["spacy"], "calls": [] },
     "prophet": { "imports": ["prophet"], "calls": [] },
-    "pyro": { "imports": ["pyro"], "calls": [["pyro","get_param_store"]] },
     "stable_baselines3": { "imports": ["stable_baselines3"], "calls": [] },
     "cuml": { "imports": ["cuml"], "calls": [] },
     "shap": { "imports": ["shap"], "calls": [["shap","load"]] },
