@@ -82,7 +82,7 @@ This scanner features a high-performance **parallel execution engine** built on 
 - Emits findings as **JSONL**, one object per line, including:
   - file path + location (`lineno`, `col_offset`)
   - `module`, `name`, `qualified_name`
-  - `category` and `severity` (extra fields, backwards-compatible)
+  - `category` (extra field, backwards-compatible)
   - `parser`: Metadata indicating which engine pass made the discovery (`ast`, `tokenize_fallback`, or `regex_fallback`).
 - Guards against pathological inputs with:
   - max file size (`MAX_FILE_BYTES`)
@@ -238,7 +238,6 @@ Each line is a standalone JSON object. Example finding:
   "name": "loads",
   "qualified_name": "pickle.loads",
   "category": "deserialize",
-  "severity": "high",
   "lineno": 34,
   "col_offset": 11
 }

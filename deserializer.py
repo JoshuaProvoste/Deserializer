@@ -401,7 +401,6 @@ class RefVisitor(ast.NodeVisitor):
                 func,
                 qualified_name=qualified,
                 category="reference",
-                severity="medium",
             )
         self.generic_visit(node)
 
@@ -418,7 +417,6 @@ class RefVisitor(ast.NodeVisitor):
                 func,
                 qualified_name=qualified,
                 category="reference",
-                severity="medium",
             )
         self.generic_visit(node)
 
@@ -430,11 +428,11 @@ class RefVisitor(ast.NodeVisitor):
         if mod and func and self._is_tracked_call(mod, func):
             # Simple classification for better triage/filtering (does not affect detection logic)
             if mod == "pickle" and func in ("load", "loads"):
-                category, severity = "deserialize", "high"
+                category = "deserialize"
             elif mod == "torch" and func == "load":
-                category, severity = "model_load", "high"
+                category = "model_load"
             else:
-                category, severity = "call", "medium"
+                category = "call"
 
             self._report(
                 node,
@@ -443,7 +441,6 @@ class RefVisitor(ast.NodeVisitor):
                 func,
                 qualified_name=qualified,
                 category=category,
-                severity=severity,
             )
         self.generic_visit(node)
 
@@ -487,7 +484,7 @@ class RefVisitor(ast.NodeVisitor):
     def _is_tracked_call(self, mod, func):
         return mod in self.rules and (mod, func) in self.rules[mod]["calls"]
 
-    def _report(self, node, kind, module, name, alias=None, *, qualified_name=None, category=None, severity=None):
+    def _report(self, node, kind, module, name, alias=None, *, qualified_name=None, category=None):
         item = {
             "kind": kind,
             "module": module,
@@ -501,8 +498,6 @@ class RefVisitor(ast.NodeVisitor):
             item["qualified_name"] = qualified_name
         if category is not None:
             item["category"] = category
-        if severity is not None:
-            item["severity"] = severity
 
         self.findings.append(item)
 
@@ -528,14 +523,14 @@ def scan_tokens_fallback(src: str, path: Path, rules: dict) -> list[dict]:
     def is_tracked_call(mod: str, func: str) -> bool:
         return mod in rules and (mod, func) in rules[mod]["calls"]
 
-    def classify(mod: str, func: str, kind: str = "call") -> tuple[str, str]:
+    def classify(mod: str, func: str, kind: str = "call") -> str:
         if kind == "reference":
-            return "reference", "medium"
+            return "reference"
         if mod == "pickle" and func in ("load", "loads"):
-            return "deserialize", "high"
+            return "deserialize"
         if mod == "torch" and func == "load":
-            return "model_load", "high"
-        return "call", "medium"
+            return "model_load"
+        return "call"
 
     def resolve_dotted(parts: list[str]) -> tuple[str | None, str | None, str | None]:
         # De-alias root
@@ -561,7 +556,7 @@ def scan_tokens_fallback(src: str, path: Path, rules: dict) -> list[dict]:
         return None, None, None
 
     def emit_finding(mod: str, func: str, qualified: str, lineno: int, col: int, kind: str = "call") -> None:
-        category, severity = classify(mod, func, kind)
+        category = classify(mod, func, kind)
         findings.append(
             {
                 "kind": kind,
@@ -572,7 +567,6 @@ def scan_tokens_fallback(src: str, path: Path, rules: dict) -> list[dict]:
                 "col_offset": col,
                 "qualified_name": qualified,
                 "category": category,
-                "severity": severity,
                 "parser": "tokenize_fallback",
             }
         )
@@ -859,7 +853,6 @@ def scan_regex_fallback(src: str, path: Path, rules: dict) -> list[dict]:
                     "col_offset": col,
                     "qualified_name": f"{mod}.{func}",
                     "category": "regex_fallback_call",
-                    "severity": "high",
                     "parser": "regex_fallback"
                 })
 
@@ -879,7 +872,6 @@ def scan_regex_fallback(src: str, path: Path, rules: dict) -> list[dict]:
                     "col_offset": col,
                     "qualified_name": f"{mod}.{func}",
                     "category": "regex_fallback_ref",
-                    "severity": "medium",
                     "parser": "regex_fallback"
                 })
 def init_worker():
@@ -1060,11 +1052,10 @@ def main():
         # it is repainted right below afterwards (single-line progress display).
         status.clear()
         # Compact CLI line (restored variables after compaction)
-        sev = item.get("severity", "-")
         cat = item.get("category", "-")
         qn = item.get("qualified_name") or f"{item.get('module')}.{item.get('name')}"
         loc = f"{item.get('file')}:{item.get('lineno')}"
-        print(f"[{sev.upper()}][{cat}] {loc}  {qn}", file=human)
+        print(f"[{cat}] {loc}  {qn}", file=human)
         status.redraw()
 
     def print_error(item: dict):
