@@ -9,7 +9,7 @@
     "pandas": {"imports": ["pandas"],"calls": [["pandas", "read_pickle"]]},
     "numpy": {"imports": ["numpy"],"calls": [["numpy", "load"]]},
     "joblib": {"imports": ["joblib"],"calls": [["joblib","load"]]},
-    "networkx": {"imports": ["networkx"],"calls": [["networkx","write_gpickle"], ["networkx","read_gpickle"]]},
+    "networkx": {"imports": ["networkx"],"calls": [["networkx","read_gpickle"]]},
     "statsmodels": {"imports": ["statsmodels"],"calls": [["statsmodels","load"]]},
     "dask": {"imports": ["dask"],"calls": [["dask","to_pickle"], ["dask","read_pickle"]]},
     "pyspark": {"imports": ["pyspark"],"calls": [["pyspark","saveAsPickleFile"], ["pyspark","pickleFile"]]},
