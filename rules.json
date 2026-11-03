@@ -41,7 +41,7 @@
     "detectron2": { "imports": ["detectron2"], "calls": [] },
     "fairseq": { "imports": ["fairseq"], "calls": [["fairseq","load_model_ensemble_and_task"]] },
     "scrapy": { "imports": ["scrapy"], "calls": [] },
-    "accelerate": { "imports": ["accelerate"], "calls": [["accelerate","load_state"]] },
+    "accelerate": { "imports": ["accelerate"], "calls": [["accelerate","load_state"], ["accelerate","load_checkpoint_in_model"]] },
     "skopt": { "imports": ["skopt"], "calls": [["skopt","load"]] },
     "river": { "imports": ["river"], "calls": [] },
     "airflow": { "imports": ["airflow"], "calls": [] },
