@@ -60,7 +60,7 @@
     "diskcache": { "imports": ["diskcache"], "calls": [] },
     "zmq": { "imports": ["zmq"], "calls": [] },
     "kombu": { "imports": ["kombu"], "calls": [] },
-    "dramatiq": { "imports": ["dramatiq"], "calls": [["dramatiq","PickleCodec"]] },
+    "dramatiq": { "imports": ["dramatiq"], "calls": [] },
     "requests_cache": { "imports": ["requests_cache"], "calls": [] },
     "flask_caching": { "imports": ["flask_caching"], "calls": [] },
     "sktime": { "imports": ["sktime"], "calls": [] },
