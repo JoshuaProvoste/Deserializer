@@ -93,7 +93,7 @@
     "mmcv": { "imports": ["mmcv"], "calls": [["mmcv","load_checkpoint"]] },
     "huey": { "imports": ["huey"], "calls": [] },
     "dagster": { "imports": ["dagster"], "calls": [] },
-    "klepto": { "imports": ["klepto"], "calls": [["klepto","file_archive"]] },
+    "klepto": { "imports": ["klepto"], "calls": [] },
     "pytorch3d": { "imports": ["pytorch3d"], "calls": [] },
     "faiss": { "imports": ["faiss"], "calls": [] },
     "PIL": { "imports": ["PIL"], "calls": [] },
