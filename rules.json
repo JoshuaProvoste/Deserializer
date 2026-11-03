@@ -97,7 +97,7 @@
     "apache_beam": { "imports": ["apache_beam"], "calls": [] },
     "timm": { "imports": ["timm"], "calls": [["timm", "load_state_dict_from_url"]] },
     "mmcv": { "imports": ["mmcv"], "calls": [["mmcv","load_checkpoint"]] },
-    "huey": { "imports": ["huey"], "calls": [] },
+    "huey": { "imports": ["huey"], "calls": [["huey", "loads"]] },
     "dagster": { "imports": ["dagster"], "calls": [] },
     "klepto": { "imports": ["klepto"], "calls": [] },
     "pytorch3d": { "imports": ["pytorch3d"], "calls": [] },
