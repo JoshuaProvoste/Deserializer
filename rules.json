@@ -40,7 +40,6 @@
     "pycaret": { "imports": ["pycaret"], "calls": [["pycaret","load_model"]] },
     "detectron2": { "imports": ["detectron2"], "calls": [] },
     "fairseq": { "imports": ["fairseq"], "calls": [["fairseq","load_model_ensemble_and_task"]] },
-    "sqlalchemy": { "imports": ["sqlalchemy"], "calls": [] },
     "scrapy": { "imports": ["scrapy"], "calls": [] },
     "accelerate": { "imports": ["accelerate"], "calls": [["accelerate","load_state"]] },
     "skopt": { "imports": ["skopt"], "calls": [["skopt","load"]] },
