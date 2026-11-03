@@ -50,6 +50,7 @@
     "rq": { "imports": ["rq"], "calls": [] },
     "spacy": { "imports": ["spacy"], "calls": [["spacy", "load"]] },
     "langchain_core": { "imports": ["langchain_core"], "calls": [["langchain_core", "loads"]] },
+    "langgraph": { "imports": ["langgraph"], "calls": [["langgraph", "loads"]] },
     "prophet": { "imports": ["prophet"], "calls": [] },
     "stable_baselines3": { "imports": ["stable_baselines3"], "calls": [["stable_baselines3", "load"], ["stable_baselines3", "load_from_zip_file"]] },
     "cuml": { "imports": ["cuml"], "calls": [] },
