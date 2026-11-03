@@ -24,7 +24,6 @@
     "xgboost": { "imports": ["xgboost"], "calls": [] },
     "catboost": { "imports": ["catboost"], "calls": [] },
     "lightgbm": { "imports": ["lightgbm"], "calls": [] },
-    "ray": { "imports": ["ray"], "calls": [["ray","get"]] },
     "nltk": { "imports": ["nltk"], "calls": [] },
     "django": { "imports": ["django"], "calls": [] },
     "matplotlib": { "imports": ["matplotlib"], "calls": [] },
