@@ -72,7 +72,7 @@
     "igraph": { "imports": ["igraph"], "calls": [] },
     "concurrent": { "imports": ["concurrent"], "calls": [] },
     "cloudpickle": { "imports": ["cloudpickle"], "calls": [["cloudpickle","load"], ["cloudpickle","loads"]] },
-    "dill": { "imports": ["dill"], "calls": [["dill","dump"], ["dill","load"], ["dill","dumps"], ["dill","loads"]] },
+    "dill": { "imports": ["dill"], "calls": [["dill","load"], ["dill","loads"]] },
     "imblearn": { "imports": ["imblearn"], "calls": [] },
     "dgl": { "imports": ["dgl"], "calls": [] },
     "prefect": { "imports": ["prefect"], "calls": [["prefect","PickleSerializer"]] },
