@@ -44,7 +44,6 @@
     "accelerate": { "imports": ["accelerate"], "calls": [["accelerate","load_state"]] },
     "skopt": { "imports": ["skopt"], "calls": [["skopt","load"]] },
     "river": { "imports": ["river"], "calls": [] },
-    "surprise": { "imports": ["surprise"], "calls": [] },
     "airflow": { "imports": ["airflow"], "calls": [] },
     "multiprocessing": { "imports": ["multiprocessing"], "calls": [] },
     "diskcache": { "imports": ["diskcache"], "calls": [] },
