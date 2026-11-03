@@ -60,6 +60,7 @@
     "zmq": { "imports": ["zmq"], "calls": [["zmq", "recv_pyobj"], ["zmq", "recv_serialized"]] },
     "kombu": { "imports": ["kombu"], "calls": [["kombu", "loads"]] },
     "dramatiq": { "imports": ["dramatiq"], "calls": [["dramatiq", "decode"]] },
+    "faust": { "imports": ["faust"], "calls": [["faust","loads"]] },
     "flask_caching": { "imports": ["flask_caching"], "calls": [["flask_caching", "get"]] },
     "sympy": { "imports": ["sympy"], "calls": [["sympy", "sympify"], ["sympy", "parse_expr"]] },
     "ultralytics": { "imports": ["ultralytics"], "calls": [["ultralytics", "torch_safe_load"], ["ultralytics", "YOLO"]] },
