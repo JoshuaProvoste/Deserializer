@@ -874,6 +874,9 @@ def scan_regex_fallback(src: str, path: Path, rules: dict) -> list[dict]:
                     "category": "regex_fallback_ref",
                     "parser": "regex_fallback"
                 })
+
+    return [{"file": str(path), **f} for f in findings]
+
 def init_worker():
     """ Worker initializer to ignore SIGINT and silence stderr for clean Ctrl+C tracebacks on Windows. """
     signal.signal(signal.SIGINT, signal.SIG_IGN)
