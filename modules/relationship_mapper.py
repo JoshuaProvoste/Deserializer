@@ -435,10 +435,16 @@ class RelationshipMapper:
             "activities": self.analyzer.activities
         }
 
-    def map_bulk(self, findings: List[Dict[str, Any]], concurrency: int = None) -> List[Dict[str, Any]]:
+    def map_bulk(self, findings: List[Dict[str, Any]], concurrency: int = None,
+                 progress_cb=None) -> List[Dict[str, Any]]:
         """
         Executes bulk mapping of findings using Multiprocessing.
         This provides a programmatic way to leverage the parallel engine from other scripts.
+
+        If `progress_cb(done, total)` is given, per-record progress is reported
+        through it and the mapper's own console output is kept silent, so the
+        caller can render the progress on a single dynamic line. When it is not
+        given, behaviour is exactly the same as before.
         """
         if concurrency is None:
             concurrency = max(1, cpu_count() - 2)
@@ -457,11 +463,15 @@ class RelationshipMapper:
                     temp_results[idx] = result
                     completed += 1
                     # Progress update for console-based tools
-                    print(f"[{completed}/{total_findings}] Processing: {findings[idx].get('file')}:{findings[idx].get('lineno')}...", end='\r', flush=True)
+                    if progress_cb is not None:
+                        progress_cb(completed, total_findings)
+                    else:
+                        print(f"[{completed}/{total_findings}] Processing: {findings[idx].get('file')}:{findings[idx].get('lineno')}...", end='\r', flush=True)
                 except Exception as exc:
                     print(f"\n[!] Error processing record {idx}: {exc}")
             
-            print(f"\n[+] Bulk Mapping Completed")
+            if progress_cb is None:
+                print(f"\n[+] Bulk Mapping Completed")
             return [r for r in temp_results if r is not None]
 
 def main(args: List[str]):

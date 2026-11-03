@@ -138,6 +138,7 @@ class _StatusLine:
             self.enabled = False
         self._text = ""
         self._width = 0
+        self._active = False
 
     def _write(self, data):
         try:
@@ -165,10 +166,11 @@ class _StatusLine:
             return
         self._text = text
         self._width = len(text)
+        self._active = True
 
     def clear(self):
         """Erase the status line, leaving the cursor at column 0."""
-        if not self.enabled or self._width == 0:
+        if not self.enabled or not self._active or self._width == 0:
             return
         if not self._write("\r" + " " * self._width + "\r"):
             return
@@ -176,11 +178,35 @@ class _StatusLine:
 
     def redraw(self):
         """Repaint the last status text (cursor is expected at column 0)."""
-        if not self.enabled or not self._text:
+        if not self.enabled or not self._active or not self._text:
             return
         if not self._write(self._text):
             return
         self._width = len(self._text)
+
+    def finish(self, text=None):
+        """
+        Freeze the status line as a permanent, normal line.
+
+        The final content is *kept* on screen (instead of being erased) so the
+        end state of the phase stays visible, and the row is closed with a
+        newline. Afterwards the line is inactive: clear()/redraw() become no-ops
+        until the next update() starts a new one.
+        """
+        if not self.enabled or not self._active:
+            return
+        if text is None:
+            text = self._text
+        columns = max(20, _terminal_columns(self._stream) - 1)
+        if len(text) > columns:
+            text = text[:columns - 3] + "..." if columns > 3 else text[:columns]
+        padding = ""
+        if self._width > len(text):
+            padding = " " * (self._width - len(text))
+        self._active = False
+        self._text = ""
+        self._width = 0
+        self._write("\r" + text + padding + "\n")
 
 
 def sanitize_template_syntax(src: str) -> str:
@@ -1145,8 +1171,9 @@ def main():
             except OSError:
                 out_size = None
 
-    # Summary
-    status.clear()
+    # Summary. The status line is frozen (not erased) so the progress the user
+    # was just watching stays visible as a normal, finished line.
+    status.finish()
     print("\n\nScan finished.", file=human)
     print(f"Files scanned: {files_scanned}", file=human)
     print(f"Findings: {total_findings}", file=human)
@@ -1184,8 +1211,22 @@ def main():
 
                 print(f"Identified {len(findings)} findings. Starting bulk mapping...\n", file=human)
                 
-                # Execute Parallel Mapping via the new map_bulk API
-                mapper_results = mapper.map_bulk(findings, args.concurrency)
+                # Execute Parallel Mapping via the new map_bulk API. The mapping
+                # phase can be slow on big trees, so the *same* single dynamic
+                # line is reused to show its progress (the mapper keeps its own
+                # console output silent when a callback is provided).
+                def mapping_progress(done, total):
+                    pct = (done / total) * 100 if total else 100.0
+                    status.update(f"Mapping: {pct:5.1f}% ({done}/{total} findings)")
+
+                status.update(f"Mapping: {0.0:5.1f}% (0/{len(findings)} findings)")
+                mapper_results = mapper.map_bulk(findings, args.concurrency,
+                                                 progress_cb=mapping_progress)
+                mapped = len(mapper_results)
+                status.finish(
+                    f"Mapping: {mapped / len(findings) * 100:5.1f}%"
+                    f" ({mapped}/{len(findings)} findings)"
+                )
                 
                 # Persist results
                 with open(output_mapper, 'w', encoding='utf-8') as f:
@@ -1216,6 +1257,9 @@ def main():
                     
                     if os.path.exists(output_mapper):
                         count = 0
+                        total_reports = len(mapper_results)
+                        if total_reports:
+                            status.update(f"Reports: {0.0:5.1f}% (0/{total_reports})")
                         with open(output_mapper, 'r', encoding='utf-8') as f:
                             for idx, line in enumerate(f, 1):
                                 if not line.strip(): continue
@@ -1227,10 +1271,17 @@ def main():
                                     args.path
                                 )
                                 
+                                status.clear()
                                 report_file = processor.generate_report(result, idx, project_name)
                                 print(f"  [+] Generated: {report_file}", file=human)
                                 count += 1
+                                if total_reports:
+                                    status.update(
+                                        f"Reports: {count / total_reports * 100:5.1f}%"
+                                        f" ({count}/{total_reports})"
+                                    )
                         
+                        status.finish()
                         print(f"\n[OK] {count} detailed reports have been generated.", file=human)
                         print(f"Check the '{reports_dir}' folder to see the results.", file=human)
 
