@@ -9,6 +9,7 @@
     "marshal": {"imports": ["marshal"],"calls": [["marshal", "load"], ["marshal", "loads"]]},
     "importlib": {"imports": ["importlib"],"calls": [["importlib", "import_module"]]},
     "runpy": {"imports": ["runpy"],"calls": [["runpy", "run_module"], ["runpy", "run_path"]]},
+    "jsonpickle": {"imports": ["jsonpickle"],"calls": [["jsonpickle", "decode"], ["jsonpickle", "loads"]]},
     "torch": {"imports": ["torch"],"calls": [["torch","load"], ["torch","load_url"], ["torch","load_state_dict_from_url"]]},
     "pandas": {"imports": ["pandas"],"calls": [["pandas", "read_pickle"], ["pandas", "read_hdf"]]},
     "numpy": {"imports": ["numpy"],"calls": [["numpy", "load"]]},
