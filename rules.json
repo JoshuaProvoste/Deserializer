@@ -87,7 +87,7 @@
     "xarray": { "imports": ["xarray"], "calls": [] },
     "torchaudio": { "imports": ["torchaudio"], "calls": [] },
     "torchtext": { "imports": ["torchtext"], "calls": [] },
-    "deepspeed": { "imports": ["deepspeed"], "calls": [["deepspeed","save_checkpoint"], ["deepspeed","load_checkpoint"]] },
+    "deepspeed": { "imports": ["deepspeed"], "calls": [["deepspeed","load_checkpoint"]] },
     "apache_beam": { "imports": ["apache_beam"], "calls": [] },
     "timm": { "imports": ["timm"], "calls": [] },
     "mmcv": { "imports": ["mmcv"], "calls": [["mmcv","save_checkpoint"], ["mmcv","load_checkpoint"]] },
