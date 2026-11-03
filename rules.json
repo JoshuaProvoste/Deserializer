@@ -102,5 +102,6 @@
     "obspy": { "imports": ["obspy"], "calls": [["obspy", "read"]] },
     "construct": { "imports": ["construct"], "calls": [["construct", "parse"], ["construct", "parse_stream"], ["construct", "parse_file"]] },
     "mongoengine": { "imports": ["mongoengine"], "calls": [["mongoengine", "from_json"]] },
-    "casadi": { "imports": ["casadi"], "calls": [["casadi", "load"], ["casadi", "deserialize"]] }
+    "casadi": { "imports": ["casadi"], "calls": [["casadi", "load"], ["casadi", "deserialize"]] },
+    "_jsonnet": { "imports": ["_jsonnet"], "calls": [["_jsonnet", "evaluate_file"], ["_jsonnet", "evaluate_snippet"]] }
 }
