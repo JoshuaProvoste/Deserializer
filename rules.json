@@ -108,7 +108,7 @@
     "flair": { "imports": ["flair"], "calls": [] },
     "mpi4py": { "imports": ["mpi4py"], "calls": [] },
     "featuretools": { "imports": ["featuretools"], "calls": [["featuretools","load_features"]] },
-    "autogluon": { "imports": ["autogluon"], "calls": [] },
+    "autogluon": { "imports": ["autogluon"], "calls": [["autogluon", "load"]] },
     "pmdarima": { "imports": ["pmdarima"], "calls": [] },
     "apscheduler": { "imports": ["apscheduler"], "calls": [] },
     "kafka": { "imports": ["kafka"], "calls": [] },
