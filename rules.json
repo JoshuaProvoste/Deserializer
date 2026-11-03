@@ -42,7 +42,7 @@
     "stable_baselines3": { "imports": ["stable_baselines3"], "calls": [] },
     "cuml": { "imports": ["cuml"], "calls": [] },
     "shap": { "imports": ["shap"], "calls": [["shap","load"]] },
-    "pycaret": { "imports": ["pycaret"], "calls": [["pycaret","save_model"], ["pycaret","load_model"]] },
+    "pycaret": { "imports": ["pycaret"], "calls": [["pycaret","load_model"]] },
     "detectron2": { "imports": ["detectron2"], "calls": [] },
     "fairseq": { "imports": ["fairseq"], "calls": [["fairseq","save_checkpoint"], ["fairseq","load_model_ensemble_and_task"]] },
     "monai": { "imports": ["monai"], "calls": [["monai","CheckpointSaver"]] },
