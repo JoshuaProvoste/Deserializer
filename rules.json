@@ -31,7 +31,7 @@
     "django": { "imports": ["django"], "calls": [] },
     "matplotlib": { "imports": ["matplotlib"], "calls": [] },
     "ZODB": { "imports": ["ZODB"], "calls": [] },
-    "allennlp": { "imports": ["allennlp"], "calls": [["allennlp","archive_model"], ["allennlp","load_archive"]] },
+    "allennlp": { "imports": ["allennlp"], "calls": [["allennlp","load_archive"]] },
     "transformers": { "imports": ["transformers"], "calls": [] },
     "skorch": { "imports": ["skorch"], "calls": [] },
     "celery": { "imports": ["celery"], "calls": [] },
