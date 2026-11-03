@@ -45,7 +45,6 @@
     "skopt": { "imports": ["skopt"], "calls": [["skopt","load"]] },
     "river": { "imports": ["river"], "calls": [] },
     "surprise": { "imports": ["surprise"], "calls": [] },
-    "bentoml": { "imports": ["bentoml"], "calls": [["bentoml","load_model"]] },
     "airflow": { "imports": ["airflow"], "calls": [] },
     "multiprocessing": { "imports": ["multiprocessing"], "calls": [] },
     "diskcache": { "imports": ["diskcache"], "calls": [] },
