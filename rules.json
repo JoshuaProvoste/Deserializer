@@ -19,7 +19,7 @@
     "fastai": {"imports": ["fastai"],"calls": [["fastai","load_learner"]]},
     "ignite": {"imports": ["ignite"], "calls": [["ignite", "Checkpoint"], ["ignite", "DiskSaver"], ["ignite", "load_objects"]]},
     "gensim": {"imports": ["gensim"],"calls": [["gensim","load"]]},
-    "mlflow": {"imports": ["mlflow"],"calls": [["mlflow","save_model"], ["mlflow","load_model"]]},
+    "mlflow": {"imports": ["mlflow"],"calls": [["mlflow","load_model"]]},
     "sklearn": {"imports": ["sklearn"],"calls": [] },
     "geopandas": { "imports": ["geopandas"], "calls": [["geopandas","read_pickle"]] },
     "modin": { "imports": ["modin"], "calls": [["modin","read_pickle"], ["modin","to_pickle"]] },
