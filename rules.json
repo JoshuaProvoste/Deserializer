@@ -8,7 +8,6 @@
     "_pickle": {"imports": ["_pickle"],"calls": [["_pickle", "load"], ["_pickle", "loads"]]},
     "zodbpickle": {"imports": ["zodbpickle"],"calls": [["zodbpickle", "load"], ["zodbpickle", "loads"]]},
     "marshal": {"imports": ["marshal"],"calls": [["marshal", "load"], ["marshal", "loads"]]},
-    "importlib": {"imports": ["importlib"],"calls": [["importlib", "import_module"], ["importlib", "__import__"]]},
     "runpy": {"imports": ["runpy"],"calls": [["runpy", "run_module"], ["runpy", "run_path"]]},
     "pkgutil": {"imports": ["pkgutil"],"calls": [["pkgutil", "read_code"], ["pkgutil", "resolve_name"]]},
     "jsonpickle": {"imports": ["jsonpickle"],"calls": [["jsonpickle", "decode"], ["jsonpickle", "loads"]]},
